@@ -92,6 +92,9 @@
 
     <!-- Unified Bottom HUD - Quantum Leap Design -->
     <div id="quantum-hud">
+        <!-- Gesture LED Indicator -->
+        <div class="gesture-led" id="gesture-led"></div>
+        
         <!-- Layer & Position Info -->
         <div class="hud-section position-info">
             <div class="layer-display">
@@ -273,6 +276,7 @@
         import { LightBeamSystem } from './js/LightBeamSystem.js';
         import { VoiceCommandModule } from './js/VoiceCommandModule.js';
         import { NavigationHistoryHUD } from './js/NavigationHistoryHUD.js';
+        import { GestureLED } from './js/GestureLED.js';
         import CONFIG from './js/config.js';
 
         // Debug logging system
