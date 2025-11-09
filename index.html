@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetherium Navigator - Multi-Layer System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1>🌌 Aetherium Navigator</h1>
+            <p>Multi-layer gesture-controlled interface</p>
+            <p>Navigate through cards with hand gestures</p>
+            <button id="start-btn">🚀 Start Experience</button>
+            <div class="permissions-info">
+                📹 Camera permission will be requested<br>
+                🔊 Audio will be enabled<br>
+                🖐️ Use hand gestures to navigate
+            </div>
+        </div>
+    </div>
+    <!-- Layer Tabs -->
+    <div id="layer-tabs">
+        <div class="layer-tab active" data-layer="video">
+            <div class="icon">🎬</div>
+            <div class="label">Videos</div>
+        </div>
+        <div class="layer-tab" data-layer="news">
+            <div class="icon">📰</div>
+            <div class="label">News</div>
+        </div>
+        <div class="layer-tab" data-layer="images">
+            <div class="icon">🖼️</div>
+            <div class="label">Images</div>
+        </div>
+        <div class="layer-tab" data-layer="games">
+            <div class="icon">🎮</div>
+            <div class="label">Games</div>
+        </div>
+        <div class="layer-tab" data-layer="apps">
+            <div class="icon">📱</div>
+            <div class="label">Apps</div>
+        </div>
+        <div class="layer-tab" data-layer="settings">
+            <div class="icon">⚙️</div>
+            <div class="label">Settings</div>
+        </div>
+    </div>
+
+    <!-- Dynamic Background Effects -->
+    <div id="dynamic-background">
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+    </div>
+
+    <!-- Cards Viewport -->
+    <div id="cards-viewport"></div>
+
+    <!-- Snap Indicators -->
+    <div class="snap-indicator left">👈</div>
+    <div class="snap-indicator right">👉</div>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav">
+        <button class="nav-button" id="prev-btn">◀ Prev</button>
+        <button class="nav-button" id="layer-up">▲ Layer Up</button>
+        <button class="nav-button" id="layer-down">▼ Layer Down</button>
+        <button class="nav-button" id="next-btn">Next ▶</button>
+    </div>
+
+    <!-- Layer WOW Label -->
+    <div id="layer-wow-label">
+        <div class="wow-text">WOW</div>
+        <div class="wow-layer-name">Videos</div>
+        <div class="wow-icon">🎬</div>
+    </div>
+
+    <!-- Gesture Info -->
+    <div id="gesture-info">
+        <h3>🖐️ Gestures</h3>
+        <p><span class="status-dot inactive" id="hand-status"></span>Hand: <strong id="hand-state">Not detected</strong></p>
+        <p>Gesture: <strong id="gesture-type">None</strong></p>
+        <p>Grid Lock: <strong id="grid-lock">Active</strong></p>
+    </div>
+
+    <!-- Debug History Panel -->
+    <div id="debug-history">
+        <h3>🔍 Debug History</h3>
+        <div id="debug-log"></div>
+    </div>
+
+    <!-- Current Indicator -->
+    <div id="current-indicator">
+        <div id="current-layer-name">Videos</div>
+        <div style="font-size: 0.8em; opacity: 0.7;">
+            Card <span id="current-card">1</span> / <span id="total-cards">4</span>
+        </div>
+    </div>
+
+    <!-- Confirmation Overlay -->
+    <div id="confirmation-overlay">
+        <div class="confirmation-box">
+            <h2 id="confirmation-title">Confirm Action</h2>
+            <p id="confirmation-message">Are you sure?</p>
+            <div class="confirmation-buttons">
+                <button class="confirm-btn yes" id="confirm-yes">✓ YES</button>
+                <button class="confirm-btn no" id="confirm-no">✗ NO</button>
+            </div>
+            <div class="gesture-instructions">
+                Use gestures:<br>
+                <strong>👍 Thumbs Up (1 sec) = YES</strong><br>
+                <strong>☝️ Shake Index (3x) = NO</strong><br>
+                or press <strong>Enter/Y</strong> for YES, <strong>Escape/N</strong> for NO
+            </div>
+            <div id="gesture-progress">
+                <div id="thumbs-up-progress" style="display: none;">
+                    <div>👍 Hold thumbs up...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="thumbs-progress-fill"></div>
+                    </div>
+                </div>
+                <div id="shake-progress" style="display: none;">
+                    <div class="shake-counter">☝️ Shakes: <span id="shake-count">0</span> / 3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <video id="webcam" autoplay playsinline></video>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+    <script type="module">
+        import { AudioManager } from './js/AudioManager.js';
+        import { LayerManager } from './js/LayerManager.js';
+        import { GridLockSystem } from './js/GridLockSystem.js';
+        import { NavigationController } from './js/NavigationController.js';
+        import CONFIG from './js/config.js';
+
+        // Debug logging system
+        const debugLog = [];
+        const MAX_DEBUG_ENTRIES = 50;
+
+        function addDebugEntry(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = { message, type, timestamp };
+            
+            debugLog.unshift(entry);
+            if (debugLog.length > MAX_DEBUG_ENTRIES) {
+                debugLog.pop();
+            }
+            
+            updateDebugUI();
+        }
+
+        function updateDebugUI() {
+            const logContainer = document.getElementById('debug-log');
+            logContainer.innerHTML = debugLog.map(entry => `
+                <div class="debug-entry ${entry.type}">
+                    <span class="debug-timestamp">[${entry.timestamp}]</span> ${entry.message}
+                </div>
+            `).join('');
+        }
+
+        // Initialize audio
+        const audioManager = new AudioManager();
+
+        // Function to update WOW label
+        function updateWowLabel(layerName) {
+            const wowLabel = document.getElementById('layer-wow-label');
+            const wowLayerName = wowLabel.querySelector('.wow-layer-name');
+            const wowIcon = wowLabel.querySelector('.wow-icon');
+
+            const config = CONFIG.layers[layerName] || { label: layerName, icon: '❓' };
+
+            // Update text and icon
+            wowLayerName.textContent = config.label;
+            wowIcon.textContent = config.icon;
+
+            // Remove all layer classes
+            wowLabel.classList.remove('layer-video', 'layer-news', 'layer-images', 'layer-games', 'layer-apps', 'layer-settings');
+
+            // Add current layer class
+            wowLabel.classList.add(`layer-${layerName}`);
+
+            // Trigger animation
+            wowLabel.style.animation = 'none';
+            setTimeout(() => {
+                wowLabel.style.animation = 'wowPulse 2s ease-in-out infinite';
+            }, 10);
+        }
+
+        // Initialize layer manager
+        const layerManager = new LayerManager({
+            initialLayer: CONFIG.navigation.initialLayer,
+            onLayerChange: (layerName) => {
+                audioManager.playSuccess();
+                addDebugEntry(`Layer changed to: ${layerName}`, 'layer');
+                update3DLayerPositions();
+                updateWowLabel(layerName);
+            },
+            onCardChange: (index, direction) => {
+                audioManager.playCardSelect();
+                addDebugEntry(`Card ${index + 1} (direction: ${direction})`, 'gesture');
+            }
+        });
+
+        // Initialize WOW label
+        updateWowLabel('video');
+
+        // Dynamic Background Effects System
+        const dynamicBg = document.getElementById('dynamic-background');
+        let navigationVelocity = 0;
+        let lastNavigationTime = 0;
+        let velocityDecayTimer = null;
+
+        function updateDynamicBackground() {
+            const now = Date.now();
+            const timeSinceLastNav = now - lastNavigationTime;
+
+            // Calculate velocity (navigations per second)
+            if (timeSinceLastNav < 1000) {
+                navigationVelocity = Math.min(10, navigationVelocity + 1);
+            } else {
+                navigationVelocity = Math.max(0, navigationVelocity - 0.5);
+            }
+
+            // Apply effects based on velocity
+            if (navigationVelocity > 5) {
+                dynamicBg.classList.add('high-velocity');
+                dynamicBg.classList.add('active');
+            } else if (navigationVelocity > 2) {
+                dynamicBg.classList.remove('high-velocity');
+                dynamicBg.classList.add('active');
+            } else if (navigationVelocity > 0.5) {
+                dynamicBg.classList.remove('high-velocity');
+                dynamicBg.classList.add('active');
+            } else {
+                dynamicBg.classList.remove('high-velocity');
+                dynamicBg.classList.remove('active');
+            }
+
+            // Clear existing timer
+            if (velocityDecayTimer) {
+                clearTimeout(velocityDecayTimer);
+            }
+
+            // Schedule velocity decay
+            velocityDecayTimer = setTimeout(() => {
+                if (Date.now() - lastNavigationTime > 2000) {
+                    navigationVelocity = 0;
+                    dynamicBg.classList.remove('high-velocity');
+                    dynamicBg.classList.remove('active');
+                }
+            }, 2000);
+        }
+
+        function onNavigationEvent() {
+            lastNavigationTime = Date.now();
+            updateDynamicBackground();
+        }
+
+        // Initialize grid lock system
+        const gridLock = new GridLockSystem(CONFIG.gridLock);
+
+        // Initialize navigation controller
+        const navController = new NavigationController(layerManager, {
+            onNavigate: (event) => {
+                addDebugEntry(`Nav: ${event.type}`, 'gesture');
+                onNavigationEvent();
+            }
+        });
+
+        navController.init('cards-viewport');
+
+        // 3D Layer positioning system
+        function update3DLayerPositions() {
+            const layerNames = layerManager.getLayerNames();
+            const currentLayerName = layerManager.getCurrentLayer();
+            const currentIndex = layerNames.indexOf(currentLayerName);
+
+            layerNames.forEach((layerName, index) => {
+                const layerContainer = document.getElementById(`layer-${layerName}`);
+                if (!layerContainer) return;
+
+                // Remove all position classes
+                layerContainer.classList.remove('active', 'front-1', 'back-1', 'back-2', 'far-back');
+
+                const diff = index - currentIndex;
+
+                if (diff === 0) {
+                    // Current layer - in focus
+                    layerContainer.classList.add('active');
+                } else if (diff === 1) {
+                    // Next layer - slightly behind
+                    layerContainer.classList.add('back-1');
+                } else if (diff === 2) {
+                    // Two layers behind
+                    layerContainer.classList.add('back-2');
+                } else if (diff > 2) {
+                    // Far back
+                    layerContainer.classList.add('far-back');
+                } else if (diff === -1) {
+                    // Previous layer - fading forward
+                    layerContainer.classList.add('front-1');
+                } else {
+                    // Far forward
+                    layerContainer.classList.add('far-back');
+                }
+            });
+
+            addDebugEntry(`3D Update: ${currentLayerName} at depth 0`, 'layer');
+        }
+
+        // Button controls
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            navController.navigateCard(-1);
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            navController.navigateCard(1);
+        });
+
+        document.getElementById('layer-up').addEventListener('click', () => {
+            navController.navigateLayer(-1);
+        });
+
+        document.getElementById('layer-down').addEventListener('click', () => {
+            navController.navigateLayer(1);
+        });
+
+        // Tab controls
+        document.querySelectorAll('.layer-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                navController.switchToLayer(tab.dataset.layer);
+                audioManager.playCardHover();
+            });
+        });
+
+        // Confirmation buttons
+        document.getElementById('confirm-yes').addEventListener('click', () => {
+            navController.confirmYes();
+        });
+
+        document.getElementById('confirm-no').addEventListener('click', () => {
+            navController.confirmNo();
+        });
+
+        // Keyboard controls
+        window.addEventListener('keydown', (e) => {
+            if (navController.isConfirmationPending()) {
+                if (e.key === 'Enter' || e.key.toLowerCase() === 'y') {
+                    navController.confirmYes();
+                } else if (e.key === 'Escape' || e.key.toLowerCase() === 'n') {
+                    navController.confirmNo();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowLeft') navController.navigateCard(-1);
+            if (e.key === 'ArrowRight') navController.navigateCard(1);
+            if (e.key === 'ArrowUp') navController.navigateLayer(-1);
+            if (e.key === 'ArrowDown') navController.navigateLayer(1);
+            if (e.key === 'f') navController.toggleFullscreen();
+            if (e.key === 'd') navController.deleteCurrentCard();
+            if (e.key === 'v') document.getElementById('webcam').classList.toggle('visible');
+        });
+
+        // Hand tracking with MediaPipe
+        const webcam = document.getElementById('webcam');
+
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: CONFIG.camera.maxNumHands,
+            modelComplexity: CONFIG.camera.modelComplexity,
+            minDetectionConfidence: CONFIG.camera.minDetectionConfidence,
+            minTrackingConfidence: CONFIG.camera.minTrackingConfidence
+        });
+
+        // Gesture state tracking
+        let thumbsUpStartTime = null;
+        let lastConfirmTime = 0;
+        const THUMBS_UP_DURATION = CONFIG.gestures.thumbsUpDuration;
+        const CONFIRM_COOLDOWN = CONFIG.gestures.confirmCooldown;
+
+        let indexShakes = [];
+        const SHAKE_THRESHOLD = CONFIG.gestures.shakeThreshold;
+        const SHAKE_TIME_WINDOW = CONFIG.gestures.shakeTimeWindow;
+
+        hands.onResults((results) => {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                document.getElementById('hand-status').className = 'status-dot active';
+                document.getElementById('hand-state').textContent = 'Detected';
+
+                // Detect gestures
+                const isPinch = detectPinch(landmarks);
+                const isFist = detectFist(landmarks);
+                const isThumbsUp = detectThumbsUp(landmarks);
+                const indexPosition = getIndexFingerPosition(landmarks);
+
+                // Log gesture detection
+                if (isPinch) addDebugEntry('👌 Pinch detected', 'gesture');
+                if (isFist) addDebugEntry('✊ Fist detected', 'gesture');
+                if (isThumbsUp) addDebugEntry('👍 Thumbs up detected', 'gesture');
+
+                // Track thumbs up duration
+                if (isThumbsUp) {
+                    if (!thumbsUpStartTime) {
+                        thumbsUpStartTime = Date.now();
+                    }
+                } else {
+                    thumbsUpStartTime = null;
+                }
+
+                // Track index finger shakes (left-right movement)
+                trackIndexShake(indexPosition);
+
+                // Handle confirmation gestures
+                if (navController.isConfirmationPending()) {
+                    // Update progress UI
+                    const thumbsUpProgress = document.getElementById('thumbs-up-progress');
+                    const shakeProgress = document.getElementById('shake-progress');
+                    const shakeCount = document.getElementById('shake-count');
+                    const progressFill = document.getElementById('thumbs-progress-fill');
+
+                    if (isThumbsUp && thumbsUpStartTime) {
+                        const elapsed = Date.now() - thumbsUpStartTime;
+                        const progress = Math.min(100, (elapsed / THUMBS_UP_DURATION) * 100);
+                        
+                        thumbsUpProgress.style.display = 'block';
+                        shakeProgress.style.display = 'none';
+                        progressFill.style.width = progress + '%';
+                    } else {
+                        thumbsUpProgress.style.display = 'none';
+                    }
+
+                    const recentShakes = countRecentShakes();
+                    if (recentShakes > 0) {
+                        shakeProgress.style.display = 'block';
+                        shakeCount.textContent = recentShakes;
+                    }
+
+                    const now = Date.now();
+                    const timeSinceLastConfirm = now - lastConfirmTime;
+
+                    // YES: Thumbs up for 1 second (with cooldown mitigation)
+                    if (thumbsUpStartTime && (now - thumbsUpStartTime) >= THUMBS_UP_DURATION) {
+                        if (timeSinceLastConfirm >= CONFIRM_COOLDOWN) {
+                            navController.confirmYes();
+                            audioManager.playSuccess();
+                            addDebugEntry('✅ Confirmed YES (thumbs up)', 'gesture');
+                            lastConfirmTime = now;
+                            thumbsUpStartTime = null;
+                            thumbsUpProgress.style.display = 'none';
+                        } else {
+                            // Cooldown active - prevent spam
+                            const cooldownRemaining = ((CONFIRM_COOLDOWN - timeSinceLastConfirm) / 1000).toFixed(1);
+                            addDebugEntry(`⏳ Cooldown: ${cooldownRemaining}s`, 'info');
+                            thumbsUpStartTime = null;
+                            thumbsUpProgress.style.display = 'none';
+                        }
+                    }
+                    // NO: Shake index finger 3 times
+                    else if (recentShakes >= SHAKE_THRESHOLD) {
+                        navController.confirmNo();
+                        audioManager.playError();
+                        addDebugEntry('❌ Confirmed NO (shake)', 'gesture');
+                        indexShakes = [];
+                        shakeProgress.style.display = 'none';
+                    }
+                } else {
+                    // Normal navigation - NO pinch/fist actions
+                    const palmBase = landmarks[0];
+                    const currentPos = { x: palmBase.x, y: palmBase.y };
+                    
+                    const gesture = gridLock.processHandMovement(currentPos);
+                    
+                    if (gesture) {
+                        if (gesture.type === 'horizontal') {
+                            navController.navigateCard(gesture.direction);
+                            addDebugEntry(`↔ Swipe ${gesture.direction > 0 ? 'RIGHT' : 'LEFT'}`, 'gesture');
+                        } else if (gesture.type === 'vertical') {
+                            navController.navigateLayer(gesture.direction);
+                            addDebugEntry(`↕ Layer ${gesture.direction > 0 ? 'DOWN' : 'UP'}`, 'layer');
+                        }
+                    }
+
+                    // Special actions (rare use cases)
+                    // Pinch = Click on element (will trigger confirmation)
+                    // Fist = Exit fullscreen (direct action, no confirmation)
+                    if (isFist && navController.fullscreenCard) {
+                        navController.executeFullscreen(); // Exit fullscreen
+                        addDebugEntry('� Exit fullscreen (fist)', 'gesture');
+                    }
+
+                    const acc = gridLock.getAccumulator();
+                    const intent = gridLock.getLastIntent();
+                    document.getElementById('gesture-type').textContent = 
+                        `X: ${acc.x.toFixed(2)}, Y: ${acc.y.toFixed(2)} | Intent: ${intent.x !== 0 ? (intent.x > 0 ? '→' : '←') : ''}${intent.y !== 0 ? (intent.y > 0 ? '↓' : '↑') : ''}`;
+                }
+
+            } else {
+                document.getElementById('hand-status').className = 'status-dot inactive';
+                document.getElementById('hand-state').textContent = 'Not detected';
+                gridLock.reset();
+                thumbsUpStartTime = null;
+                indexShakes = [];
+            }
+        });
+
+        // Gesture detection helpers
+        function detectPinch(landmarks) {
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const distance = Math.sqrt(
+                Math.pow(thumbTip.x - indexTip.x, 2) +
+                Math.pow(thumbTip.y - indexTip.y, 2)
+            );
+            return distance < CONFIG.gestures.pinchThreshold;
+        }
+
+        function detectFist(landmarks) {
+            const fingerTips = [8, 12, 16, 20];
+            const palmBase = landmarks[0];
+            let curledCount = 0;
+
+            fingerTips.forEach(tipIndex => {
+                const tip = landmarks[tipIndex];
+                const distanceToPalm = Math.sqrt(
+                    Math.pow(tip.x - palmBase.x, 2) +
+                    Math.pow(tip.y - palmBase.y, 2)
+                );
+                if (distanceToPalm < CONFIG.gestures.fistThreshold) curledCount++;
+            });
+
+            return curledCount >= 3;
+        }
+
+        function detectThumbsUp(landmarks) {
+            const thumbTip = landmarks[4];
+            const thumbIP = landmarks[3];
+            const indexMCP = landmarks[5];
+            const wrist = landmarks[0];
+            
+            // Pollice deve puntare verso l'alto
+            const thumbPointingUp = thumbTip.y < thumbIP.y && thumbTip.y < wrist.y;
+            
+            // Altre dita devono essere chiuse
+            const fingerTips = [8, 12, 16, 20];
+            let curledCount = 0;
+            
+            fingerTips.forEach(tipIndex => {
+                const tip = landmarks[tipIndex];
+                if (tip.y > indexMCP.y) curledCount++;
+            });
+            
+            return thumbPointingUp && curledCount >= 3;
+        }
+
+        function getIndexFingerPosition(landmarks) {
+            const indexTip = landmarks[8];
+            return { x: indexTip.x, y: indexTip.y, time: Date.now() };
+        }
+
+        let lastIndexX = null;
+        let lastDirection = null;
+
+        function trackIndexShake(position) {
+            if (lastIndexX === null) {
+                lastIndexX = position.x;
+                return;
+            }
+
+            const delta = position.x - lastIndexX;
+            const currentDirection = delta > 0 ? 'right' : 'left';
+
+            // Rileva cambio di direzione (shake)
+            if (Math.abs(delta) > 0.03 && lastDirection && currentDirection !== lastDirection) {
+                indexShakes.push({ time: position.time, direction: currentDirection });
+                
+                // Limita array per performance
+                if (indexShakes.length > 10) {
+                    indexShakes.shift();
+                }
+            }
+
+            if (Math.abs(delta) > 0.02) {
+                lastDirection = currentDirection;
+            }
+            
+            lastIndexX = position.x;
+        }
+
+        function countRecentShakes() {
+            const now = Date.now();
+            const recentShakes = indexShakes.filter(shake => 
+                (now - shake.time) < SHAKE_TIME_WINDOW
+            );
+            return recentShakes.length;
+        }
+
+        // Start experience
+        let cameraStarted = false;
+
+        async function startExperience() {
+            try {
+                // Resume audio
+                await audioManager.resume();
+
+                // Request camera permission and start
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 640, 
+                        height: 480 
+                    } 
+                });
+                
+                webcam.srcObject = stream;
+                await webcam.play();
+
+                // Start MediaPipe camera
+                const camera = new Camera(webcam, {
+                    onFrame: async () => {
+                        await hands.send({ image: webcam });
+                    },
+                    width: 640,
+                    height: 480
+                });
+
+                await camera.start();
+                cameraStarted = true;
+
+                // Hide start screen
+                document.getElementById('start-screen').classList.add('hidden');
+
+                // Initialize 3D layer positions
+                update3DLayerPositions();
+
+                addDebugEntry('🚀 System initialized', 'layer');
+                addDebugEntry('📹 Camera started', 'info');
+
+                console.log('Camera and audio started successfully');
+
+            } catch (error) {
+                console.error('Error starting experience:', error);
+                addDebugEntry(`❌ Error: ${error.message}`, 'error');
+                alert('Unable to access camera. Please grant camera permission and try again.');
+            }
+        }
+
+        // Start button
+        document.getElementById('start-btn').addEventListener('click', startExperience);
+
+        // Initial debug entry
+        addDebugEntry('💫 Aetherium Navigator loaded', 'info');
+
+        console.log('Aetherium Navigator initialized with modular architecture');
+    </script>
+</body>
+</html>
