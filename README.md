@@ -1,98 +1,164 @@
 # Aetherium Navigator
 
-A next-generation gesture-controlled navigation system with **predictive tracking**, multi-layer navigation, and real-time procedural drum & bass audio. Built with Three.js, MediaPipe Hands, and fully modular ES6+ architecture.
+A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback. Built with MediaPipe Hands, Web Speech API, and a fully modular ES6+ architecture optimized for performance and user experience.
 
-![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![Three.js](https://img.shields.io/badge/Three.js-r157-blue) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Predictive](https://img.shields.io/badge/Predictive_Tracking-Enabled-purple)
+![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue) ![Adaptive](https://img.shields.io/badge/Adaptive_System-3_Levels-purple)
+
+---
 
 ## ✨ Features
 
-### 🚀 Core Navigation
+### 🚀 Multi-Modal Navigation
 
-- **Multi-Layer System**: Navigate through 6 categorized layers (Videos, News, Images, Games, Apps, Settings)
-- **Infinite Scroll**: Seamless horizontal and vertical looping - never get stuck at edges
-- **Predictive Tracking**: AI-powered motion prediction that anticipates movements 50ms in the future
-  - Analyzes velocity and acceleration from last 10 frames
-  - Physics-based prediction: `position = current + velocity * dt + 0.5 * acceleration * dt²`
-  - Adaptive prediction time based on movement speed
-  - Confidence scoring for reliable anticipation
-- **Smart Grid Lock**: Intelligent gesture detection with:
-  - Separate thresholds for vertical (0.10) vs horizontal (0.12) movement
-  - Velocity-based intent detection
-  - Direction change delay to prevent accidental reversals
-  - Infinite loop wrapping on all axes
+Navigate through content using **gestures**, **keyboard**, or **voice** - the system adapts to your preferred input method:
 
-### 🎨 Visual Excellence
+- **🖐️ Hand Gestures**: MediaPipe Hands tracking with 21 landmarks
+  - Swipe left/right for card navigation
+  - Swipe up/down for layer switching
+  - Point (2s hold) for focus mode
+  - Advanced gestures unlock at higher adaptive levels
+  
+- **⌨️ Keyboard Controls**: Full navigation with arrows + WASD
+  - `A/D` or `←/→`: Navigate cards horizontally
+  - `W/S` or `↑/↓`: Navigate layers vertically
+  - `M`: Toggle voice commands on/off
+  - `F`: Fullscreen, `V`: Toggle webcam view
+  
+- **🎤 Voice Commands**: Bilingual speech recognition (English + Italian)
+  - English: "left", "right", "up", "down", "next", "back"
+  - Italian: "sinistra", "destra", "su", "giù", "avanti", "indietro"
+  - Continuous listening with auto-restart
+  - Visual microphone indicator (top-right)
 
-- **Dynamic WOW Label**: Animated category indicator in top-left corner
-  - Real-time layer identification
-  - Pulsing gradient effects
-  - Layer-specific color schemes
-- **Velocity-Based Background Effects**: Three animated glows that react to navigation speed
-  - Normal mode: Subtle pulsing
-  - High-velocity mode: Intense animations when navigating rapidly
-  - Auto-fade when idle
-- **Enhanced Card Design**:
-  - Glassmorphism with backdrop blur
-  - Gradient text effects
-  - Hover interactions
-  - Shadow depth and glow effects
-- **3D Layer Depth**: Perspective-based positioning with progressive blur
-- **GPU-Accelerated**: Optimized with `will-change`, `contain`, hardware compositing
+### 🧠 Adaptive Navigation System
 
-### 🎵 Procedural Audio System
+**Progressive unlock** system that rewards skill and familiarity:
 
-- **Real-time Drum & Bass**: Generated breakbeat at 174 BPM
-  - Kick drum: Synthesized low punch (150→50Hz sweep)
-  - Snare: Noise + tone hybrid (1000Hz highpass + 200Hz triangle)
-  - Hi-hat: Metallic noise (8000Hz highpass)
-  - Bassline: Sub bass (80Hz sawtooth)
-- **100% Web Audio API**: No external audio files
-- **16-step Pattern**: Authentic breakbeat rhythm
-- **Configurable**: Adjust BPM, volume, patterns via `config.js`
+- **Level 1 (Default)**: Basic gestures - swipe navigation, point to focus
+- **Level 2 (Unlocked at 85% accuracy)**: Advanced - pinch gestures, fan cards
+- **Level 3 (Unlocked at 90% accuracy)**: Expert - fist collapse, explosion effects
 
-### 🖐️ Gesture Control
+**Performance tracking**:
+- Real-time metrics: accuracy, speed, stability
+- Auto-upgrade/downgrade based on user skill
+- Visual progress bar in quantum HUD
+- Locked gestures provide upgrade hints
 
-- **🖐️ Open Hand Pan**: Swipe horizontally/vertically to navigate
-- **👍 Thumbs Up (1s hold)**: Confirm actions (with cooldown)
-- **☝️ Shake Index (3x)**: Cancel/deny actions
-- **✊ Fist**: Exit fullscreen mode
-- **Real-time Tracking**: MediaPipe Hands with 21 landmarks
-- **Predictive Cursor**: Cursor anticipates hand movement
+### 🎨 Quantum HUD - Glassmorphism Interface
+
+**Bottom-aligned unified control panel** with 5 sections:
+
+1. **Position Info**: Current layer name + card counter (1/4)
+2. **Navigation Controls**: 4 SVG buttons (prev/next cards, up/down layers)
+3. **Adaptive Display**: Level progress bar + metrics
+4. **Status Panel**: Hand detection, gesture legend, debug ticker
+5. **Navigation History**: Last 5 actions with color-coded icons
+
+**Design**:
+- Convex glassmorphism with `backdrop-filter: blur(40px)`
+- Inter font family, 72px height, 36px border-radius
+- Translucent background `rgba(20,20,35,0.85)`
+- Floating 20px from bottom edge
+- Category-specific accent colors (cyan, magenta, green, orange)
+
+### � Navigation History Widget
+
+**Live action tracking** - see your last 5 navigation moves:
+
+- **Color-coded icons**:
+  - � Cyan: Card navigation (left/right swipes)
+  - 🟣 Magenta: Layer navigation (up/down)
+  - 🟢 Green: Voice commands
+  - 🟠 Orange: Keyboard inputs
+  
+- **Smooth animations**: Icons fade in from right, scroll left, fade out
+- **Auto-cleanup**: Oldest actions removed when new ones arrive
+- **Source tracking**: Distinguishes gesture/keyboard/voice input
+
+### 🎨 Visual Feedback
+
+**Akira-Style Light Beams**:
+- Horizontal cyan/magenta beams for card navigation
+- Vertical pink/cyan beams for layer switching
+- Gradient trails with velocity-based intensity
+- Rendered on dedicated canvas layer
+
+**3D Vanishing Point Perspective**:
+- Active layer at z-depth 0 (full focus)
+- Back layers at -500px, -1000px (visible, blurred)
+- Front layers hidden (opacity 0) until gesture reveals
+- Smooth blur transitions with CSS `filter`
+
+**Dynamic Background**:
+- Three animated glow orbs
+- React to navigation velocity
+- High-speed mode: Intense pulsing
+- Auto-fade when idle (2s timeout)
+
+### 🎵 Spatial Audio System
+
+**Web Audio API** procedural sound synthesis:
+
+- **Gesture Sounds**: Whoosh (swipe), beep (focus), grab (confirm)
+- **Spatial Positioning**: 3D audio based on hand/card position
+- **Navigation Feedback**: Success tones, error alerts
+- **No Music**: Ambient loops disabled (gesture effects only)
+- **Configurable**: Volume/type in `AudioManager.js`
+
+### 🔒 Smart Grid Lock
+
+Prevents accidental navigation and jitter:
+
+- **Separate thresholds**: Vertical (0.10) easier than horizontal (0.12)
+- **Velocity tracking**: Only responds to intentional movements
+- **Direction cooldown**: 800ms delay before reversing
+- **Infinite wrapping**: Seamless loops on all axes
+- **Predictive intent**: Anticipates gesture completion
 
 ### ⚙️ Modular Architecture
 
 ```
 /navigator
-├── index.html                     # Clean HTML (only ~180 lines)
-├── style.css                      # All styles externalized
+├── index.html                      # Main app (1170 lines, fully integrated)
+├── style.css                       # Complete styling (2097 lines)
 └── js/
-    ├── config.js                  # ⭐ Centralized configuration
-    ├── PredictiveTracker.js       # ⭐ Motion prediction engine
-    ├── GestureDetector.js         # ⭐ Gesture recognition
-    ├── UIManager.js               # ⭐ UI updates & effects
-    ├── GridLockSystem.js          # Smart gesture processing
-    ├── AudioManager.js            # Procedural audio engine
-    ├── LayerManager.js            # Multi-layer navigation
-    ├── NavigationController.js    # DOM updates & routing
-    ├── Card.js                    # 3D card components
-    ├── DataStream.js              # Real-time data simulation
-    └── SceneManager.js            # Three.js rendering
+    ├── config.js                   # Centralized configuration
+    ├── AdaptiveNavigationSystem.js # ⭐ 3-level progression system
+    ├── AdaptiveNavigationHUD.js    # Adaptive progress display
+    ├── AudioManager.js             # Spatial audio synthesis
+    ├── GestureDetector.js          # Hand gesture recognition
+    ├── GridLockSystem.js           # Smart gesture processing
+    ├── LayerManager.js             # Multi-layer state management
+    ├── NavigationController.js     # Navigation logic & routing
+    ├── DOMLODManager.js            # Performance optimization (LOD)
+    ├── VisualEffects.js            # Canvas-based visual effects
+    ├── LightBeamSystem.js          # ⭐ Akira-style light beams
+    ├── VoiceCommandModule.js       # ⭐ Speech recognition (EN/IT)
+    └── NavigationHistoryHUD.js     # ⭐ Action history tracking
 ```
+
+---
 
 ## 🛠️ Technology Stack
 
 - **HTML5** - Semantic structure
-- **CSS3** - Advanced animations, glassmorphism, GPU acceleration
-- **JavaScript (ES6+ Modules)** - Fully modular architecture
-- **Three.js (r157+)** - 3D scene rendering
-- **MediaPipe Hands** - Real-time hand tracking (21 landmarks)
-- **Web Audio API** - Procedural sound synthesis
+- **CSS3** - Glassmorphism, GPU-accelerated animations, backdrop filters
+- **JavaScript (ES6+ Modules)** - Fully modular, 12 independent modules
+- **MediaPipe Hands** - Real-time 21-landmark hand tracking
+- **Web Speech API** - Continuous voice recognition (bilingual)
+- **Web Audio API** - Spatial sound synthesis
+- **Canvas API** - Light beams and visual effects rendering
+
+---
 
 ## 📋 Prerequisites
 
-- Modern browser (Chrome 90+, Firefox 88+, Edge 90+, Safari 14+)
-- Webcam for gesture input
-- Local web server (required for ES6 modules and webcam access)
+- **Modern browser**: Chrome 90+, Edge 90+ (best), Firefox 88+, Safari 14+
+- **Webcam**: For gesture input
+- **Microphone**: For voice commands (optional)
+- **Local server**: Required for ES6 modules and media access
+
+---
 
 ## 🚀 Getting Started
 
@@ -119,116 +185,282 @@ php -S localhost:8000
 
 **VS Code:** Install "Live Server" extension → Right-click `index.html` → "Open with Live Server"
 
+---
+
 ## 🎮 How to Use
 
-1. **Click "Start Experience"** - Grants camera/audio permissions
-2. **Position your hand** - Hold hand in front of webcam
-3. **Navigate**:
-   - **Swipe left/right**: Navigate between cards (infinite loop)
-   - **Swipe up/down**: Navigate between layers (infinite loop)
-   - Watch the **WOW label** change as you switch layers
-4. **Confirm actions**:
-   - **Thumbs up (hold 1s)**: Confirm
-   - **Shake index finger (3x)**: Cancel
-5. **Exit fullscreen**: Make a fist gesture
+### First Launch
 
-### Keyboard Shortcuts
+1. **Click "🚀 Start Experience"** - Grants camera/audio/microphone permissions
+2. **Position your hand** - Hold hand clearly in front of webcam
+3. **See the green hand icon** in quantum HUD (bottom) when detected
 
-- `←→`: Navigate cards
-- `↑↓`: Navigate layers
-- `F`: Toggle fullscreen
-- `D`: Delete current card
+### Navigation Methods
+
+**🖐️ Hand Gestures**:
+- **Swipe left/right**: Navigate cards horizontally
+- **Swipe up/down**: Change layers vertically
+- **Point (hold 2s)**: Focus mode (Kamehameha effect)
+- **Advanced gestures** unlock at Level 2 and Level 3
+
+**⌨️ Keyboard**:
+- `A` / `D` or `←` / `→`: Navigate cards
+- `W` / `S` or `↑` / `↓`: Navigate layers
+- `M`: Toggle voice commands
+- `F`: Fullscreen toggle
 - `V`: Toggle webcam view
+- `D`: Delete current card
+
+**🎤 Voice Commands** (press `M` to activate):
+- **English**: "left", "right", "up", "down", "next", "back"
+- **Italian**: "sinistra", "destra", "su", "giù", "avanti", "indietro"
+- Look for 🎤 icon (top-right) when listening
+
+### Understanding the HUD
+
+**Bottom quantum HUD shows**:
+- **Left**: Layer name + card position (e.g., "Videos 1/4")
+- **Center**: 4 navigation buttons (clickable)
+- **Middle**: Adaptive level progress bar
+- **Right**: Hand status + gesture legend
+- **Far right**: Last 5 navigation actions (color-coded history)
+
+### Adaptive Level System
+
+Start at **Level 1** with basic gestures. System tracks your:
+- **Accuracy**: Successful vs failed gestures
+- **Speed**: Average gesture completion time
+- **Stability**: Consistency of movements
+
+**Unlock progression**:
+- **Level 2** (85% accuracy): Pinch gestures, fan cards
+- **Level 3** (90% accuracy): Fist collapse, explosion effects
+
+Watch the progress bar in HUD - green = ready to upgrade!
+
+---
 
 ## ⚙️ Configuration
 
-All settings in `js/config.js` - modify atomically without breaking anything!
+All settings in `js/config.js` - modify without breaking anything!
 
-### Adjust Predictive Tracking
-
-```javascript
-// js/config.js
-CONFIG.predictiveTracking = {
-    enabled: true,
-    historySize: 10,           // Frames to analyze
-    predictionTime: 50,        // ms in future (latency compensation)
-    smoothingFactor: 0.3,      // 0-1, higher = more reactive
-    minVelocityThreshold: 0.001 // Minimum speed for prediction
-}
-```
-
-### Adjust Navigation Sensitivity
+### Adjust Grid Lock Sensitivity
 
 ```javascript
 CONFIG.gridLock = {
-    threshold: 0.12,              // Horizontal sensitivity
+    threshold: 0.12,              // Horizontal sensitivity (higher = less sensitive)
     thresholdVertical: 0.10,      // Vertical sensitivity (lower = easier)
-    minIntentVelocity: 0.015,     // Horizontal intent threshold
-    minIntentVelocityVertical: 0.012  // Vertical intent threshold
+    minIntentVelocity: 0.015,     // Horizontal movement speed threshold
+    minIntentVelocityVertical: 0.012 // Vertical movement speed threshold
 }
 ```
 
-### Change Audio Settings
+### Adjust Adaptive System
+
+```javascript
+CONFIG.adaptiveNavigation = {
+    enabled: true,
+    levels: {
+        1: { accuracyThreshold: 0.75, speedThreshold: 60, stabilityThreshold: 0.70 },
+        2: { accuracyThreshold: 0.85, speedThreshold: 75, stabilityThreshold: 0.80 },
+        3: { accuracyThreshold: 0.90, speedThreshold: 90, stabilityThreshold: 0.85 }
+    }
+```
+
+### Audio Settings
 
 ```javascript
 CONFIG.audio = {
-    masterVolume: 0.3,
-    drumBPM: 174,    // Try 165 for slower, 180 for faster
-    drumVolume: 0.12
+    masterVolume: 0.3,           // Overall volume (0-1)
+    spatialEnabled: true,        // 3D spatial positioning
+    gestureEffectsEnabled: true  // Whoosh/beep sounds
 }
 ```
 
-### Modify Visual Effects
+### Camera & Hand Tracking
 
 ```javascript
-CONFIG.effects = {
-    dynamicBackgroundEnabled: true,
-    wowLabelEnabled: true,
-    cardHoverEffects: true
-}
-
-CONFIG.performance = {
-    highVelocityThreshold: 5,      // Speed for intense effects
-    mediumVelocityThreshold: 2,    // Speed for normal effects
-    velocityDecayTime: 2000        // ms before effects fade
+CONFIG.camera = {
+    maxNumHands: 1,              // Track one hand
+    modelComplexity: 1,          // 0=lite, 1=full (recommended)
+    minDetectionConfidence: 0.7, // Detection threshold
+    minTrackingConfidence: 0.6   // Tracking threshold
 }
 ```
 
-## 🔧 Advanced Features
-
-### Predictive Tracking System
-
-The system analyzes the last 10 frames of hand movement to predict future position:
-
-1. **Velocity Calculation**: `v = Δposition / Δtime`
-2. **Acceleration Calculation**: `a = Δvelocity / Δtime`
-3. **Position Prediction**: `p_future = p_current + v * dt + 0.5 * a * dt²`
-4. **Confidence Scoring**: Based on movement consistency (0-1 scale)
-5. **Adaptive Mode**: Prediction time scales with velocity
-
-**Result**: The interface responds BEFORE you finish your gesture - feels telepathic!
-
-### Grid Lock System
-
-Prevents accidental navigation and jitter:
-
-- **Accumulator with damping**: Smooths out small movements
-- **Velocity tracking**: Only reacts to intentional movements
-- **Direction change delay**: 800ms cooldown before reversing direction
-- **Separate thresholds**: Easier vertical navigation (layer switching)
-
-### Infinite Scroll
-
-Both horizontal (cards) and vertical (layers) navigation wraps seamlessly:
-- At last card → wraps to first
-- At first card → wraps to last
-- Same for layers
+---
 
 ## 🐛 Troubleshooting
 
-### Camera Access Issues
+### Camera Not Working
 - Use `http://` or `https://` (not `file://`)
-- Allow camera permissions in browser
+- Allow camera permissions in browser settings
+- Try Chrome/Edge (best MediaPipe compatibility)
+- Press `V` to toggle webcam view and verify feed
+
+### Voice Commands Not Responding
+- Press `M` to toggle voice recognition on
+- Look for 🎤 icon (top-right) - green = listening
+- Speak clearly in English or Italian
+- Chrome/Edge have best Web Speech API support
+- Check browser microphone permissions
+
+### Gestures Not Detected
+- Ensure good lighting conditions
+- Position hand clearly in webcam frame
+- Move hand slowly and deliberately
+- Check quantum HUD for green hand icon
+- Locked gestures show 🔒 hints - level up to unlock
+
+### Performance Issues
+- Close other browser tabs
+- Reduce camera resolution in MediaPipe settings
+- Disable dynamic background: set `CONFIG.effects.dynamicBackgroundEnabled = false`
+- Check browser console for errors (F12)
+
+### Navigation History Not Showing
+- Widget appears far-right in quantum HUD
+- Requires at least one navigation action to populate
+- Color-coded: cyan (cards), magenta (layers), green (voice), orange (keyboard)
+
+---
+
+## 🎯 Performance Metrics
+
+- **Hand Tracking**: 30 FPS (MediaPipe Hands)
+- **Gesture Response**: <100ms with grid lock optimization
+- **Frame Rate**: Target 60 FPS (browser-dependent)
+- **Memory**: ~80MB (including MediaPipe + Web Speech)
+- **Startup Time**: ~2-3s (MediaPipe model loading)
+
+---
+
+## 🔐 Security & Privacy
+
+- **100% Client-Side**: All processing in browser
+- **No Data Transmission**: Webcam/microphone data never leaves device
+- **No Tracking**: Zero analytics or external services
+- **No Storage**: No cookies, localStorage, or persistent data
+- **Open Source**: Full code transparency
+
+---
+
+## 🚀 Advanced Features
+
+### Voice Command Customization
+
+Add custom voice commands in `VoiceCommandModule.js`:
+
+```javascript
+// Add new command mapping
+voiceCommands.addCommand('home', 'layer-up');
+voiceCommands.addCommand('casa', 'layer-up'); // Italian
+```
+
+### Navigation History API
+
+Access history programmatically:
+
+```javascript
+const history = navHistory.getHistory();      // Get all entries
+const count = navHistory.getCount();           // Get count
+navHistory.clear();                            // Clear all history
+navHistory.addAction('card-left', 'custom');   // Add custom action
+```
+
+### Adaptive System Callbacks
+
+Hook into level changes:
+
+```javascript
+adaptiveNav.on('levelChange', (newLevel) => {
+    console.log(`Unlocked Level ${newLevel}!`);
+    // Custom actions when user levels up
+});
+```
+
+### Light Beam Customization
+
+Trigger custom light beams:
+
+```javascript
+lightBeams.createBeam('left', 0.8);           // Horizontal beam (intensity 0-1)
+lightBeams.createVerticalBeam('up', 0.5);     // Vertical beam
+```
+
+---
+
+## 📝 Module Reference
+
+### Core Modules
+
+| Module | Lines | Purpose |
+|--------|-------|---------|
+| `AdaptiveNavigationSystem.js` | 455 | 3-level progression tracking |
+| `VoiceCommandModule.js` | 390 | Bilingual speech recognition |
+| `AudioManager.js` | 709 | Spatial audio synthesis |
+| `NavigationController.js` | ~400 | Navigation state management |
+| `GestureDetector.js` | ~350 | Hand gesture recognition |
+| `LightBeamSystem.js` | 195 | Akira-style visual beams |
+| `NavigationHistoryHUD.js` | 180 | Action history tracking |
+
+### Support Modules
+
+| Module | Purpose |
+|--------|---------|
+| `LayerManager.js` | Multi-layer state management |
+| `GridLockSystem.js` | Gesture smoothing & thresholds |
+| `DOMLODManager.js` | Performance optimization (LOD) |
+| `VisualEffects.js` | Canvas effects (Kamehameha, singularity) |
+| `AdaptiveNavigationHUD.js` | Progress bar UI |
+
+---
+
+## 🎨 Design Philosophy
+
+**Principles**:
+1. **Content First**: Cards are hero element, UI is minimal
+2. **Progressive Disclosure**: Advanced features unlock with skill
+3. **Multi-Modal**: Support all input types (gesture/keyboard/voice)
+4. **Immediate Feedback**: Every action has visual/audio response
+5. **Zero Learning Curve**: Start navigating immediately
+
+**Visual Language**:
+- **Glassmorphism**: Translucent surfaces with blur
+- **Cyber Aesthetics**: Akira-inspired light beams
+- **Color Coding**: Consistent color = consistent meaning
+- **Spatial Audio**: Sound follows visual position
+
+---
+
+## 🏆 Credits & Acknowledgments
+
+**Technologies**:
+- **[MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands)** - Google's hand tracking
+- **[Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)** - Browser voice recognition
+- **[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)** - Spatial audio synthesis
+
+**Design Inspiration**:
+- **Akira** - Light beam aesthetics
+- **Blade Runner** - Cyber UI elements
+- **Apple Vision Pro** - Glassmorphism design
+
+---
+
+## 📄 License
+
+MIT License - Free to use, modify, and distribute
+
+---
+
+## 📧 Contact
+
+Questions? Open an issue or PR on GitHub!
+
+---
+
+**Built with ❤️ using modern web standards - no frameworks, just pure JavaScript magic.** ✨
+
 - Try Chrome/Edge (best compatibility)
 
 ### Gesture Not Responding
