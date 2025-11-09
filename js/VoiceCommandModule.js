@@ -5,9 +5,10 @@
  */
 
 export class VoiceCommandModule {
-    constructor(navigationController, audioManager) {
+    constructor(navigationController, audioManager, historyHUD = null) {
         this.navigationController = navigationController;
         this.audioManager = audioManager;
+        this.historyHUD = historyHUD;
         
         // Web Speech API
         this.recognition = null;
@@ -290,20 +291,24 @@ export class VoiceCommandModule {
                 this.navigationController.navigateToLayer(
                     this.navigationController.currentLayer - 1
                 );
+                if (this.historyHUD) this.historyHUD.addAction('layer-up', 'voice');
                 break;
                 
             case 'layer-down':
                 this.navigationController.navigateToLayer(
                     this.navigationController.currentLayer + 1
                 );
+                if (this.historyHUD) this.historyHUD.addAction('layer-down', 'voice');
                 break;
                 
             case 'card-left':
                 this.navigationController.navigateInDirection('left');
+                if (this.historyHUD) this.historyHUD.addAction('card-left', 'voice');
                 break;
                 
             case 'card-right':
                 this.navigationController.navigateInDirection('right');
+                if (this.historyHUD) this.historyHUD.addAction('card-right', 'voice');
                 break;
                 
             default:

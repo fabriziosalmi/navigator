@@ -326,6 +326,9 @@
         // Initialize gesture detector (with glitch suppression)
         const gestureDetector = new GestureDetector();
 
+        // Initialize navigation history HUD
+        const navHistory = new NavigationHistoryHUD(5);
+
         // Initialize voice command module (will be activated after camera starts)
         let voiceCommands = null;
 
@@ -561,33 +564,33 @@
         document.getElementById('prev-btn').addEventListener('click', () => {
             audioManager.playGrab(-0.5, -0.8);
             audioManager.playWhoosh(-0.3, 0, 0.5);
-            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, -15, 0, '#00ffff');
             lightBeams.createBeam('left', 0.5);
             navController.navigateCard(-1);
+            navHistory.addAction('card-left', 'gesture');
         });
 
         document.getElementById('next-btn').addEventListener('click', () => {
             audioManager.playGrab(0.5, -0.8);
             audioManager.playWhoosh(0.3, 0, 0.5);
-            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 15, 0, '#00ffff');
             lightBeams.createBeam('right', 0.5);
             navController.navigateCard(1);
+            navHistory.addAction('card-right', 'gesture');
         });
 
         document.getElementById('layer-up').addEventListener('click', () => {
             audioManager.playGrab(0, -0.8);
             audioManager.playWhoosh(0, 0.3, 0.5);
-            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, -15, '#ff00ff');
             lightBeams.createVerticalBeam('up', 0.5);
             navController.navigateLayer(-1);
+            navHistory.addAction('layer-up', 'gesture');
         });
 
         document.getElementById('layer-down').addEventListener('click', () => {
             audioManager.playGrab(0, -0.8);
             audioManager.playWhoosh(0, -0.3, 0.5);
-            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, 15, '#ff00ff');
             lightBeams.createVerticalBeam('down', 0.5);
             navController.navigateLayer(1);
+            navHistory.addAction('layer-down', 'gesture');
         });
 
         // Tab controls
@@ -622,20 +625,24 @@
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
                 navController.navigateCard(-1);
                 lightBeams.createBeam('left', 0.5);
+                navHistory.addAction('card-left', 'keyboard');
             }
             if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
                 navController.navigateCard(1);
                 lightBeams.createBeam('right', 0.5);
+                navHistory.addAction('card-right', 'keyboard');
             }
             
             // Vertical navigation (layer change)
             if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
                 navController.navigateLayer(-1);
                 lightBeams.createVerticalBeam('up', 0.5);
+                navHistory.addAction('layer-up', 'keyboard');
             }
             if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
                 navController.navigateLayer(1);
                 lightBeams.createVerticalBeam('down', 0.5);
+                navHistory.addAction('layer-down', 'keyboard');
             }
             
             // Voice commands toggle
@@ -1027,16 +1034,14 @@
                                 // Spatial whoosh sound
                                 audioManager.playWhoosh(cardX, 0, velocity);
                                 
-                                // Light trail effect - DISABLED FOR CLEANER UI
-                                // const centerX = window.innerWidth / 2;
-                                // const centerY = window.innerHeight / 2;
-                                // const trailVx = gesture.direction > 0 ? 15 : -15;
-                                // visualFX.addLightTrail(centerX, centerY, trailVx, 0, '#00ffff');
-                                
                                 // Akira-style light beam for horizontal navigation
                                 lightBeams.createBeam(gesture.direction > 0 ? 'right' : 'left', velocity);
                                 
                                 navController.navigateCard(gesture.direction);
+                                
+                                // Track in history HUD
+                                const actionType = gesture.direction > 0 ? 'card-right' : 'card-left';
+                                navHistory.addAction(actionType, 'gesture');
                                 
                                 // Track successful navigation for adaptive system
                                 const gestureTime = Date.now() - (gestureDetector.lastGestureStartTime || Date.now());
@@ -1052,16 +1057,14 @@
                                 // Spatial whoosh sound
                                 audioManager.playWhoosh(0, layerY, velocity);
                                 
-                                // Light trail effect - DISABLED FOR CLEANER UI
-                                // const centerX = window.innerWidth / 2;
-                                // const centerY = window.innerHeight / 2;
-                                // const trailVy = gesture.direction > 0 ? 15 : -15;
-                                // visualFX.addLightTrail(centerX, centerY, 0, trailVy, '#ff00ff');
-                                
                                 // Akira-style vertical light beam for layer navigation
                                 lightBeams.createVerticalBeam(gesture.direction > 0 ? 'down' : 'up', velocity);
                                 
                                 navController.navigateLayer(gesture.direction);
+                                
+                                // Track in history HUD
+                                const actionType = gesture.direction > 0 ? 'layer-down' : 'layer-up';
+                                navHistory.addAction(actionType, 'gesture');
                                 
                                 // Track successful layer navigation
                                 const gestureTime = Date.now() - (gestureDetector.lastGestureStartTime || Date.now());
@@ -1137,7 +1140,7 @@
                 cameraStarted = true;
 
                 // Initialize voice commands
-                voiceCommands = new VoiceCommandModule(navController, audioManager);
+                voiceCommands = new VoiceCommandModule(navController, audioManager, navHistory);
                 addDebugEntry('🎤 Voice commands ready (press M to toggle)', 'info');
 
                 // Hide start screen
