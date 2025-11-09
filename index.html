@@ -73,9 +73,9 @@
     <!-- Cards Viewport -->
     <div id="cards-viewport"></div>
 
-    <!-- Snap Indicators -->
-    <div class="snap-indicator left">👈</div>
-    <div class="snap-indicator right">👉</div>
+    <!-- Snap Indicators - Hidden for modern UI -->
+    <div class="snap-indicator left" style="display: none;">👈</div>
+    <div class="snap-indicator right" style="display: none;">👉</div>
 
     <!-- Unified Bottom HUD - Quantum Leap Design -->
     <div id="quantum-hud">
@@ -344,6 +344,13 @@
                 update3DLayerPositions();
                 updateQuantumHUD(layerName);
                 updateDOMLOD(); // Update LOD when layer changes
+                
+                // Update total cards count in HUD
+                const hudTotalCards = document.getElementById('hud-total-cards');
+                if (hudTotalCards) {
+                    const activeCards = document.querySelectorAll('.layer.active .card');
+                    hudTotalCards.textContent = activeCards.length;
+                }
                 
                 // Data stream visual effect (aggiornamento dati visibile) - DISABLED FOR CLEANER UI
                 /*

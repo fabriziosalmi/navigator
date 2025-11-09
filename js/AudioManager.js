@@ -66,8 +66,8 @@ export class AudioManager {
             this.isInitialized = true;
             console.log('AudioManager initialized with 3D spatial audio');
             
-            // Start ambient background
-            this.startAmbient();
+            // Ambient background disabled - keeping only gesture/navigation effects
+            // this.startAmbient();
         } catch (error) {
             console.error('Web Audio API not supported:', error);
             this.isEnabled = false;
@@ -507,10 +507,11 @@ export class AudioManager {
             this.ambientGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
         } else if (this.isEnabled && this.ambientGain) {
             this.ambientGain.gain.linearRampToValueAtTime(0.12 * this.masterVolume, this.audioContext.currentTime + 0.5);
-        } else if (this.isEnabled && !this.ambientGain) {
-            // Restart ambient if it wasn't playing
-            this.startAmbient();
         }
+        // Ambient restart disabled - gesture/navigation effects only
+        // else if (this.isEnabled && !this.ambientGain) {
+        //     this.startAmbient();
+        // }
         return this.isEnabled;
     }
     
