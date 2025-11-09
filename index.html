@@ -259,14 +259,14 @@
                 `).join('');
             }
             
-            // Update bottom ticker
-            const tickerContent = document.getElementById('ticker-content');
-            if (tickerContent) {
-                const recentEntries = debugLog.slice(0, 10).map(entry => {
-                    const icon = entry.type === 'gesture' ? '👆' : entry.type === 'layer' ? '📁' : entry.type === 'error' ? '⚠️' : '•';
-                    return `${icon} ${entry.message}`;
-                }).join('  •  ');
-                tickerContent.textContent = recentEntries + '  •  ' + recentEntries; // Duplicate for seamless loop
+            // Update quantum HUD ticker
+            const hudTicker = document.getElementById('hud-ticker-text');
+            if (hudTicker) {
+                const recentEntry = debugLog[0];
+                if (recentEntry) {
+                    const icon = recentEntry.type === 'gesture' ? '→' : recentEntry.type === 'layer' ? '↕' : '⚠';
+                    hudTicker.textContent = `${icon} ${recentEntry.message}`;
+                }
             }
         }
 
@@ -276,14 +276,14 @@
         // Initialize Adaptive Navigation System
         const adaptiveNav = new AdaptiveNavigationSystem();
         
-        // Move adaptive HUD to bottom bar
+        // Move adaptive HUD to quantum HUD
         const adaptiveHUD = new AdaptiveNavigationHUD(adaptiveNav);
-        // Reparent HUD to bottom bar
+        // Reparent HUD to quantum HUD adaptive section
         setTimeout(() => {
             const hudContainer = document.querySelector('.adaptive-progress-bar');
-            const bottomHudSlot = document.getElementById('adaptive-hud-bottom');
-            if (hudContainer && bottomHudSlot) {
-                bottomHudSlot.appendChild(hudContainer);
+            const quantumHudSlot = document.getElementById('adaptive-hud-quantum');
+            if (hudContainer && quantumHudSlot) {
+                quantumHudSlot.appendChild(hudContainer);
             }
         }, 100);
 
@@ -296,34 +296,42 @@
         // Initialize gesture detector (with glitch suppression)
         const gestureDetector = new GestureDetector();
 
-        // Function to update WOW label
-        function updateWowLabel(layerName) {
-            const wowLabel = document.getElementById('layer-wow-label');
-            const wowLayerName = wowLabel.querySelector('.wow-layer-name');
-            const wowIcon = wowLabel.querySelector('.wow-icon');
-
+        // Function to update quantum HUD layer info
+        function updateQuantumHUD(layerName) {
             const config = CONFIG.layers[layerName] || { label: layerName, icon: '❓' };
-
-            // Update text and icon
-            wowLayerName.textContent = config.label;
-            wowIcon.textContent = config.icon;
-
-            // Remove all layer classes
-            wowLabel.classList.remove('layer-video', 'layer-news', 'layer-images', 'layer-games', 'layer-apps', 'layer-settings');
-
-            // Add current layer class
-            wowLabel.classList.add(`layer-${layerName}`);
-
-            // Trigger animation
-            wowLabel.style.animation = 'none';
-            setTimeout(() => {
-                wowLabel.style.animation = 'wowPulse 2s ease-in-out infinite';
-            }, 10);
             
-            // Update bottom bar layer badge
-            const layerBadge = document.getElementById('current-layer-badge');
-            if (layerBadge) {
-                layerBadge.textContent = `${config.icon} ${config.label}`;
+            // Update layer name in HUD
+            const hudLayerName = document.getElementById('hud-layer-name');
+            if (hudLayerName) {
+                hudLayerName.textContent = config.label;
+                // Set category color
+                const categoryColors = {
+                    'video': '#ff0064',
+                    'news': '#ffa500',
+                    'images': '#ff00ff',
+                    'games': '#00ff00',
+                    'apps': '#0064ff',
+                    'settings': '#969696'
+                };
+                hudLayerName.style.color = categoryColors[layerName] || '#00ffff';
+                hudLayerName.style.textShadow = `0 0 12px ${categoryColors[layerName] || '#00ffff'}40`;
+            }
+            
+            // Update layer meta (position)
+            const hudLayerMeta = document.getElementById('hud-layer-meta');
+            if (hudLayerMeta) {
+                const layerIndex = Object.keys(CONFIG.layers).indexOf(layerName) + 1;
+                const totalLayers = Object.keys(CONFIG.layers).length;
+                hudLayerMeta.textContent = `Layer ${layerIndex}/${totalLayers}`;
+            }
+            
+            // Also update old WOW label if present (fallback)
+            const wowLabel = document.getElementById('layer-wow-label');
+            if (wowLabel) {
+                const wowLayerName = wowLabel.querySelector('.wow-layer-name');
+                const wowIcon = wowLabel.querySelector('.wow-icon');
+                if (wowLayerName) wowLayerName.textContent = config.label;
+                if (wowIcon) wowIcon.textContent = config.icon;
             }
         }
 
@@ -334,7 +342,7 @@
                 audioManager.playSuccess();
                 addDebugEntry(`Layer changed to: ${layerName}`, 'layer');
                 update3DLayerPositions();
-                updateWowLabel(layerName);
+                updateQuantumHUD(layerName);
                 updateDOMLOD(); // Update LOD when layer changes
                 
                 // Data stream visual effect (aggiornamento dati visibile) - DISABLED FOR CLEANER UI
@@ -358,9 +366,9 @@
                 addDebugEntry(`Card ${index + 1} (direction: ${direction})`, 'gesture');
                 updateDOMLOD(); // Update LOD when card changes
                 
-                // Update bottom bar card counter
-                const currentCardBottom = document.getElementById('current-card-bottom');
-                if (currentCardBottom) currentCardBottom.textContent = index + 1;
+                // Update quantum HUD card counter
+                const hudCurrentCard = document.getElementById('hud-current-card');
+                if (hudCurrentCard) hudCurrentCard.textContent = index + 1;
                 
                 // Highlight sound with spatial position
                 const cardX = direction > 0 ? 0.3 : -0.3;
@@ -368,8 +376,14 @@
             }
         });
 
-        // Initialize WOW label
-        updateWowLabel('video');
+        // Initialize quantum HUD with initial values
+        updateQuantumHUD('video');
+        
+        // Set total cards in HUD
+        const hudTotalCards = document.getElementById('hud-total-cards');
+        if (hudTotalCards) {
+            hudTotalCards.textContent = document.querySelectorAll('.layer.active .card').length;
+        }
 
         // Dynamic Background Effects System
         const dynamicBg = document.getElementById('dynamic-background');
@@ -693,11 +707,11 @@
                 document.getElementById('hand-status').className = 'status-dot active';
                 document.getElementById('hand-state').textContent = 'Detected';
                 
-                // Update bottom bar status
-                const handStateBadge = document.getElementById('hand-status-badge');
-                const handStateBottom = document.getElementById('hand-state-bottom');
-                if (handStateBadge) handStateBadge.classList.add('active');
-                if (handStateBottom) handStateBottom.textContent = 'Detected';
+                // Update quantum HUD hand status
+                const hudHandStatus = document.getElementById('hud-hand-status');
+                const hudHandText = document.getElementById('hud-hand-text');
+                if (hudHandStatus) hudHandStatus.classList.add('active');
+                if (hudHandText) hudHandText.textContent = 'Detected';
 
                 // Get hand position for Hand Aura
                 const palmBase = landmarks[0];
@@ -1012,11 +1026,11 @@
                 document.getElementById('hand-status').className = 'status-dot inactive';
                 document.getElementById('hand-state').textContent = 'Not detected';
                 
-                // Update bottom bar status
-                const handStateBadge = document.getElementById('hand-status-badge');
-                const handStateBottom = document.getElementById('hand-state-bottom');
-                if (handStateBadge) handStateBadge.classList.remove('active');
-                if (handStateBottom) handStateBottom.textContent = 'No hand';
+                // Update quantum HUD hand status
+                const hudHandStatus = document.getElementById('hud-hand-status');
+                const hudHandText = document.getElementById('hud-hand-text');
+                if (hudHandStatus) hudHandStatus.classList.remove('active');
+                if (hudHandText) hudHandText.textContent = 'Searching';
                 
                 gridLock.reset();
                 thumbsUpStartTime = null;
