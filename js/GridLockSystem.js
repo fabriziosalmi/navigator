@@ -1,7 +1,10 @@
+import { PredictiveTracker } from './PredictiveTracker.js';
+
 /**
  * GridLockSystem - Sistema di aggancio a griglia per gesture fluide senza sfarfallii
  * Con intelligent direction control per distinguere intent da reset naturale
  * Con threshold separate per movimenti verticali e orizzontali
+ * Con predictive tracking per anticipare i movimenti
  */
 export class GridLockSystem {
     constructor(config = {}) {
@@ -24,6 +27,10 @@ export class GridLockSystem {
         this.maxVelocityHistory = 5;
         this.minIntentVelocity = config.minIntentVelocity || 0.015;
         this.minIntentVelocityVertical = config.minIntentVelocityVertical || this.minIntentVelocity;
+
+        // Predictive Tracking
+        this.predictiveEnabled = config.predictiveEnabled !== undefined ? config.predictiveEnabled : true;
+        this.predictor = new PredictiveTracker(config.predictiveConfig || {});
     }
 
     reset() {
@@ -31,26 +38,45 @@ export class GridLockSystem {
         this.previousHandPos = null;
         this.isSnapping = false;
         this.velocityHistory = [];
+        if (this.predictor) {
+            this.predictor.reset();
+        }
     }
 
     resetAccumulator() {
         this.gestureAccumulator = { x: 0, y: 0 };
     }
 
-    processHandMovement(currentPos) {
+    processHandMovement(currentPos, timestamp = Date.now()) {
         if (!this.enabled || this.isSnapping) {
             this.previousHandPos = currentPos;
+            if (this.predictor) {
+                this.predictor.update(currentPos, timestamp);
+            }
             return null;
         }
 
         if (!this.previousHandPos) {
             this.previousHandPos = currentPos;
+            if (this.predictor) {
+                this.predictor.update(currentPos, timestamp);
+            }
             return null;
         }
 
-        // Calcola delta e velocità
-        const deltaX = currentPos.x - this.previousHandPos.x;
-        const deltaY = currentPos.y - this.previousHandPos.y;
+        // Usa predictive tracking se abilitato
+        let workingPos = currentPos;
+        if (this.predictiveEnabled && this.predictor) {
+            const prediction = this.predictor.getAdaptivePrediction(currentPos, timestamp);
+            // Usa posizione predetta se confidence è alta
+            if (prediction.confidence > 0.6) {
+                workingPos = { x: prediction.x, y: prediction.y };
+            }
+        }
+
+        // Calcola delta e velocità usando posizione predetta
+        const deltaX = workingPos.x - this.previousHandPos.x;
+        const deltaY = workingPos.y - this.previousHandPos.y;
         const velocity = { x: Math.abs(deltaX), y: Math.abs(deltaY) };
 
         // Aggiorna history velocità
@@ -107,7 +133,8 @@ export class GridLockSystem {
         this.gestureAccumulator.x *= this.damping;
         this.gestureAccumulator.y *= this.damping;
 
-        this.previousHandPos = currentPos;
+        // Salva posizione predetta come riferimento
+        this.previousHandPos = workingPos;
 
         // Determina direzione
         const absX = Math.abs(this.gestureAccumulator.x);
@@ -214,6 +241,24 @@ export class GridLockSystem {
         this.enabled = enabled;
         if (!enabled) {
             this.reset();
+        }
+    }
+
+    /**
+     * Ottieni info debug sul predictive tracker
+     */
+    getPredictiveDebugInfo() {
+        if (!this.predictor) return null;
+        return this.predictor.getDebugInfo();
+    }
+
+    /**
+     * Abilita/disabilita predictive tracking
+     */
+    setPredictiveEnabled(enabled) {
+        this.predictiveEnabled = enabled;
+        if (!enabled && this.predictor) {
+            this.predictor.reset();
         }
     }
 }

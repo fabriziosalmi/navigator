@@ -1,11 +1,13 @@
 /**
  * Card.js
- * 
+ *
  * Represents a single data card in the 3D space.
  * Combines a Three.js mesh for 3D positioning with an HTML overlay for content display.
+ * Supports Adaptive Detail Rendering (LOD) for optimal performance.
  */
 
 import * as THREE from 'three';
+import { LOD_LEVELS } from './LODManager.js';
 
 export class Card {
     constructor(id, title, initialValue = 0) {
@@ -32,7 +34,12 @@ export class Card {
         this.floatOffset = Math.random() * Math.PI * 2; // Random phase for floating
         this.floatSpeed = 0.5 + Math.random() * 0.5; // Random speed
         this.floatAmplitude = 0.1;
-        
+
+        // LOD (Level of Detail) state
+        this.currentLOD = LOD_LEVELS.HIGH;
+        this.materials = {}; // Will hold HIGH, MEDIUM, LOW material presets
+        this.animationsEnabled = true; // Disable for LOW/CULLED LOD
+
         this.init();
     }
     
@@ -42,15 +49,12 @@ export class Card {
     init() {
         // Create card mesh (plane geometry)
         const geometry = new THREE.PlaneGeometry(2.5, 3);
-        const material = new THREE.MeshStandardMaterial({
-            color: 0x1a1a2e,
-            emissive: 0x0a0a1a,
-            side: THREE.DoubleSide,
-            metalness: 0.3,
-            roughness: 0.7
-        });
-        
-        this.mesh = new THREE.Mesh(geometry, material);
+
+        // Create 3 material presets for LOD
+        this.createMaterialPresets();
+
+        // Use HIGH quality material by default
+        this.mesh = new THREE.Mesh(geometry, this.materials[LOD_LEVELS.HIGH]);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
         
@@ -78,6 +82,34 @@ export class Card {
         console.log(`Card ${this.id} initialized`);
     }
     
+    /**
+     * Create material presets for different LOD levels
+     */
+    createMaterialPresets() {
+        // HIGH: Full quality - MeshStandardMaterial with all features
+        this.materials[LOD_LEVELS.HIGH] = new THREE.MeshStandardMaterial({
+            color: 0x1a1a2e,
+            emissive: 0x0a0a1a,
+            side: THREE.DoubleSide,
+            metalness: 0.3,
+            roughness: 0.7
+        });
+
+        // MEDIUM: Reduced quality - MeshBasicMaterial with emissive only
+        this.materials[LOD_LEVELS.MEDIUM] = new THREE.MeshBasicMaterial({
+            color: 0x1a1a2e,
+            side: THREE.DoubleSide
+        });
+
+        // LOW: Minimal quality - Simple color, no lighting
+        this.materials[LOD_LEVELS.LOW] = new THREE.MeshBasicMaterial({
+            color: 0x0a0a1a,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.7
+        });
+    }
+
     /**
      * Create the HTML overlay element for displaying card data
      */
@@ -186,6 +218,62 @@ export class Card {
     }
     
     /**
+     * Set LOD (Level of Detail) level for performance optimization
+     * @param {string} lodLevel - LOD_LEVELS constant (HIGH, MEDIUM, LOW, CULLED)
+     */
+    setLODLevel(lodLevel) {
+        if (this.currentLOD === lodLevel) return;
+
+        this.currentLOD = lodLevel;
+
+        switch (lodLevel) {
+            case LOD_LEVELS.HIGH:
+                // Full quality
+                this.mesh.material = this.materials[LOD_LEVELS.HIGH];
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+                this.outline.visible = true;
+                this.htmlElement.style.display = 'block';
+                this.htmlElement.classList.remove('lod-medium', 'lod-low');
+                this.htmlElement.classList.add('lod-high');
+                this.animationsEnabled = true;
+                break;
+
+            case LOD_LEVELS.MEDIUM:
+                // Reduced quality
+                this.mesh.material = this.materials[LOD_LEVELS.MEDIUM];
+                this.mesh.castShadow = false;
+                this.mesh.receiveShadow = false;
+                this.outline.visible = false;
+                this.htmlElement.style.display = 'block';
+                this.htmlElement.classList.remove('lod-high', 'lod-low');
+                this.htmlElement.classList.add('lod-medium');
+                this.animationsEnabled = true;
+                break;
+
+            case LOD_LEVELS.LOW:
+                // Minimal quality
+                this.mesh.material = this.materials[LOD_LEVELS.LOW];
+                this.mesh.castShadow = false;
+                this.mesh.receiveShadow = false;
+                this.outline.visible = false;
+                this.htmlElement.style.display = 'block';
+                this.htmlElement.classList.remove('lod-high', 'lod-medium');
+                this.htmlElement.classList.add('lod-low');
+                this.animationsEnabled = false;
+                break;
+
+            case LOD_LEVELS.CULLED:
+                // Hidden completely
+                this.mesh.visible = false;
+                this.outline.visible = false;
+                this.htmlElement.style.display = 'none';
+                this.animationsEnabled = false;
+                break;
+        }
+    }
+
+    /**
      * Update the card's position and HTML overlay position
      * Called every frame
      * @param {number} deltaTime
@@ -193,17 +281,24 @@ export class Card {
      * @param {THREE.Camera} camera
      */
     update(deltaTime, elapsedTime, camera) {
-        // Floating animation
-        const floatY = Math.sin(elapsedTime * this.floatSpeed + this.floatOffset) * this.floatAmplitude;
-        this.mesh.position.y = floatY;
-        
-        // Smooth scale transition
-        this.currentScale += (this.targetScale - this.currentScale) * 0.1;
-        this.group.scale.set(this.currentScale, this.currentScale, this.currentScale);
-        
-        // Decay target scale back to base
-        this.targetScale += (this.baseScale - this.targetScale) * 0.05;
-        
+        // Skip updates for CULLED cards
+        if (this.currentLOD === LOD_LEVELS.CULLED) {
+            return;
+        }
+
+        // Floating animation (only if animations enabled)
+        if (this.animationsEnabled) {
+            const floatY = Math.sin(elapsedTime * this.floatSpeed + this.floatOffset) * this.floatAmplitude;
+            this.mesh.position.y = floatY;
+
+            // Smooth scale transition
+            this.currentScale += (this.targetScale - this.currentScale) * 0.1;
+            this.group.scale.set(this.currentScale, this.currentScale, this.currentScale);
+
+            // Decay target scale back to base
+            this.targetScale += (this.baseScale - this.targetScale) * 0.05;
+        }
+
         // Update HTML overlay position to match 3D position
         this.updateHTMLPosition(camera);
     }
@@ -267,12 +362,19 @@ export class Card {
         if (this.htmlElement && this.htmlElement.parentNode) {
             this.htmlElement.parentNode.removeChild(this.htmlElement);
         }
-        
+
         // Dispose Three.js resources
         if (this.mesh) {
             this.mesh.geometry.dispose();
-            this.mesh.material.dispose();
         }
+
+        // Dispose all material presets
+        Object.values(this.materials).forEach(material => {
+            if (material) {
+                material.dispose();
+            }
+        });
+
         if (this.outline) {
             this.outline.geometry.dispose();
             this.outline.material.dispose();

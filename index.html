@@ -10,7 +10,7 @@
     <!-- Start Screen -->
     <div id="start-screen">
         <div class="start-box">
-            <h1>🌌 Aetherium Navigator</h1>
+            <h1>🌌 Navigator</h1>
             <p>Multi-layer gesture-controlled interface</p>
             <p>Navigate through cards with hand gestures</p>
             <button id="start-btn">🚀 Start Experience</button>
@@ -56,6 +56,12 @@
         <div class="bg-glow bg-glow-3"></div>
     </div>
 
+    <!-- Light Trails Canvas (Akira/Tron style) -->
+    <canvas id="light-trails-canvas"></canvas>
+
+    <!-- Data Streams Canvas (visible data flow) -->
+    <canvas id="data-streams-canvas"></canvas>
+
     <!-- Cards Viewport -->
     <div id="cards-viewport"></div>
 
@@ -63,12 +69,32 @@
     <div class="snap-indicator left">👈</div>
     <div class="snap-indicator right">👉</div>
 
-    <!-- Bottom Navigation -->
+    <!-- Unified Bottom Bar -->
     <div id="bottom-nav">
-        <button class="nav-button" id="prev-btn">◀ Prev</button>
-        <button class="nav-button" id="layer-up">▲ Layer Up</button>
-        <button class="nav-button" id="layer-down">▼ Layer Down</button>
-        <button class="nav-button" id="next-btn">Next ▶</button>
+        <!-- Navigation Controls -->
+        <div class="bottom-section">
+            <button class="nav-button compact" id="prev-btn">◀</button>
+            <button class="nav-button compact" id="layer-up">▲</button>
+            <button class="nav-button compact" id="layer-down">▼</button>
+            <button class="nav-button compact" id="next-btn">▶</button>
+        </div>
+        
+        <!-- Adaptive Level Display (moved from sidebar) -->
+        <div class="bottom-section adaptive-hud-compact" id="adaptive-hud-bottom">
+            <!-- Will be populated by AdaptiveNavigationHUD -->
+        </div>
+        
+        <!-- Current Status -->
+        <div class="bottom-section status-compact">
+            <span class="layer-badge" id="current-layer-badge">🎬 Videos</span>
+            <span class="card-counter">Card <span id="current-card-bottom">1</span>/<span id="total-cards-bottom">4</span></span>
+            <span class="hand-status-badge" id="hand-status-badge">🖐️ <span id="hand-state-bottom">No hand</span></span>
+        </div>
+        
+        <!-- Debug Ticker (single scrolling line) -->
+        <div class="bottom-section debug-ticker" id="debug-ticker">
+            <div class="ticker-content" id="ticker-content"></div>
+        </div>
     </div>
 
     <!-- Layer WOW Label -->
@@ -84,6 +110,26 @@
         <p><span class="status-dot inactive" id="hand-status"></span>Hand: <strong id="hand-state">Not detected</strong></p>
         <p>Gesture: <strong id="gesture-type">None</strong></p>
         <p>Grid Lock: <strong id="grid-lock">Active</strong></p>
+    </div>
+
+    <!-- GESTURE INDICATOR - Shows available gestures in real-time -->
+    <div id="gesture-indicator">
+        <div class="gesture-hint" id="point-hint" data-gesture="point" title="Point to focus">
+            <div class="gesture-icon">👆</div>
+            <div class="gesture-label">Point<br><span class="gesture-context">2s = Focus</span></div>
+        </div>
+        <div class="gesture-hint" id="pinch-hint" data-gesture="pinch" title="Pinch to zoom/grab">
+            <div class="gesture-icon">🤏</div>
+            <div class="gesture-label">Pinch<br><span class="gesture-context">Zoom/Grab</span></div>
+        </div>
+        <div class="gesture-hint" id="fist-hint" data-gesture="fist" title="Fist to collapse">
+            <div class="gesture-icon">✊</div>
+            <div class="gesture-label">Fist<br><span class="gesture-context">Collapse</span></div>
+        </div>
+        <div class="gesture-hint" id="open-hint" data-gesture="open" title="Open hand to explode">
+            <div class="gesture-icon">🖐️</div>
+            <div class="gesture-label">Open<br><span class="gesture-context">Navigate/Reset</span></div>
+        </div>
     </div>
 
     <!-- Debug History Panel -->
@@ -140,6 +186,11 @@
         import { LayerManager } from './js/LayerManager.js';
         import { GridLockSystem } from './js/GridLockSystem.js';
         import { NavigationController } from './js/NavigationController.js';
+        import { GestureDetector } from './js/GestureDetector.js';
+        import { DOMLODManager } from './js/DOMLODManager.js';
+        import { VisualEffects } from './js/VisualEffects.js';
+        import { AdaptiveNavigationSystem } from './js/AdaptiveNavigationSystem.js';
+        import { AdaptiveNavigationHUD } from './js/AdaptiveNavigationHUD.js';
         import CONFIG from './js/config.js';
 
         // Debug logging system
@@ -159,16 +210,49 @@
         }
 
         function updateDebugUI() {
+            // Update old panel (hidden)
             const logContainer = document.getElementById('debug-log');
-            logContainer.innerHTML = debugLog.map(entry => `
-                <div class="debug-entry ${entry.type}">
-                    <span class="debug-timestamp">[${entry.timestamp}]</span> ${entry.message}
-                </div>
-            `).join('');
+            if (logContainer) {
+                logContainer.innerHTML = debugLog.map(entry => `
+                    <div class="debug-entry ${entry.type}">
+                        <span class="debug-timestamp">[${entry.timestamp}]</span> ${entry.message}
+                    </div>
+                `).join('');
+            }
+            
+            // Update bottom ticker
+            const tickerContent = document.getElementById('ticker-content');
+            if (tickerContent) {
+                const recentEntries = debugLog.slice(0, 10).map(entry => {
+                    const icon = entry.type === 'gesture' ? '👆' : entry.type === 'layer' ? '📁' : entry.type === 'error' ? '⚠️' : '•';
+                    return `${icon} ${entry.message}`;
+                }).join('  •  ');
+                tickerContent.textContent = recentEntries + '  •  ' + recentEntries; // Duplicate for seamless loop
+            }
         }
 
         // Initialize audio
         const audioManager = new AudioManager();
+
+        // Initialize Adaptive Navigation System
+        const adaptiveNav = new AdaptiveNavigationSystem();
+        
+        // Move adaptive HUD to bottom bar
+        const adaptiveHUD = new AdaptiveNavigationHUD(adaptiveNav);
+        // Reparent HUD to bottom bar
+        setTimeout(() => {
+            const hudContainer = document.querySelector('.adaptive-progress-bar');
+            const bottomHudSlot = document.getElementById('adaptive-hud-bottom');
+            if (hudContainer && bottomHudSlot) {
+                bottomHudSlot.appendChild(hudContainer);
+            }
+        }, 100);
+
+        // Initialize visual effects (Blade Runner/Akira aesthetics)
+        const visualFX = new VisualEffects();
+
+        // Initialize gesture detector (with glitch suppression)
+        const gestureDetector = new GestureDetector();
 
         // Function to update WOW label
         function updateWowLabel(layerName) {
@@ -193,6 +277,12 @@
             setTimeout(() => {
                 wowLabel.style.animation = 'wowPulse 2s ease-in-out infinite';
             }, 10);
+            
+            // Update bottom bar layer badge
+            const layerBadge = document.getElementById('current-layer-badge');
+            if (layerBadge) {
+                layerBadge.textContent = `${config.icon} ${config.label}`;
+            }
         }
 
         // Initialize layer manager
@@ -203,10 +293,36 @@
                 addDebugEntry(`Layer changed to: ${layerName}`, 'layer');
                 update3DLayerPositions();
                 updateWowLabel(layerName);
+                updateDOMLOD(); // Update LOD when layer changes
+                
+                // Data stream visual effect (aggiornamento dati visibile) - DISABLED FOR CLEANER UI
+                /*
+                const startX = Math.random() * window.innerWidth;
+                const startY = Math.random() < 0.5 ? 0 : window.innerHeight;
+                const targetX = window.innerWidth / 2;
+                const targetY = window.innerHeight / 2;
+                const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ffff00'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                visualFX.createDataStream(startX, startY, targetX, targetY, color, () => {
+                    // Ripple effect on impact
+                    visualFX.createRipple(targetX, targetY, color);
+                    audioManager.playDataPing(0, 0);
+                });
+                */
             },
             onCardChange: (index, direction) => {
                 audioManager.playCardSelect();
                 addDebugEntry(`Card ${index + 1} (direction: ${direction})`, 'gesture');
+                updateDOMLOD(); // Update LOD when card changes
+                
+                // Update bottom bar card counter
+                const currentCardBottom = document.getElementById('current-card-bottom');
+                if (currentCardBottom) currentCardBottom.textContent = index + 1;
+                
+                // Highlight sound with spatial position
+                const cardX = direction > 0 ? 0.3 : -0.3;
+                audioManager.playHighlight(cardX, 0);
             }
         });
 
@@ -278,6 +394,34 @@
 
         navController.init('cards-viewport');
 
+        // Initialize DOM LOD Manager for foveated rendering
+        const domLODManager = new DOMLODManager({
+            enabled: CONFIG.domLOD.enabled,
+            activeRadius: CONFIG.domLOD.activeRadius,
+            adjacentRadius: CONFIG.domLOD.adjacentRadius,
+            nearbyRadius: CONFIG.domLOD.nearbyRadius,
+            distantRadius: CONFIG.domLOD.distantRadius,
+            updateInterval: CONFIG.domLOD.updateInterval
+        });
+
+        // Function to update DOM LOD for current layer
+        function updateDOMLOD() {
+            const currentLayerName = layerManager.getCurrentLayer();
+            const layerContainer = document.getElementById(`layer-${currentLayerName}`);
+            if (!layerContainer) return;
+
+            const cards = layerContainer.querySelectorAll('.card');
+            const currentCardIndex = layerManager.getCurrentCardIndex();
+
+            // Initialize or update LOD manager
+            domLODManager.init(cards);
+            domLODManager.update(currentCardIndex);
+
+            // Log stats
+            const stats = domLODManager.getStats();
+            addDebugEntry(`LOD: ${stats.activeCards}A ${stats.adjacentCards}Ad ${stats.nearbyCards}N ${stats.hiddenCards}H`, 'info');
+        }
+
         // 3D Layer positioning system
         function update3DLayerPositions() {
             const layerNames = layerManager.getLayerNames();
@@ -317,20 +461,32 @@
             addDebugEntry(`3D Update: ${currentLayerName} at depth 0`, 'layer');
         }
 
-        // Button controls
+        // Button controls with spatial audio and visual effects
         document.getElementById('prev-btn').addEventListener('click', () => {
+            audioManager.playGrab(-0.5, -0.8);
+            audioManager.playWhoosh(-0.3, 0, 0.5);
+            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, -15, 0, '#00ffff');
             navController.navigateCard(-1);
         });
 
         document.getElementById('next-btn').addEventListener('click', () => {
+            audioManager.playGrab(0.5, -0.8);
+            audioManager.playWhoosh(0.3, 0, 0.5);
+            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 15, 0, '#00ffff');
             navController.navigateCard(1);
         });
 
         document.getElementById('layer-up').addEventListener('click', () => {
+            audioManager.playGrab(0, -0.8);
+            audioManager.playWhoosh(0, 0.3, 0.5);
+            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, -15, '#ff00ff');
             navController.navigateLayer(-1);
         });
 
         document.getElementById('layer-down').addEventListener('click', () => {
+            audioManager.playGrab(0, -0.8);
+            audioManager.playWhoosh(0, -0.3, 0.5);
+            // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, 15, '#ff00ff');
             navController.navigateLayer(1);
         });
 
@@ -371,6 +527,95 @@
             if (e.key === 'v') document.getElementById('webcam').classList.toggle('visible');
         });
 
+        /**
+         * UPDATE GESTURE INDICATOR
+         * Shows which gestures are available based on current mode
+         */
+        function updateGestureIndicator(mode) {
+            const pointHint = document.getElementById('point-hint');
+            const pinchHint = document.getElementById('pinch-hint');
+            const fistHint = document.getElementById('fist-hint');
+            const openHint = document.getElementById('open-hint');
+
+            // Reset all
+            [pointHint, pinchHint, fistHint, openHint].forEach(hint => {
+                hint.classList.remove('active', 'disabled', 'locked');
+            });
+            
+            // Check current adaptive level
+            const currentLevel = adaptiveNav.getCurrentLevel();
+
+            switch (mode) {
+                case 'navigation':
+                    // Show available gestures based on level
+                    pointHint.classList.add('active');
+                    pointHint.querySelector('.gesture-context').textContent = 'Hold 2s to focus';
+                    
+                    if (currentLevel >= 2) {
+                        pinchHint.querySelector('.gesture-context').textContent = 'Zoom or fan cards';
+                    } else {
+                        pinchHint.classList.add('locked');
+                        pinchHint.querySelector('.gesture-context').textContent = '🔒 Level 2';
+                    }
+                    
+                    if (currentLevel >= 3) {
+                        fistHint.querySelector('.gesture-context').textContent = 'Start collapse';
+                        openHint.querySelector('.gesture-context').textContent = 'Trigger explosion';
+                    } else {
+                        fistHint.classList.add('locked');
+                        fistHint.querySelector('.gesture-context').textContent = '🔒 Level 3';
+                        openHint.classList.add('locked');
+                        openHint.querySelector('.gesture-context').textContent = '🔒 Level 3';
+                    }
+                    break;
+
+                case 'focus':
+                    // In focus mode, only point and open hand active
+                    pointHint.classList.add('active');
+                    pointHint.querySelector('.gesture-context').textContent = 'Focusing...';
+                    pinchHint.classList.add('disabled');
+                    fistHint.classList.add('disabled');
+                    if (currentLevel >= 3) {
+                        openHint.classList.add('active');
+                        openHint.querySelector('.gesture-context').textContent = 'Exit focus';
+                    } else {
+                        openHint.classList.add('locked');
+                    }
+                    break;
+
+                case 'singularity':
+                    // In singularity mode, only open hand active
+                    pointHint.classList.add('disabled');
+                    pinchHint.classList.add('disabled');
+                    fistHint.classList.add('disabled');
+                    if (currentLevel >= 3) {
+                        openHint.classList.add('active');
+                        openHint.querySelector('.gesture-context').textContent = 'Explode cards';
+                    } else {
+                        openHint.classList.add('locked');
+                    }
+                    break;
+
+                case 'point':
+                    // Point gesture detected
+                    pointHint.classList.add('active');
+                    pointHint.querySelector('.gesture-context').textContent = 'Keep holding...';
+                    break;
+
+                case 'pinch':
+                    // Pinch gesture active
+                    if (currentLevel >= 2) {
+                        pinchHint.classList.add('active');
+                        pinchHint.querySelector('.gesture-context').textContent = 'Zooming...';
+                    }
+                    break;
+
+                default:
+                    // Default navigation state
+                    break;
+            }
+        }
+
         // Hand tracking with MediaPipe
         const webcam = document.getElementById('webcam');
 
@@ -401,17 +646,61 @@
                 
                 document.getElementById('hand-status').className = 'status-dot active';
                 document.getElementById('hand-state').textContent = 'Detected';
+                
+                // Update bottom bar status
+                const handStateBadge = document.getElementById('hand-status-badge');
+                const handStateBottom = document.getElementById('hand-state-bottom');
+                if (handStateBadge) handStateBadge.classList.add('active');
+                if (handStateBottom) handStateBottom.textContent = 'Detected';
 
-                // Detect gestures
-                const isPinch = detectPinch(landmarks);
-                const isFist = detectFist(landmarks);
-                const isThumbsUp = detectThumbsUp(landmarks);
-                const indexPosition = getIndexFingerPosition(landmarks);
+                // Get hand position for Hand Aura
+                const palmBase = landmarks[0];
+                const handX = palmBase.x * window.innerWidth;
+                const handY = palmBase.y * window.innerHeight;
+
+                // Detect gestures (con glitch suppression)
+                const timestamp = Date.now();
+                
+                // Check which gestures are available at current adaptive level
+                const currentLevel = adaptiveNav.getCurrentLevel();
+                const isPinch = currentLevel >= 2 ? gestureDetector.detectPinch(landmarks, timestamp) : false;
+                const isFist = currentLevel >= 3 ? gestureDetector.detectFist(landmarks, timestamp) : false;
+                const isOpenHand = currentLevel >= 3 ? gestureDetector.detectOpenHand(landmarks, timestamp) : false;
+                const isThumbsUp = gestureDetector.detectThumbsUp(landmarks, timestamp);
+                const isPoint = gestureDetector.detectPoint(landmarks, timestamp); // Always available (L1)
+                const indexPosition = gestureDetector.getIndexFingerPosition(landmarks);
+
+                // Update Hand Aura based on gesture state
+                let auraMode = 'navigation';
+                if (gestureDetector.focusModeActive) {
+                    auraMode = 'focus';
+                } else if (isPinch) {
+                    auraMode = 'pinch';
+                } else if (isPoint) {
+                    auraMode = 'point';
+                }
+                visualFX.updateHandPosition(handX, handY, auraMode);
 
                 // Log gesture detection
                 if (isPinch) addDebugEntry('👌 Pinch detected', 'gesture');
                 if (isFist) addDebugEntry('✊ Fist detected', 'gesture');
                 if (isThumbsUp) addDebugEntry('👍 Thumbs up detected', 'gesture');
+                if (isPoint) addDebugEntry('👆 Point detected', 'gesture');
+                if (isOpenHand) addDebugEntry('🖐️ Open hand detected', 'gesture');
+                
+                // Detect locked gestures and provide feedback
+                if (currentLevel < 2 && gestureDetector.detectPinch(landmarks, timestamp)) {
+                    adaptiveNav.recordError('locked_gesture', 'pinch');
+                    addDebugEntry('🔒 Pinch locked - Reach L2 to unlock', 'error');
+                }
+                if (currentLevel < 3 && gestureDetector.detectFist(landmarks, timestamp)) {
+                    adaptiveNav.recordError('locked_gesture', 'fist');
+                    addDebugEntry('🔒 Fist locked - Reach L3 to unlock', 'error');
+                }
+                if (currentLevel < 3 && gestureDetector.detectOpenHand(landmarks, timestamp)) {
+                    adaptiveNav.recordError('locked_gesture', 'open');
+                    addDebugEntry('🔒 Open hand locked - Reach L3 to unlock', 'error');
+                }
 
                 // Track thumbs up duration
                 if (isThumbsUp) {
@@ -423,7 +712,7 @@
                 }
 
                 // Track index finger shakes (left-right movement)
-                trackIndexShake(indexPosition);
+                gestureDetector.trackIndexShake(indexPosition);
 
                 // Handle confirmation gestures
                 if (navController.isConfirmationPending()) {
@@ -444,7 +733,7 @@
                         thumbsUpProgress.style.display = 'none';
                     }
 
-                    const recentShakes = countRecentShakes();
+                    const recentShakes = gestureDetector.countRecentShakes();
                     if (recentShakes > 0) {
                         shakeProgress.style.display = 'block';
                         shakeCount.textContent = recentShakes;
@@ -479,135 +768,213 @@
                         shakeProgress.style.display = 'none';
                     }
                 } else {
-                    // Normal navigation - NO pinch/fist actions
-                    const palmBase = landmarks[0];
-                    const currentPos = { x: palmBase.x, y: palmBase.y };
-                    
-                    const gesture = gridLock.processHandMovement(currentPos);
-                    
-                    if (gesture) {
-                        if (gesture.type === 'horizontal') {
-                            navController.navigateCard(gesture.direction);
-                            addDebugEntry(`↔ Swipe ${gesture.direction > 0 ? 'RIGHT' : 'LEFT'}`, 'gesture');
-                        } else if (gesture.type === 'vertical') {
-                            navController.navigateLayer(gesture.direction);
-                            addDebugEntry(`↕ Layer ${gesture.direction > 0 ? 'DOWN' : 'UP'}`, 'layer');
+                    // KAMEHAMEHA FOCUS MODE - Point gesture held for 2 seconds
+                    if (isPoint) {
+                        const indexTip = landmarks[8];
+                        const fingerX = indexTip.x * window.innerWidth;
+                        const fingerY = indexTip.y * window.innerHeight;
+                        
+                        gestureDetector.startFocusMode({ x: fingerX, y: fingerY });
+                        updateGestureIndicator('point');
+                        
+                        if (gestureDetector.shouldActivateFocus() && !gestureDetector.focusModeActive) {
+                            gestureDetector.focusModeActive = true;
+                            updateGestureIndicator('focus');
+                            
+                            // Get current card position
+                            const centerX = window.innerWidth / 2;
+                            const centerY = window.innerHeight / 2;
+                            
+                            // Start Kamehameha beam
+                            visualFX.startKamehamehaFocus(fingerX, fingerY, centerX, centerY);
+                            audioManager.playDataPing(0, 0);
+                            addDebugEntry('⚡ KAMEHAMEHA FOCUS ACTIVATED', 'gesture');
+                            
+                            // Blur and push away other cards
+                            document.querySelectorAll('.card:not(.center)').forEach(card => {
+                                card.style.filter = 'blur(10px)';
+                                card.style.transform = card.style.transform.replace(/scale\([^)]+\)/, 'scale(0.6)');
+                            });
+                            
+                            // Expand focused card
+                            const centerCard = document.querySelector('.card.center');
+                            if (centerCard) {
+                                centerCard.style.transform = 'scale(1.2)';
+                                centerCard.style.zIndex = '1000';
+                            }
+                        }
+                    } else {
+                        // Exit focus mode
+                        if (gestureDetector.focusModeActive) {
+                            gestureDetector.resetFocusMode();
+                            visualFX.stopKamehamehaFocus();
+                            updateGestureIndicator('navigation');
+                            addDebugEntry('🔚 Focus mode ended', 'gesture');
+                            
+                            // Restore cards
+                            document.querySelectorAll('.card').forEach(card => {
+                                card.style.filter = '';
+                                card.style.transform = '';
+                                card.style.zIndex = '';
+                            });
+                            navController.updateView();
                         }
                     }
 
-                    // Special actions (rare use cases)
-                    // Pinch = Click on element (will trigger confirmation)
-                    // Fist = Exit fullscreen (direct action, no confirmation)
-                    if (isFist && navController.fullscreenCard) {
-                        navController.executeFullscreen(); // Exit fullscreen
-                        addDebugEntry('� Exit fullscreen (fist)', 'gesture');
+                    // SINGULARITY MODE - Fist to collapse, open hand to explode
+                    if (isFist && !gestureDetector.singularityActive) {
+                        gestureDetector.startSingularity();
+                        
+                        if (gestureDetector.shouldCollapseSingularity()) {
+                            gestureDetector.singularityActive = true;
+                            gestureDetector.singularityCollapsed = true;
+                            updateGestureIndicator('singularity');
+                            
+                            const palmBase = landmarks[0];
+                            const handX = palmBase.x * window.innerWidth;
+                            const handY = palmBase.y * window.innerHeight;
+                            
+                            // Get all card positions
+                            const cards = document.querySelectorAll('.card.center, .card.left, .card.right');
+                            const cardPositions = Array.from(cards).map(card => {
+                                const rect = card.getBoundingClientRect();
+                                return {
+                                    x: rect.left + rect.width / 2,
+                                    y: rect.top + rect.height / 2,
+                                    color: '#0ff'
+                                };
+                            });
+                            
+                            visualFX.startSingularityCollapse(handX, handY, cardPositions);
+                            audioManager.playWhoosh(0, 0, 1);
+                            addDebugEntry('🌀 SINGULARITY COLLAPSE', 'gesture');
+                            
+                            // Hide cards
+                            cards.forEach(card => {
+                                card.style.opacity = '0';
+                                card.style.transform = 'scale(0)';
+                            });
+                        }
+                    } else if (isOpenHand && gestureDetector.singularityCollapsed) {
+                        // EXPLOSION - redistribute cards in perfect grid
+                        const gridPositions = [
+                            { x: window.innerWidth * 0.3, y: window.innerHeight * 0.4 },
+                            { x: window.innerWidth * 0.5, y: window.innerHeight * 0.4 },
+                            { x: window.innerWidth * 0.7, y: window.innerHeight * 0.4 },
+                            { x: window.innerWidth * 0.3, y: window.innerHeight * 0.6 },
+                        ];
+                        
+                        visualFX.startSingularityExplosion(gridPositions);
+                        audioManager.playSuccess();
+                        addDebugEntry('💥 SINGULARITY EXPLOSION', 'gesture');
+                        
+                        // Restore cards with animation
+                        setTimeout(() => {
+                            const cards = document.querySelectorAll('.card');
+                            cards.forEach(card => {
+                                card.style.opacity = '';
+                                card.style.transform = '';
+                            });
+                            navController.updateView();
+                            gestureDetector.resetSingularity();
+                            updateGestureIndicator('navigation');
+                            
+                            setTimeout(() => {
+                                visualFX.stopSingularity();
+                            }, 1000);
+                        }, 500);
                     }
 
-                    const acc = gridLock.getAccumulator();
-                    const intent = gridLock.getLastIntent();
-                    document.getElementById('gesture-type').textContent = 
-                        `X: ${acc.x.toFixed(2)}, Y: ${acc.y.toFixed(2)} | Intent: ${intent.x !== 0 ? (intent.x > 0 ? '→' : '←') : ''}${intent.y !== 0 ? (intent.y > 0 ? '↓' : '↑') : ''}`;
+                    // Normal navigation - NO pinch/fist actions during special modes
+                    if (!gestureDetector.focusModeActive && !gestureDetector.singularityActive) {
+                        updateGestureIndicator('navigation');
+                        const palmBase = landmarks[0];
+                        const currentPos = { x: palmBase.x, y: palmBase.y };
+
+                        // Usa predictive tracking con timestamp
+                        const timestamp = Date.now();
+                        const gesture = gridLock.processHandMovement(currentPos, timestamp);
+
+                        if (gesture) {
+                            if (gesture.type === 'horizontal') {
+                                // Calculate card position for spatial audio
+                                const cardX = gesture.direction > 0 ? 0.3 : -0.3;
+                                const velocity = Math.abs(gesture.direction);
+                                
+                                // Spatial whoosh sound
+                                audioManager.playWhoosh(cardX, 0, velocity);
+                                
+                                // Light trail effect - DISABLED FOR CLEANER UI
+                                // const centerX = window.innerWidth / 2;
+                                // const centerY = window.innerHeight / 2;
+                                // const trailVx = gesture.direction > 0 ? 15 : -15;
+                                // visualFX.addLightTrail(centerX, centerY, trailVx, 0, '#00ffff');
+                                
+                                navController.navigateCard(gesture.direction);
+                                
+                                // Track successful navigation for adaptive system
+                                const gestureTime = Date.now() - (gestureDetector.lastGestureStartTime || Date.now());
+                                adaptiveNav.recordSuccess('swipe', gestureTime, 0.9);
+                                
+                                addDebugEntry(`↔ Swipe ${gesture.direction > 0 ? 'RIGHT' : 'LEFT'}`, 'gesture');
+                                
+                            } else if (gesture.type === 'vertical') {
+                                // Calculate layer position for spatial audio
+                                const layerY = gesture.direction > 0 ? -0.3 : 0.3;
+                                const velocity = Math.abs(gesture.direction);
+                                
+                                // Spatial whoosh sound
+                                audioManager.playWhoosh(0, layerY, velocity);
+                                
+                                // Light trail effect - DISABLED FOR CLEANER UI
+                                // const centerX = window.innerWidth / 2;
+                                // const centerY = window.innerHeight / 2;
+                                // const trailVy = gesture.direction > 0 ? 15 : -15;
+                                // visualFX.addLightTrail(centerX, centerY, 0, trailVy, '#ff00ff');
+                                
+                                navController.navigateLayer(gesture.direction);
+                                
+                                // Track successful layer navigation
+                                const gestureTime = Date.now() - (gestureDetector.lastGestureStartTime || Date.now());
+                                adaptiveNav.recordSuccess('vertical', gestureTime, 0.85);
+                                
+                                addDebugEntry(`↕ Layer ${gesture.direction > 0 ? 'DOWN' : 'UP'}`, 'layer');
+                            }
+                        }
+
+                        // Special actions (rare use cases)
+                        // Fist = Exit fullscreen (direct action, no confirmation)
+                        if (isFist && navController.fullscreenCard) {
+                            navController.executeFullscreen(); // Exit fullscreen
+                            addDebugEntry('🔙 Exit fullscreen (fist)', 'gesture');
+                        }
+
+                        const acc = gridLock.getAccumulator();
+                        const intent = gridLock.getLastIntent();
+                        document.getElementById('gesture-type').textContent = 
+                            `X: ${acc.x.toFixed(2)}, Y: ${acc.y.toFixed(2)} | Intent: ${intent.x !== 0 ? (intent.x > 0 ? '→' : '←') : ''}${intent.y !== 0 ? (intent.y > 0 ? '↓' : '↑') : ''}`;
+                    }
                 }
 
             } else {
                 document.getElementById('hand-status').className = 'status-dot inactive';
                 document.getElementById('hand-state').textContent = 'Not detected';
+                
+                // Update bottom bar status
+                const handStateBadge = document.getElementById('hand-status-badge');
+                const handStateBottom = document.getElementById('hand-state-bottom');
+                if (handStateBadge) handStateBadge.classList.remove('active');
+                if (handStateBottom) handStateBottom.textContent = 'No hand';
+                
                 gridLock.reset();
                 thumbsUpStartTime = null;
                 indexShakes = [];
+                
+                // Deactivate Hand Aura when no hand detected
+                visualFX.deactivateHandAura();
             }
         });
 
-        // Gesture detection helpers
-        function detectPinch(landmarks) {
-            const thumbTip = landmarks[4];
-            const indexTip = landmarks[8];
-            const distance = Math.sqrt(
-                Math.pow(thumbTip.x - indexTip.x, 2) +
-                Math.pow(thumbTip.y - indexTip.y, 2)
-            );
-            return distance < CONFIG.gestures.pinchThreshold;
-        }
-
-        function detectFist(landmarks) {
-            const fingerTips = [8, 12, 16, 20];
-            const palmBase = landmarks[0];
-            let curledCount = 0;
-
-            fingerTips.forEach(tipIndex => {
-                const tip = landmarks[tipIndex];
-                const distanceToPalm = Math.sqrt(
-                    Math.pow(tip.x - palmBase.x, 2) +
-                    Math.pow(tip.y - palmBase.y, 2)
-                );
-                if (distanceToPalm < CONFIG.gestures.fistThreshold) curledCount++;
-            });
-
-            return curledCount >= 3;
-        }
-
-        function detectThumbsUp(landmarks) {
-            const thumbTip = landmarks[4];
-            const thumbIP = landmarks[3];
-            const indexMCP = landmarks[5];
-            const wrist = landmarks[0];
-            
-            // Pollice deve puntare verso l'alto
-            const thumbPointingUp = thumbTip.y < thumbIP.y && thumbTip.y < wrist.y;
-            
-            // Altre dita devono essere chiuse
-            const fingerTips = [8, 12, 16, 20];
-            let curledCount = 0;
-            
-            fingerTips.forEach(tipIndex => {
-                const tip = landmarks[tipIndex];
-                if (tip.y > indexMCP.y) curledCount++;
-            });
-            
-            return thumbPointingUp && curledCount >= 3;
-        }
-
-        function getIndexFingerPosition(landmarks) {
-            const indexTip = landmarks[8];
-            return { x: indexTip.x, y: indexTip.y, time: Date.now() };
-        }
-
-        let lastIndexX = null;
-        let lastDirection = null;
-
-        function trackIndexShake(position) {
-            if (lastIndexX === null) {
-                lastIndexX = position.x;
-                return;
-            }
-
-            const delta = position.x - lastIndexX;
-            const currentDirection = delta > 0 ? 'right' : 'left';
-
-            // Rileva cambio di direzione (shake)
-            if (Math.abs(delta) > 0.03 && lastDirection && currentDirection !== lastDirection) {
-                indexShakes.push({ time: position.time, direction: currentDirection });
-                
-                // Limita array per performance
-                if (indexShakes.length > 10) {
-                    indexShakes.shift();
-                }
-            }
-
-            if (Math.abs(delta) > 0.02) {
-                lastDirection = currentDirection;
-            }
-            
-            lastIndexX = position.x;
-        }
-
-        function countRecentShakes() {
-            const now = Date.now();
-            const recentShakes = indexShakes.filter(shake => 
-                (now - shake.time) < SHAKE_TIME_WINDOW
-            );
-            return recentShakes.length;
-        }
 
         // Start experience
         let cameraStarted = false;
