@@ -5,10 +5,11 @@
  */
 
 export class VoiceCommandModule {
-    constructor(navigationController, audioManager, historyHUD = null) {
+    constructor(navigationController, audioManager, historyHUD = null, gestureLED = null) {
         this.navigationController = navigationController;
         this.audioManager = audioManager;
         this.historyHUD = historyHUD;
+        this.gestureLED = gestureLED;
         
         // Web Speech API
         this.recognition = null;
@@ -262,6 +263,11 @@ export class VoiceCommandModule {
      */
     executeCommand(action) {
         console.log('Executing voice command:', action);
+        
+        // Activate gesture LED
+        if (this.gestureLED) {
+            this.gestureLED.pulse();
+        }
         
         // Play success sound
         if (this.audioManager && this.feedbackEnabled) {

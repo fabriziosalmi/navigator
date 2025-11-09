@@ -346,6 +346,9 @@
         // Initialize navigation history HUD
         const navHistory = new NavigationHistoryHUD(5);
 
+        // Initialize Gesture LED (cybernetic feedback)
+        const gestureLED = new GestureLED();
+
         // Initialize voice command module (will be activated after camera starts)
         let voiceCommands = null;
 
@@ -504,6 +507,7 @@
         const navController = new NavigationController(layerManager, {
             onNavigate: (event) => {
                 addDebugEntry(`Nav: ${event.type}`, 'gesture');
+                gestureLED.pulse(); // Activate LED on navigation
                 onNavigationEvent();
             }
         });
@@ -640,11 +644,13 @@
 
             // Horizontal navigation (card swipe)
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+                gestureLED.pulse(); // LED feedback
                 navController.navigateCard(-1);
                 lightBeams.createBeam('left', 0.5);
                 navHistory.addAction('card-left', 'keyboard');
             }
             if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+                gestureLED.pulse(); // LED feedback
                 navController.navigateCard(1);
                 lightBeams.createBeam('right', 0.5);
                 navHistory.addAction('card-right', 'keyboard');
@@ -652,11 +658,13 @@
             
             // Vertical navigation (layer change)
             if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
+                gestureLED.pulse(); // LED feedback
                 navController.navigateLayer(-1);
                 lightBeams.createVerticalBeam('up', 0.5);
                 navHistory.addAction('layer-up', 'keyboard');
             }
             if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+                gestureLED.pulse(); // LED feedback
                 navController.navigateLayer(1);
                 lightBeams.createVerticalBeam('down', 0.5);
                 navHistory.addAction('layer-down', 'keyboard');
@@ -1158,7 +1166,7 @@
                 cameraStarted = true;
 
                 // Initialize voice commands
-                voiceCommands = new VoiceCommandModule(navController, audioManager, navHistory);
+                voiceCommands = new VoiceCommandModule(navController, audioManager, navHistory, gestureLED);
                 addDebugEntry('🎤 Voice commands ready (press M to toggle)', 'info');
 
                 // Hide start screen
