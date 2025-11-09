@@ -61,6 +61,9 @@
 
     <!-- Data Streams Canvas (visible data flow) -->
     <canvas id="data-streams-canvas"></canvas>
+    
+    <!-- Akira-style Light Beams Canvas -->
+    <canvas id="light-beams-canvas"></canvas>
 
     <!-- Cards Viewport -->
     <div id="cards-viewport"></div>
@@ -191,6 +194,7 @@
         import { VisualEffects } from './js/VisualEffects.js';
         import { AdaptiveNavigationSystem } from './js/AdaptiveNavigationSystem.js';
         import { AdaptiveNavigationHUD } from './js/AdaptiveNavigationHUD.js';
+        import { LightBeamSystem } from './js/LightBeamSystem.js';
         import CONFIG from './js/config.js';
 
         // Debug logging system
@@ -250,6 +254,9 @@
 
         // Initialize visual effects (Blade Runner/Akira aesthetics)
         const visualFX = new VisualEffects();
+
+        // Initialize light beam system
+        const lightBeams = new LightBeamSystem();
 
         // Initialize gesture detector (with glitch suppression)
         const gestureDetector = new GestureDetector();
@@ -466,6 +473,7 @@
             audioManager.playGrab(-0.5, -0.8);
             audioManager.playWhoosh(-0.3, 0, 0.5);
             // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, -15, 0, '#00ffff');
+            lightBeams.createBeam('left', 0.5);
             navController.navigateCard(-1);
         });
 
@@ -473,6 +481,7 @@
             audioManager.playGrab(0.5, -0.8);
             audioManager.playWhoosh(0.3, 0, 0.5);
             // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 15, 0, '#00ffff');
+            lightBeams.createBeam('right', 0.5);
             navController.navigateCard(1);
         });
 
@@ -480,6 +489,7 @@
             audioManager.playGrab(0, -0.8);
             audioManager.playWhoosh(0, 0.3, 0.5);
             // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, -15, '#ff00ff');
+            lightBeams.createVerticalBeam('up', 0.5);
             navController.navigateLayer(-1);
         });
 
@@ -487,6 +497,7 @@
             audioManager.playGrab(0, -0.8);
             audioManager.playWhoosh(0, -0.3, 0.5);
             // visualFX.addLightTrail(window.innerWidth / 2, window.innerHeight / 2, 0, 15, '#ff00ff');
+            lightBeams.createVerticalBeam('down', 0.5);
             navController.navigateLayer(1);
         });
 
@@ -910,6 +921,9 @@
                                 // const trailVx = gesture.direction > 0 ? 15 : -15;
                                 // visualFX.addLightTrail(centerX, centerY, trailVx, 0, '#00ffff');
                                 
+                                // Akira-style light beam for horizontal navigation
+                                lightBeams.createBeam(gesture.direction > 0 ? 'right' : 'left', velocity);
+                                
                                 navController.navigateCard(gesture.direction);
                                 
                                 // Track successful navigation for adaptive system
@@ -931,6 +945,9 @@
                                 // const centerY = window.innerHeight / 2;
                                 // const trailVy = gesture.direction > 0 ? 15 : -15;
                                 // visualFX.addLightTrail(centerX, centerY, 0, trailVy, '#ff00ff');
+                                
+                                // Akira-style vertical light beam for layer navigation
+                                lightBeams.createVerticalBeam(gesture.direction > 0 ? 'down' : 'up', velocity);
                                 
                                 navController.navigateLayer(gesture.direction);
                                 

@@ -55,14 +55,14 @@
             font-weight: bold;
         }
 
-        /* Cards Viewport - Full Screen */
+        /* Cards Viewport - Full Screen - ENHANCED PERSPECTIVE */
         #cards-viewport {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            perspective: 2000px;
+            perspective: 3000px;
             perspective-origin: 50% 50%;
             overflow: hidden;
         }
@@ -78,50 +78,50 @@
             contain: layout style paint;
         }
 
-        /* Layer depth positioning - 3D matrix */
+        /* Layer depth positioning - 3D matrix - ENHANCED DEPTH */
         .layer-container {
-            transform: translateZ(-1000px) scale(0.5);
+            transform: translateZ(-2000px) scale(0.3);
             opacity: 0;
-            filter: blur(10px);
+            filter: blur(20px) brightness(0.5);
             pointer-events: none;
         }
 
         .layer-container.active {
             transform: translateZ(0px) scale(1);
             opacity: 1;
-            filter: blur(0px);
+            filter: blur(0px) brightness(1);
             pointer-events: all;
             z-index: 10;
         }
 
         .layer-container.front-1 {
-            transform: translateZ(200px) scale(1.1);
-            opacity: 0.3;
-            filter: blur(8px);
+            transform: translateZ(400px) scale(1.15);
+            opacity: 0.2;
+            filter: blur(12px) brightness(1.2);
             pointer-events: none;
             z-index: 5;
         }
 
         .layer-container.back-1 {
-            transform: translateZ(-200px) scale(0.9);
-            opacity: 0.5;
-            filter: blur(4px);
+            transform: translateZ(-400px) scale(0.85);
+            opacity: 0.6;
+            filter: blur(6px) brightness(0.9);
             pointer-events: none;
             z-index: 9;
         }
 
         .layer-container.back-2 {
-            transform: translateZ(-400px) scale(0.8);
-            opacity: 0.3;
-            filter: blur(6px);
+            transform: translateZ(-800px) scale(0.7);
+            opacity: 0.4;
+            filter: blur(10px) brightness(0.8);
             pointer-events: none;
             z-index: 8;
         }
 
         .layer-container.far-back {
-            transform: translateZ(-800px) scale(0.6);
+            transform: translateZ(-1600px) scale(0.4);
             opacity: 0.1;
-            filter: blur(12px);
+            filter: blur(18px) brightness(0.6);
             pointer-events: none;
             z-index: 1;
         }
@@ -1260,6 +1260,18 @@
             width: 100%;
             height: 100%;
             z-index: 4;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        /* Light Beams Canvas - Akira-style navigation beams */
+        #light-beams-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
             pointer-events: none;
             mix-blend-mode: screen;
         }
