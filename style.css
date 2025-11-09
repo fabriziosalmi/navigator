@@ -78,7 +78,7 @@
             contain: layout style paint;
         }
 
-        /* Layer depth positioning - 3D matrix - ENHANCED DEPTH */
+        /* Layer depth positioning - VANISHING POINT PERSPECTIVE */
         .layer-container {
             transform: translateZ(-2000px) scale(0.3);
             opacity: 0;
@@ -94,34 +94,43 @@
             z-index: 10;
         }
 
+        /* Layers AHEAD - Hidden until gesture reveals with transition */
         .layer-container.front-1 {
-            transform: translateZ(400px) scale(1.15);
-            opacity: 0.2;
-            filter: blur(12px) brightness(1.2);
+            transform: translateZ(600px) scale(1.25);
+            opacity: 0;
+            filter: blur(20px) brightness(1.3);
             pointer-events: none;
-            z-index: 5;
+            z-index: 11;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* When revealing forward layer during navigation */
+        .layer-container.front-1.revealing {
+            opacity: 0.3;
+            filter: blur(8px) brightness(1.1);
         }
 
+        /* Layers BEHIND - Visible in central perspective */
         .layer-container.back-1 {
-            transform: translateZ(-400px) scale(0.85);
-            opacity: 0.6;
-            filter: blur(6px) brightness(0.9);
+            transform: translateZ(-500px) scale(0.8);
+            opacity: 0.7;
+            filter: blur(4px) brightness(0.85);
             pointer-events: none;
             z-index: 9;
         }
 
         .layer-container.back-2 {
-            transform: translateZ(-800px) scale(0.7);
-            opacity: 0.4;
-            filter: blur(10px) brightness(0.8);
+            transform: translateZ(-1000px) scale(0.6);
+            opacity: 0.5;
+            filter: blur(8px) brightness(0.7);
             pointer-events: none;
             z-index: 8;
         }
 
         .layer-container.far-back {
-            transform: translateZ(-1600px) scale(0.4);
-            opacity: 0.1;
-            filter: blur(18px) brightness(0.6);
+            transform: translateZ(-1800px) scale(0.35);
+            opacity: 0.2;
+            filter: blur(16px) brightness(0.5);
             pointer-events: none;
             z-index: 1;
         }
@@ -672,12 +681,17 @@
         }
         
         .layer-name {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             letter-spacing: -0.02em;
             color: #00ffff;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
-            transition: all 0.2s ease;
+            text-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .layer-name:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 16px rgba(0, 255, 255, 0.6);
         }
         
         .layer-meta {
@@ -699,10 +713,17 @@
         }
         
         .current-card {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-position:hover .current-card {
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+            transform: scale(1.1);
         }
         
         .separator {
@@ -804,10 +825,82 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.6);
             letter-spacing: 0.02em;
+            transition: color 0.3s ease;
         }
         
         .hand-status.active #hud-hand-text {
             color: #00ff00;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Gesture Legend Compact */
+        .gesture-legend-compact {
+            display: flex;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .legend-item {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: help;
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item svg {
+            width: 14px;
+            height: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .legend-item:hover svg {
+            color: #00ffff;
+        }
+        
+        .legend-item.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .legend-item.locked svg {
+            color: rgba(255, 100, 0, 0.6);
+        }
+        
+        .legend-item.active {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+        }
+        
+        .legend-item.active svg {
+            color: #00ffff;
+            animation: iconPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         .debug-compact {

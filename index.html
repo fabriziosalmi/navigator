@@ -94,23 +94,23 @@
 
         <!-- Central Navigation -->
         <div class="hud-section nav-controls">
-            <button class="hud-nav" id="prev-btn" data-action="prev">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="hud-nav" id="prev-btn" data-action="prev" title="Previous card">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M15 18l-6-6 6-6"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="layer-up" data-action="layer-up">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 15l-6-6-6 6"/>
+            <button class="hud-nav" id="layer-up" data-action="layer-up" title="Layer up">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 19V5m0 0l-7 7m7-7l7 7"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="layer-down" data-action="layer-down">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9l6 6 6-6"/>
+            <button class="hud-nav" id="layer-down" data-action="layer-down" title="Layer down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 5v14m0 0l-7-7m7 7l7-7"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="next-btn" data-action="next">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="hud-nav" id="next-btn" data-action="next" title="Next card">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M9 18l6-6-6-6"/>
                 </svg>
             </button>
@@ -129,6 +129,27 @@
                 </svg>
                 <span id="hud-hand-text">Searching</span>
             </div>
+            
+            <!-- Gesture Legend Compact -->
+            <div class="gesture-legend-compact">
+                <div class="legend-item" data-gesture="swipe" title="Swipe left/right to navigate cards">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+                <div class="legend-item" data-gesture="point" title="Point 2s to focus card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14m0 0l-7-7m7 7l7-7"/>
+                    </svg>
+                </div>
+                <div class="legend-item locked" data-gesture="pinch" title="Pinch (unlock at Level 2)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M3 12h3m12 0h3M12 3v3m0 12v3"/>
+                    </svg>
+                </div>
+            </div>
+            
             <div class="debug-compact" id="hud-debug-ticker">
                 <span class="ticker-text" id="hud-ticker-text"></span>
             </div>
@@ -142,16 +163,16 @@
         <div class="wow-icon">🎬</div>
     </div>
 
-    <!-- Gesture Info -->
-    <div id="gesture-info">
+    <!-- Gesture Info - Hidden (integrated in HUD) -->
+    <div id="gesture-info" style="display: none;">
         <h3>🖐️ Gestures</h3>
         <p><span class="status-dot inactive" id="hand-status"></span>Hand: <strong id="hand-state">Not detected</strong></p>
         <p>Gesture: <strong id="gesture-type">None</strong></p>
         <p>Grid Lock: <strong id="grid-lock">Active</strong></p>
     </div>
 
-    <!-- GESTURE INDICATOR - Shows available gestures in real-time -->
-    <div id="gesture-indicator">
+    <!-- GESTURE INDICATOR - Hidden (will integrate in HUD) -->
+    <div id="gesture-indicator" style="display: none;">
         <div class="gesture-hint" id="point-hint" data-gesture="point" title="Point to focus">
             <div class="gesture-icon">👆</div>
             <div class="gesture-label">Point<br><span class="gesture-context">2s = Focus</span></div>
