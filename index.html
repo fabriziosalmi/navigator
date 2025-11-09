@@ -21,8 +21,8 @@
             </div>
         </div>
     </div>
-    <!-- Layer Tabs -->
-    <div id="layer-tabs">
+    <!-- Layer Tabs - Hidden (functionality preserved in HUD) -->
+    <div id="layer-tabs" style="display: none;">
         <div class="layer-tab active" data-layer="video">
             <div class="icon">🎬</div>
             <div class="label">Videos</div>
@@ -49,7 +49,12 @@
         </div>
     </div>
 
-    <!-- Dynamic Background Effects -->
+    <!-- Layer WOW Label - Hidden (integrated in HUD) -->
+    <div id="layer-wow-label" style="display: none;">
+        <div class="wow-text">WOW</div>
+        <div class="wow-layer-name">Videos</div>
+        <div class="wow-icon">🎬</div>
+    </div>    <!-- Dynamic Background Effects -->
     <div id="dynamic-background">
         <div class="bg-glow bg-glow-1"></div>
         <div class="bg-glow bg-glow-2"></div>
@@ -72,31 +77,61 @@
     <div class="snap-indicator left">👈</div>
     <div class="snap-indicator right">👉</div>
 
-    <!-- Unified Bottom Bar -->
-    <div id="bottom-nav">
-        <!-- Navigation Controls -->
-        <div class="bottom-section">
-            <button class="nav-button compact" id="prev-btn">◀</button>
-            <button class="nav-button compact" id="layer-up">▲</button>
-            <button class="nav-button compact" id="layer-down">▼</button>
-            <button class="nav-button compact" id="next-btn">▶</button>
+    <!-- Unified Bottom HUD - Quantum Leap Design -->
+    <div id="quantum-hud">
+        <!-- Layer & Position Info -->
+        <div class="hud-section position-info">
+            <div class="layer-display">
+                <span class="layer-name" id="hud-layer-name">Videos</span>
+                <span class="layer-meta" id="hud-layer-meta">Layer 1/6</span>
+            </div>
+            <div class="card-position">
+                <span class="current-card" id="hud-current-card">1</span>
+                <span class="separator">/</span>
+                <span class="total-cards" id="hud-total-cards">4</span>
+            </div>
         </div>
-        
-        <!-- Adaptive Level Display (moved from sidebar) -->
-        <div class="bottom-section adaptive-hud-compact" id="adaptive-hud-bottom">
-            <!-- Will be populated by AdaptiveNavigationHUD -->
+
+        <!-- Central Navigation -->
+        <div class="hud-section nav-controls">
+            <button class="hud-nav" id="prev-btn" data-action="prev">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="layer-up" data-action="layer-up">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 15l-6-6-6 6"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="layer-down" data-action="layer-down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="next-btn" data-action="next">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </button>
         </div>
-        
-        <!-- Current Status -->
-        <div class="bottom-section status-compact">
-            <span class="layer-badge" id="current-layer-badge">🎬 Videos</span>
-            <span class="card-counter">Card <span id="current-card-bottom">1</span>/<span id="total-cards-bottom">4</span></span>
-            <span class="hand-status-badge" id="hand-status-badge">🖐️ <span id="hand-state-bottom">No hand</span></span>
+
+        <!-- Adaptive Level Progress -->
+        <div class="hud-section adaptive-display" id="adaptive-hud-quantum">
+            <!-- Populated by AdaptiveNavigationHUD -->
         </div>
-        
-        <!-- Debug Ticker (single scrolling line) -->
-        <div class="bottom-section debug-ticker" id="debug-ticker">
-            <div class="ticker-content" id="ticker-content"></div>
+
+        <!-- Status & Metrics -->
+        <div class="hud-section status-display">
+            <div class="hand-status" id="hud-hand-status">
+                <svg class="hand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11V6a1 1 0 0 1 2 0v5m0 0V5a1 1 0 0 1 2 0v6m0 0V4a1 1 0 0 1 2 0v7m0 0V5a1 1 0 0 1 2 0v8a5 5 0 0 1-10 0v-1"/>
+                </svg>
+                <span id="hud-hand-text">Searching</span>
+            </div>
+            <div class="debug-compact" id="hud-debug-ticker">
+                <span class="ticker-text" id="hud-ticker-text"></span>
+            </div>
         </div>
     </div>
 
