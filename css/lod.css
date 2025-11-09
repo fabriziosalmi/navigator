@@ -19,26 +19,26 @@
     animation: audioWave 0.8s ease-in-out infinite;
 }
 
-/* ADJACENT: Prev/Next cards - reduced detail */
+/* ADJACENT: Prev/Next cards (distance 1-2) - reduced detail */
 .card.lod-adjacent {
-    filter: blur(1px) brightness(0.9);
-    opacity: 0.85;
+    filter: blur(0.5px) brightness(0.95);
+    opacity: 0.9;
     pointer-events: all;
 }
 
 .card.lod-adjacent .card-media {
-    filter: grayscale(0.2);
+    filter: grayscale(0.1);
     image-rendering: -webkit-optimize-contrast;
 }
 
 .card.lod-adjacent .audio-visualizer .wave {
-    animation: audioWave 1.2s ease-in-out infinite;
+    animation: audioWave 1.0s ease-in-out infinite;
 }
 
-/* NEARBY: 2-3 positions away - minimal detail */
+/* NEARBY: 3-4 positions away - minimal detail */
 .card.lod-nearby {
-    filter: blur(3px) brightness(0.7);
-    opacity: 0.6;
+    filter: blur(2px) brightness(0.8);
+    opacity: 0.5;
     pointer-events: none;
 }
 

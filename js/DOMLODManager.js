@@ -19,9 +19,9 @@ export class DOMLODManager {
         // Configuration
         this.enabled = config.enabled !== undefined ? config.enabled : true;
         this.activeRadius = config.activeRadius || 0;     // 0 = only current card
-        this.adjacentRadius = config.adjacentRadius || 1; // 1 = prev/next
-        this.nearbyRadius = config.nearbyRadius || 2;     // 2-3 positions
-        this.distantRadius = config.distantRadius || 4;   // 4+ positions
+        this.adjacentRadius = config.adjacentRadius || 2; // 2 = 2 cards per side (5 total visible)
+        this.nearbyRadius = config.nearbyRadius || 3;     // 3-4 positions
+        this.distantRadius = config.distantRadius || 5;   // 5+ positions
         this.updateThrottle = config.updateInterval || 50; // ms
 
         // State

@@ -532,10 +532,39 @@
 
             const cards = layerContainer.querySelectorAll('.card');
             const currentCardIndex = layerManager.getCurrentCardIndex();
+            const totalCards = cards.length;
 
             // Initialize or update LOD manager
             domLODManager.init(cards);
             domLODManager.update(currentCardIndex);
+
+            // Update card positions for 5-card layout using requestAnimationFrame
+            requestAnimationFrame(() => {
+                cards.forEach((card, index) => {
+                    // Calculate circular distance
+                    const directDistance = Math.abs(index - currentCardIndex);
+                    const wrapDistance = totalCards - directDistance;
+                    const distance = Math.min(directDistance, wrapDistance);
+                    
+                    // Determine if card is before or after current
+                    const isAfter = (index > currentCardIndex && directDistance <= wrapDistance) ||
+                                   (index < currentCardIndex && directDistance > wrapDistance);
+
+                    // Remove all position classes
+                    card.classList.remove('center', 'left', 'right', 'left-2', 'right-2', 'hidden');
+
+                    // Assign position class based on distance
+                    if (distance === 0) {
+                        card.classList.add('center');
+                    } else if (distance === 1) {
+                        card.classList.add(isAfter ? 'right' : 'left');
+                    } else if (distance === 2) {
+                        card.classList.add(isAfter ? 'right-2' : 'left-2');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            });
 
             // Log stats
             const stats = domLODManager.getStats();
@@ -991,7 +1020,7 @@
                             const handY = palmBase.y * window.innerHeight;
                             
                             // Get all card positions
-                            const cards = document.querySelectorAll('.card.center, .card.left, .card.right');
+                            const cards = document.querySelectorAll('.card.center, .card.left, .card.right, .card.left-2, .card.right-2');
                             const cardPositions = Array.from(cards).map(card => {
                                 const rect = card.getBoundingClientRect();
                                 return {
