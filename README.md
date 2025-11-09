@@ -1,4 +1,4 @@
-# Aetherium Navigator
+# Navigator
 
 > A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback.
 
