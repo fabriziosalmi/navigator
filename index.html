@@ -651,9 +651,10 @@
                 addDebugEntry(`🎤 Voice commands ${isListening ? 'ON' : 'OFF'}`, 'info');
             }
             
-            // Other shortcuts
+            // Other shortcuts (f = fullscreen, v = webcam toggle)
+            // Note: 'd' and 'a' are reserved for WASD navigation
             if (e.key === 'f') navController.toggleFullscreen();
-            if (e.key === 'd') navController.deleteCurrentCard();
+            // if (e.key === 'd') navController.deleteCurrentCard(); // Disabled - conflicts with WASD
             if (e.key === 'v') document.getElementById('webcam').classList.toggle('visible');
         });
 
