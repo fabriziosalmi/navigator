@@ -1,0 +1,70 @@
+/* ==============================================
+   DOM LEVEL-OF-DETAIL (LOD)
+   Foveated rendering optimization
+   ============================================== */
+
+/* ACTIVE: Current card - full detail, high performance */
+.card.lod-active {
+    filter: blur(0px) brightness(1);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.card.lod-active .card-media {
+    filter: none;
+    image-rendering: auto;
+}
+
+.card.lod-active .audio-visualizer .wave {
+    animation: audioWave 0.8s ease-in-out infinite;
+}
+
+/* ADJACENT: Prev/Next cards - reduced detail */
+.card.lod-adjacent {
+    filter: blur(1px) brightness(0.9);
+    opacity: 0.85;
+    pointer-events: all;
+}
+
+.card.lod-adjacent .card-media {
+    filter: grayscale(0.2);
+    image-rendering: -webkit-optimize-contrast;
+}
+
+.card.lod-adjacent .audio-visualizer .wave {
+    animation: audioWave 1.2s ease-in-out infinite;
+}
+
+/* NEARBY: 2-3 positions away - minimal detail */
+.card.lod-nearby {
+    filter: blur(3px) brightness(0.7);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.card.lod-nearby .card-media {
+    filter: grayscale(0.5);
+    image-rendering: pixelated;
+}
+
+.card.lod-nearby .audio-visualizer .wave {
+    animation: none;
+    transform: scaleY(0.5);
+}
+
+/* DISTANT: 4+ positions - low priority */
+.card.lod-distant {
+    filter: blur(6px) brightness(0.5);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.card.lod-distant .card-media {
+    filter: grayscale(0.8);
+    image-rendering: pixelated;
+}
+
+.card.lod-distant .audio-visualizer .wave {
+    animation: none;
+    transform: scaleY(0.3);
+}

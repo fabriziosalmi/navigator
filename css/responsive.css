@@ -1,0 +1,37 @@
+/* ==============================================
+   RESPONSIVE STYLES
+   Media queries and breakpoints
+   ============================================== */
+
+@media (max-width: 1200px) {
+    #quantum-hud {
+        width: calc(100% - 40px);
+        padding: 0 24px;
+    }
+    
+    .position-info,
+    .status-display {
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    #quantum-hud {
+        height: 64px;
+        gap: 16px;
+        padding: 0 16px;
+    }
+    
+    .layer-name {
+        font-size: 14px;
+    }
+    
+    .current-card {
+        font-size: 20px;
+    }
+    
+    .hud-nav {
+        width: 40px;
+        height: 40px;
+    }
+}

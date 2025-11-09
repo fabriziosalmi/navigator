@@ -1,0 +1,79 @@
+/* ==============================================
+   NAVIGATION HISTORY WIDGET
+   Visual breadcrumb trail
+   ============================================== */
+
+.history-display {
+    min-width: 200px;
+    justify-content: flex-end;
+}
+
+.history-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+.history-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    position: relative;
+    transition: all var(--transition-fast);
+    animation: historyFadeIn 0.4s ease-out;
+}
+
+.history-icon svg {
+    width: 16px;
+    height: 16px;
+    transition: all var(--transition-fast);
+}
+
+/* Icon type colors */
+.history-icon[data-type="card-left"] svg,
+.history-icon[data-type="card-right"] svg {
+    color: var(--color-cyan);
+}
+
+.history-icon[data-type="layer-up"] svg,
+.history-icon[data-type="layer-down"] svg {
+    color: var(--color-magenta);
+}
+
+.history-icon[data-type="voice"] svg {
+    color: #00ff99;
+}
+
+.history-icon[data-type="keyboard"] svg {
+    color: var(--color-orange);
+}
+
+/* Fade out old icons */
+.history-icon.fading {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.8);
+}
+
+@keyframes historyFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(8px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}

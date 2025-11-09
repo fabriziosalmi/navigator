@@ -1,52 +1,275 @@
 # Aetherium Navigator
 
-A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback. Built with MediaPipe Hands, Web Speech API, and a fully modular ES6+ architecture optimized for performance and user experience.
+> A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback.
 
-![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue) ![Adaptive](https://img.shields.io/badge/Adaptive_System-3_Levels-purple)
+![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
 
 ---
 
 ## ✨ Features
 
-### 🚀 Multi-Modal Navigation
+- 🖐️ **Hand Gesture Control** - MediaPipe Hands tracking with 21 landmarks
+- ⌨️ **Keyboard Navigation** - Full WASD + Arrow keys support
+- 🎤 **Voice Commands** - Bilingual (English/Italian) speech recognition
+- 🧠 **Adaptive System** - 3-level progressive unlock based on skill
+- 🎨 **Quantum HUD** - Glassmorphism interface with live metrics
+- 🌈 **Light Beams** - Akira-style visual feedback on navigation
+- 🔊 **Spatial Audio** - 3D sound synthesis with Web Audio API
+- 📊 **Navigation History** - Color-coded action tracking widget
+- ⚡ **Zero Dependencies** - Pure ES6+ modules, no frameworks
 
-Navigate through content using **gestures**, **keyboard**, or **voice** - the system adapts to your preferred input method:
+---
 
-- **🖐️ Hand Gestures**: MediaPipe Hands tracking with 21 landmarks
-  - Swipe left/right for card navigation
-  - Swipe up/down for layer switching
-  - Point (2s hold) for focus mode
-  - Advanced gestures unlock at higher adaptive levels
-  
-- **⌨️ Keyboard Controls**: Full navigation with arrows + WASD
-  - `A/D` or `←/→`: Navigate cards horizontally
-  - `W/S` or `↑/↓`: Navigate layers vertically
-  - `M`: Toggle voice commands on/off
-  - `F`: Fullscreen, `V`: Toggle webcam view
-  
-- **🎤 Voice Commands**: Bilingual speech recognition (English + Italian)
-  - English: "left", "right", "up", "down", "next", "back"
-  - Italian: "sinistra", "destra", "su", "giù", "avanti", "indietro"
-  - Continuous listening with auto-restart
-  - Visual microphone indicator (top-right)
+## 🚀 Quick Start
 
-### 🧠 Adaptive Navigation System
+### 1. Start Local Server
 
-**Progressive unlock** system that rewards skill and familiarity:
+```bash
+# Python (recommended)
+python3 -m http.server 8080
 
-- **Level 1 (Default)**: Basic gestures - swipe navigation, point to focus
-- **Level 2 (Unlocked at 85% accuracy)**: Advanced - pinch gestures, fan cards
-- **Level 3 (Unlocked at 90% accuracy)**: Expert - fist collapse, explosion effects
+# Node.js
+npx http-server -p 8080
 
-**Performance tracking**:
-- Real-time metrics: accuracy, speed, stability
-- Auto-upgrade/downgrade based on user skill
-- Visual progress bar in quantum HUD
-- Locked gestures provide upgrade hints
+# PHP
+php -S localhost:8080
+```
 
-### 🎨 Quantum HUD - Glassmorphism Interface
+### 2. Open Browser
 
-**Bottom-aligned unified control panel** with 5 sections:
+```
+http://localhost:8080
+```
+
+### 3. Start Navigating
+
+- Click **"� Start Experience"**
+- Grant camera/microphone permissions
+- Hold hand in front of webcam
+- Swipe left/right to navigate!
+
+**Full guide**: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
+
+---
+
+## 📖 Documentation
+
+- **[Getting Started](docs/GETTING_STARTED.md)** - Installation, first steps, troubleshooting
+- **[Features](docs/FEATURES.md)** - Complete feature breakdown and configuration
+- **[Architecture](docs/ARCHITECTURE.md)** - Technical deep-dive, module reference
+- **[Testing](docs/TEST_RESULTS.md)** - Playwright test suite results (36/43 passing)
+- **[Optimization](docs/OPTIMIZATION_GUIDE.md)** - Performance tuning guide
+
+---
+
+## 🎮 Navigation Methods
+
+### Gestures 🖐️
+- **Swipe Left/Right** → Navigate cards
+- **Swipe Up/Down** → Change layers
+- **Point (2s)** → Focus mode (Kamehameha effect)
+
+### Keyboard ⌨️
+- `A`/`D` or `←`/`→` → Navigate cards
+- `W`/`S` or `↑`/`↓` → Navigate layers
+- `M` → Toggle voice commands
+- `F` → Fullscreen, `V` → Webcam view
+
+### Voice 🎤
+- English: "left", "right", "up", "down"
+- Italian: "sinistra", "destra", "su", "giù"
+
+---
+
+## 🧠 Adaptive System
+
+**3-Level Progressive Unlock**:
+- **Level 1** (Default): Basic gestures
+- **Level 2** (85% accuracy): Pinch, fan cards
+- **Level 3** (90% accuracy): Fist collapse, explosions
+
+System tracks accuracy, speed, and stability - auto-upgrades when ready!
+
+---
+
+## 🛠️ Technology
+
+- **HTML5 + CSS3** - Glassmorphism, GPU-accelerated animations
+- **JavaScript ES6+** - 12 modular components, zero dependencies
+- **MediaPipe Hands** - 30 FPS hand tracking
+- **Web Speech API** - Continuous voice recognition
+- **Web Audio API** - Spatial sound synthesis
+- **Canvas API** - Light beams and visual effects
+
+---
+
+## 🎯 Browser Support
+
+| Browser | Version | Support |
+|---------|---------|---------|
+| Chrome  | 90+     | ✅ Full |
+| Edge    | 90+     | ✅ Full |
+| Opera   | 76+     | ✅ Full |
+| Firefox | 88+     | ⚠️ Partial (voice limited) |
+| Safari  | 14+     | ⚠️ Partial (voice may fail) |
+
+**Requirements**: ES6 modules, MediaPipe WASM, Web Audio API, webcam access
+
+---
+
+## ⚙️ Configuration
+
+All settings in `js/config.js`:
+
+```javascript
+// Grid Lock Sensitivity
+CONFIG.gridLock = {
+    threshold: 0.12,              // Horizontal (higher = less sensitive)
+    thresholdVertical: 0.10       // Vertical (lower = easier)
+}
+
+// Audio
+CONFIG.audio = {
+    masterVolume: 0.3,            // 0-1 scale
+    spatialEnabled: true          // 3D positioning
+}
+
+// Adaptive System
+CONFIG.adaptiveNavigation = {
+    enabled: true,
+    levels: { /* difficulty settings */ }
+}
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+npm install
+npm test              # Run all tests (Playwright)
+npm run test:ui       # Interactive test UI
+npm run test:headed   # See browser execution
+```
+
+**Results**: 36/43 tests passing (83.7%)
+- ✅ Keyboard navigation (100%)
+- ✅ Adaptive system (90.9%)
+- ✅ Navigation history (80%)
+- ⚠️ Visual refinements (63.6% - CSS limitations in headless)
+
+See [docs/TEST_RESULTS.md](docs/TEST_RESULTS.md) for details.
+
+---
+
+## 📦 Project Structure
+
+```
+/navigator
+├── index.html                      # Main app (1170 lines)
+├── style.css                       # Complete styling (2097 lines)
+├── package.json                    # npm config for testing
+├── playwright.config.js            # Test configuration
+├── docs/                           # Documentation
+│   ├── GETTING_STARTED.md          # Quick start guide
+│   ├── FEATURES.md                 # Feature breakdown
+│   ├── ARCHITECTURE.md             # Technical reference
+│   ├── TEST_RESULTS.md             # Test suite results
+│   └── OPTIMIZATION_GUIDE.md       # Performance tuning
+├── tests/                          # Playwright test suites
+│   ├── keyboard-navigation.spec.js
+│   ├── adaptive-system.spec.js
+│   ├── navigation-history.spec.js
+│   └── visual-refinements.spec.js
+└── js/                             # Modular ES6+ components
+    ├── config.js                   # Centralized configuration
+    ├── AdaptiveNavigationSystem.js # 3-level progression (455 lines)
+    ├── VoiceCommandModule.js       # Speech recognition (390 lines)
+    ├── AudioManager.js             # Spatial audio (709 lines)
+    ├── NavigationController.js     # Navigation logic (~400 lines)
+    ├── GestureDetector.js          # Hand tracking (~350 lines)
+    ├── LightBeamSystem.js          # Akira beams (195 lines)
+    ├── NavigationHistoryHUD.js     # Action tracking (180 lines)
+    └── ... (5 more modules)
+```
+
+---
+
+## 🔐 Security & Privacy
+
+- **100% Client-Side** - All processing in browser
+- **No Data Transmission** - Webcam/mic never leaves device
+- **No Tracking** - Zero analytics or external services
+- **No Storage** - No cookies, localStorage, or persistence
+- **Open Source** - Full code transparency
+
+---
+
+## 🐛 Troubleshooting
+
+### Gestures Not Working
+- Check webcam permissions
+- Ensure good lighting
+- Hold hand clearly in frame
+- Press `V` to see webcam view
+- Look for green hand icon in HUD
+
+### Voice Not Responding
+- Press `M` to activate
+- Check microphone permissions
+- Look for green 🎤 icon (top-right)
+- Use Chrome/Edge (best support)
+
+### Performance Issues
+- Close other browser tabs
+- Disable dynamic background in `config.js`
+- Reduce MediaPipe complexity to `modelComplexity: 0`
+
+**Full guide**: [docs/GETTING_STARTED.md#troubleshooting](docs/GETTING_STARTED.md#troubleshooting)
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+## 📄 License
+
+MIT License - Free to use, modify, and distribute.
+
+See [LICENSE](LICENSE) for full text.
+
+---
+
+## 🙏 Acknowledgments
+
+**Technologies**:
+- [MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands) - Google's hand tracking ML
+- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) - Browser voice recognition
+- [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) - Spatial audio synthesis
+
+**Design Inspiration**:
+- Akira - Light beam aesthetics
+- Blade Runner - Cyber UI elements
+- Apple Vision Pro - Glassmorphism design
+
+---
+
+## 📧 Contact
+
+Questions or feedback? Open an issue or discussion on GitHub!
+
+---
+
+**Built with ❤️ using modern web standards - no frameworks, just pure JavaScript magic.** ✨
+
 
 1. **Position Info**: Current layer name + card counter (1/4)
 2. **Navigation Controls**: 4 SVG buttons (prev/next cards, up/down layers)

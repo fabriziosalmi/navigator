@@ -1,0 +1,74 @@
+/* ==============================================
+   BASE STYLES & RESET
+   Global resets and base typography
+   ============================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Performance optimization: will-change removed to fix memory budget */
+/* Apply transform3d for GPU acceleration without will-change overhead */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+}
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ============================================ */
+
+:root {
+    /* Colors - Category Accents */
+    --color-cyan: #00ffff;
+    --color-magenta: #ff00ff;
+    --color-green: #00ff00;
+    --color-orange: #ff8800;
+    
+    /* Glassmorphism */
+    --glass-bg: rgba(20, 20, 35, 0.85);
+    --glass-blur: blur(40px);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    
+    /* Shadows */
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-glow-cyan: 0 0 30px rgba(0, 255, 255, 0.3);
+    --shadow-glow-magenta: 0 0 30px rgba(255, 0, 255, 0.3);
+    
+    /* Transitions */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Perspective */
+    --perspective-distance: 3000px;
+    --depth-active: 0px;
+    --depth-back-1: -500px;
+    --depth-back-2: -1000px;
+    --depth-front-1: 800px;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Typography */
+    --font-size-sm: 0.75rem;
+    --font-size-md: 0.875rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 24px;
+    --radius-xl: 36px;
+}

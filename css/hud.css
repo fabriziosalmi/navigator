@@ -1,0 +1,351 @@
+/* ==============================================
+   QUANTUM HUD
+   Modern convex glassmorphism interface
+   ============================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* HIDDEN: Off-screen cards - display none for max performance */
+.card.lod-hidden {
+    display: none !important;
+}
+
+/* Card Icon */
+.card-icon {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.icon-large {
+    font-size: 6em;
+    filter: drop-shadow(0 0 20px currentColor);
+    animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* ==============================================
+   HUD CONTAINER
+   ============================================== */
+
+#quantum-hud {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 80px);
+    max-width: 1400px;
+    height: 72px;
+    
+    /* Convex glassmorphism */
+    background: linear-gradient(
+        135deg,
+        rgba(20, 20, 35, 0.85) 0%,
+        rgba(30, 30, 50, 0.75) 50%,
+        rgba(20, 20, 35, 0.85) 100%
+    );
+    backdrop-filter: var(--glass-blur) saturate(180%);
+    -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
+    
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    gap: 24px;
+    z-index: 200;
+    
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    
+    transition: all var(--transition-fast);
+}
+
+#quantum-hud:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(25, 25, 40, 0.9) 0%,
+        rgba(35, 35, 55, 0.8) 50%,
+        rgba(25, 25, 40, 0.9) 100%
+    );
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 12px rgba(0, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.hud-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* ==============================================
+   POSITION INFO - Left Section
+   ============================================== */
+
+.position-info {
+    min-width: 240px;
+}
+
+.layer-display {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.layer-name {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-cyan);
+    text-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.layer-name:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 16px rgba(0, 255, 255, 0.6);
+}
+
+.layer-meta {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.card-position {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+    margin-left: 16px;
+    padding-left: 16px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.current-card {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+    transition: all var(--transition-fast);
+}
+
+.card-position:hover .current-card {
+    color: var(--color-cyan);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.separator {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.total-cards {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==============================================
+   NAVIGATION CONTROLS - Center Section
+   ============================================== */
+
+.nav-controls {
+    flex: 1;
+    justify-content: center;
+    gap: 8px;
+}
+
+.hud-nav {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.hud-nav svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+}
+
+.hud-nav:hover {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: rgba(0, 255, 255, 0.4);
+    color: var(--color-cyan);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 4px 12px rgba(0, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.hud-nav:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 6px rgba(0, 255, 255, 0.3),
+        inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ==============================================
+   STATUS DISPLAY - Right Section
+   ============================================== */
+
+.status-display {
+    min-width: 240px;
+    justify-content: flex-end;
+}
+
+.hand-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hand-status.active {
+    background: rgba(0, 255, 0, 0.1);
+    border-color: rgba(0, 255, 0, 0.3);
+}
+
+.hand-status.active .hand-icon {
+    color: var(--color-green);
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.4));
+}
+
+.hand-icon {
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all var(--transition-fast);
+}
+
+#hud-hand-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.02em;
+    transition: color var(--transition-fast);
+}
+
+.hand-status.active #hud-hand-text {
+    color: var(--color-green);
+    animation: textPulse 2s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ==============================================
+   GESTURE LEGEND COMPACT
+   ============================================== */
+
+.gesture-legend-compact {
+    display: flex;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.legend-item {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: help;
+    transition: all var(--transition-fast);
+}
+
+.legend-item svg {
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all var(--transition-fast);
+}
+
+.legend-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.legend-item:hover svg {
+    color: var(--color-cyan);
+}
+
+.legend-item.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.legend-item.locked svg {
+    color: rgba(255, 100, 0, 0.6);
+}
+
+.legend-item.active {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: rgba(0, 255, 255, 0.4);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+}
+
+.legend-item.active svg {
+    color: var(--color-cyan);
+    animation: iconPulse 1s ease-in-out infinite;
+}
+
+/* Debug Compact */
+.debug-compact {
+    max-width: 120px;
+    overflow: hidden;
+}
+
+.ticker-text {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* Adaptive Display - Minimal */
+.adaptive-display {
+    min-width: 200px;
+}

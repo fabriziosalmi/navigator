@@ -1,0 +1,110 @@
+/* ==============================================
+   CATEGORY COLORS
+   Layer-specific spatial accents
+   ============================================== */
+
+/* Video Layer - Red/Pink */
+.layer-video .card {
+    --category-color: rgba(255, 0, 100, 1);
+    --category-glow: rgba(255, 0, 100, 0.3);
+    border: 1px solid rgba(255, 0, 100, 0.2);
+}
+
+.layer-video .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(255, 0, 100, 0.8) 0%, 
+        transparent 50%, 
+        rgba(255, 0, 100, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* News Layer - Orange */
+.layer-news .card {
+    --category-color: rgba(255, 165, 0, 1);
+    --category-glow: rgba(255, 165, 0, 0.3);
+    border: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.layer-news .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(255, 165, 0, 0.8) 0%, 
+        transparent 50%, 
+        rgba(255, 165, 0, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* Images Layer - Magenta */
+.layer-images .card {
+    --category-color: rgba(255, 0, 255, 1);
+    --category-glow: rgba(255, 0, 255, 0.3);
+    border: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+.layer-images .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(255, 0, 255, 0.8) 0%, 
+        transparent 50%, 
+        rgba(255, 0, 255, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* Games Layer - Green */
+.layer-games .card {
+    --category-color: rgba(0, 255, 0, 1);
+    --category-glow: rgba(0, 255, 0, 0.3);
+    border: 1px solid rgba(0, 255, 0, 0.2);
+}
+
+.layer-games .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(0, 255, 0, 0.8) 0%, 
+        transparent 50%, 
+        rgba(0, 255, 0, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* Apps Layer - Blue */
+.layer-apps .card {
+    --category-color: rgba(0, 100, 255, 1);
+    --category-glow: rgba(0, 100, 255, 0.3);
+    border: 1px solid rgba(0, 100, 255, 0.2);
+}
+
+.layer-apps .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(0, 100, 255, 0.8) 0%, 
+        transparent 50%, 
+        rgba(0, 100, 255, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* Settings Layer - Gray */
+.layer-settings .card {
+    --category-color: rgba(150, 150, 150, 1);
+    --category-glow: rgba(150, 150, 150, 0.3);
+    border: 1px solid rgba(150, 150, 150, 0.2);
+}
+
+.layer-settings .card.active {
+    border-width: 2px;
+    border-image: linear-gradient(135deg, 
+        rgba(150, 150, 150, 0.8) 0%, 
+        transparent 50%, 
+        rgba(150, 150, 150, 0.8) 100%) 1;
+    animation: focusRingPulse 2s ease-in-out infinite;
+}
+
+/* Focus ring animation - subtle breathing effect */
+@keyframes focusRingPulse {
+    0%, 100% {
+        filter: brightness(1) drop-shadow(0 0 12px var(--category-glow));
+    }
+    50% {
+        filter: brightness(1.1) drop-shadow(0 0 20px var(--category-glow));
+    }
+}

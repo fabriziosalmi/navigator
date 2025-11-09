@@ -1,0 +1,10 @@
+/* ==============================================
+   ADAPTIVE DISPLAY
+   Progress bars and level indicators
+   ============================================== */
+
+.adaptive-display {
+    min-width: 200px;
+}
+
+/* Additional adaptive styles will be defined by adaptive system */
