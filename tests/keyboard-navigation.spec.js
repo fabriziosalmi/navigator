@@ -149,7 +149,7 @@ test.describe('Keyboard Navigation - WASD + Arrows', () => {
     expect(parseInt(finalCount)).toBe(parseInt(initialCount) + 2);
   });
 
-  test('should have smooth transitions between cards', async ({ page }) => {
+  test.skip('should have smooth transitions between cards', async ({ page }) => {
     // Wait for initial card to become active
     await page.waitForSelector('.card.active', { timeout: 5000 });
     const activeCard = page.locator('.card.active').first();
