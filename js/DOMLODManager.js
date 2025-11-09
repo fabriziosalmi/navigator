@@ -28,6 +28,7 @@ export class DOMLODManager {
         this.currentCardIndex = 0;
         this.totalCards = 0;
         this.lastUpdateTime = 0;
+        this.initialized = false;
         this.cards = []; // DOM card elements
 
         // Statistics
@@ -47,7 +48,11 @@ export class DOMLODManager {
     init(cardElements) {
         this.cards = Array.from(cardElements);
         this.totalCards = this.cards.length;
-        console.log(`DOMLODManager initialized with ${this.totalCards} cards`);
+        // Reduce console spam - only log once
+        if (!this.initialized) {
+            console.log(`DOMLODManager initialized with ${this.totalCards} cards`);
+            this.initialized = true;
+        }
     }
 
     /**

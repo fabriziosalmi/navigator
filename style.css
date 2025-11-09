@@ -4,10 +4,8 @@
             box-sizing: border-box;
         }
 
-        /* Performance optimization: only apply will-change during active animations */
-        .is-animating {
-            will-change: transform, opacity;
-        }
+        /* Performance optimization: will-change removed to fix memory budget */
+        /* Apply transform3d for GPU acceleration without will-change overhead */
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

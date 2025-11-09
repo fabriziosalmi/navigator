@@ -127,10 +127,15 @@ export class AdaptiveNavigationSystem {
     
     /**
      * Record a failed/erroneous gesture
-     * @param {string} errorType - Type of error (timeout, wrong_gesture, unstable, etc.)
-     * @param {string} gestureType - Attempted gesture type
+     * @param {string} errorType - Type of error (timeout, wrong_gesture, unstable, locked_gesture, etc.)
+     * @param {string} gestureType - Type of gesture that failed
      */
     recordError(errorType, gestureType = 'unknown') {
+        // Ignore locked gestures - they're expected behavior, not errors
+        if (errorType === 'locked_gesture') {
+            return; // Don't count locked gestures as errors
+        }
+        
         this.metrics.consecutiveErrors++;
         this.metrics.consecutiveSuccesses = 0;
         this.metrics.totalGestures++;
