@@ -85,23 +85,6 @@ export class VoiceCommandModule {
     createIndicator() {
         this.indicator = document.createElement('div');
         this.indicator.id = 'voice-indicator';
-        this.indicator.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(0, 255, 153, 0.1);
-            border: 2px solid rgba(0, 255, 153, 0.3);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            backdrop-filter: blur(10px);
-            z-index: 10000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        `;
         this.indicator.innerHTML = '🎤';
         document.body.appendChild(this.indicator);
     }
@@ -164,9 +147,9 @@ export class VoiceCommandModule {
         this.isListening = true;
         console.log('Voice recognition started');
         
-        // Show indicator
+        // Show indicator with listening class
         if (this.indicator) {
-            this.indicator.style.display = 'flex';
+            this.indicator.classList.add('listening');
         }
         
         // Audio feedback
@@ -182,9 +165,9 @@ export class VoiceCommandModule {
         this.isListening = false;
         console.log('Voice recognition ended');
         
-        // Hide indicator
+        // Hide indicator by removing listening class
         if (this.indicator) {
-            this.indicator.style.display = 'none';
+            this.indicator.classList.remove('listening');
         }
         
         // Auto-restart if still enabled
