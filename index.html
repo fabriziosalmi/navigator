@@ -154,10 +154,17 @@
                 <span class="ticker-text" id="hud-ticker-text"></span>
             </div>
         </div>
+
+        <!-- Navigation History Widget -->
+        <div class="hud-section history-display">
+            <div class="history-icons" id="hud-history">
+                <!-- Populated dynamically with last 5 navigation actions -->
+            </div>
+        </div>
     </div>
 
     <!-- Layer WOW Label -->
-    <div id="layer-wow-label">
+    <div id="layer-wow-label" style="display: none;">
         <div class="wow-text">WOW</div>
         <div class="wow-layer-name">Videos</div>
         <div class="wow-icon">🎬</div>
@@ -251,6 +258,8 @@
         import { AdaptiveNavigationSystem } from './js/AdaptiveNavigationSystem.js';
         import { AdaptiveNavigationHUD } from './js/AdaptiveNavigationHUD.js';
         import { LightBeamSystem } from './js/LightBeamSystem.js';
+        import { VoiceCommandModule } from './js/VoiceCommandModule.js';
+        import { NavigationHistoryHUD } from './js/NavigationHistoryHUD.js';
         import CONFIG from './js/config.js';
 
         // Debug logging system
@@ -316,6 +325,9 @@
 
         // Initialize gesture detector (with glitch suppression)
         const gestureDetector = new GestureDetector();
+
+        // Initialize voice command module (will be activated after camera starts)
+        let voiceCommands = null;
 
         // Function to update quantum HUD layer info
         function updateQuantumHUD(layerName) {
@@ -595,7 +607,7 @@
             navController.confirmNo();
         });
 
-        // Keyboard controls
+        // Keyboard controls (Arrow keys + WASD)
         window.addEventListener('keydown', (e) => {
             if (navController.isConfirmationPending()) {
                 if (e.key === 'Enter' || e.key.toLowerCase() === 'y') {
@@ -606,10 +618,33 @@
                 return;
             }
 
-            if (e.key === 'ArrowLeft') navController.navigateCard(-1);
-            if (e.key === 'ArrowRight') navController.navigateCard(1);
-            if (e.key === 'ArrowUp') navController.navigateLayer(-1);
-            if (e.key === 'ArrowDown') navController.navigateLayer(1);
+            // Horizontal navigation (card swipe)
+            if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+                navController.navigateCard(-1);
+                lightBeams.createBeam('left', 0.5);
+            }
+            if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+                navController.navigateCard(1);
+                lightBeams.createBeam('right', 0.5);
+            }
+            
+            // Vertical navigation (layer change)
+            if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
+                navController.navigateLayer(-1);
+                lightBeams.createVerticalBeam('up', 0.5);
+            }
+            if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+                navController.navigateLayer(1);
+                lightBeams.createVerticalBeam('down', 0.5);
+            }
+            
+            // Voice commands toggle
+            if (e.key.toLowerCase() === 'm' && voiceCommands) {
+                const isListening = voiceCommands.toggle();
+                addDebugEntry(`🎤 Voice commands ${isListening ? 'ON' : 'OFF'}`, 'info');
+            }
+            
+            // Other shortcuts
             if (e.key === 'f') navController.toggleFullscreen();
             if (e.key === 'd') navController.deleteCurrentCard();
             if (e.key === 'v') document.getElementById('webcam').classList.toggle('visible');
@@ -1100,6 +1135,10 @@
 
                 await camera.start();
                 cameraStarted = true;
+
+                // Initialize voice commands
+                voiceCommands = new VoiceCommandModule(navController, audioManager);
+                addDebugEntry('🎤 Voice commands ready (press M to toggle)', 'info');
 
                 // Hide start screen
                 document.getElementById('start-screen').classList.add('hidden');
