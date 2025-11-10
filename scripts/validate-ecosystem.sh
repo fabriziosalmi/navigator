@@ -111,6 +111,7 @@ for arg in "$@"; do
       echo "Available checks:"
       echo "  dependencies  - Check for outdated packages and vulnerabilities"
       echo "  lint          - Run ESLint on all code"
+      echo "  quality       - Check code complexity and quality metrics"
       echo "  test          - Run unit and integration tests"
       echo "  build         - Build all packages and apps"
       echo "  e2e           - Run end-to-end tests"
@@ -133,9 +134,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VALIDATORS_DIR="$SCRIPT_DIR/validators"
 
 # Array of validation steps: [key, name, script_path]
+# Note: quality check added as Step 2.5 (after lint, before tests)
 declare -a STEPS=(
   "dependencies:Dependency Check:$VALIDATORS_DIR/check-dependencies.sh"
   "lint:Code Linting:$VALIDATORS_DIR/run-lint.sh"
+  "quality:Code Quality & Complexity:$VALIDATORS_DIR/check-code-quality.sh"
   "test:Unit & Integration Tests:$VALIDATORS_DIR/run-unit-tests.sh"
   "build:Production Build:$VALIDATORS_DIR/build-all.sh"
   "e2e:End-to-End Tests:$VALIDATORS_DIR/run-e2e-tests.sh"
