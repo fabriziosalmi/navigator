@@ -1,0 +1,97 @@
+# Navigator CODEOWNERS
+# 
+# This file defines who is responsible for code in this repository.
+# When a PR is created, GitHub will automatically request review from
+# the appropriate code owners based on the files changed.
+#
+# Syntax: <pattern> <github-username-or-team>
+# 
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# =============================================================================
+# DEFAULT OWNER
+# =============================================================================
+
+# Catch-all: fabriziosalmi owns everything not explicitly specified
+* @fabriziosalmi
+
+# =============================================================================
+# CORE PACKAGES (Critical - Require Core Team Review)
+# =============================================================================
+
+/packages/core/** @fabriziosalmi
+/packages/pdk/** @fabriziosalmi
+/packages/react/** @fabriziosalmi
+
+# =============================================================================
+# INFRASTRUCTURE & CI/CD (DevOps - Require Infrastructure Team)
+# =============================================================================
+
+/.github/** @fabriziosalmi
+/scripts/** @fabriziosalmi
+/playwright.config.js @fabriziosalmi
+/vite.config.js @fabriziosalmi
+/.husky/** @fabriziosalmi
+
+# Validation system is critical
+/scripts/validate-ecosystem.sh @fabriziosalmi
+/scripts/validators/** @fabriziosalmi
+/docs/VALIDATION.md @fabriziosalmi
+
+# =============================================================================
+# DOCUMENTATION (Can be reviewed by broader team)
+# =============================================================================
+
+/docs/** @fabriziosalmi
+*.md @fabriziosalmi
+/README.md @fabriziosalmi
+/CONTRIBUTING.md @fabriziosalmi
+
+# Cookbook is architectural teaching tool - needs careful review
+/docs/COOKBOOK.md @fabriziosalmi
+/docs/COOKBOOK_REFACTORING_SUMMARY.md @fabriziosalmi
+
+# =============================================================================
+# CONFIGURATION FILES (Require careful review)
+# =============================================================================
+
+/package.json @fabriziosalmi
+/pnpm-lock.yaml @fabriziosalmi
+/pnpm-workspace.yaml @fabriziosalmi
+/tsconfig.json @fabriziosalmi
+/.eslintrc.json @fabriziosalmi
+
+# =============================================================================
+# PLUGINS (Plugin maintainers can review their own plugins)
+# =============================================================================
+
+/packages/plugin-keyboard/** @fabriziosalmi
+/packages/plugin-mock-gesture/** @fabriziosalmi
+
+# =============================================================================
+# TESTS (QA team can review test changes)
+# =============================================================================
+
+/tests/** @fabriziosalmi
+**/*.spec.ts @fabriziosalmi
+**/*.spec.js @fabriziosalmi
+**/*.test.ts @fabriziosalmi
+**/*.test.js @fabriziosalmi
+
+# =============================================================================
+# EXAMPLES & DEMOS (Less critical - can be reviewed more loosely)
+# =============================================================================
+
+/index.html @fabriziosalmi
+/js/** @fabriziosalmi
+/css/** @fabriziosalmi
+
+# =============================================================================
+# NOTES FOR FUTURE MAINTAINERS
+# =============================================================================
+#
+# 1. Add new team members with their GitHub username
+# 2. Create GitHub teams for: @navigator/core-team, @navigator/docs-team, etc.
+# 3. Update patterns when new critical packages are added
+# 4. Review this file quarterly to ensure it matches current team structure
+#
