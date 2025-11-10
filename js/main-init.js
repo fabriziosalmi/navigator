@@ -3,6 +3,7 @@
  * Extracted from inline script for CSP compliance
  */
 
+import { errorHandler } from './ErrorHandler.js';
 import { AudioManager } from './AudioManager.js';
 import { LayerManager } from './LayerManager.js';
 import { GridLockSystem } from './GridLockSystem.js';
