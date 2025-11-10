@@ -9,6 +9,19 @@
     box-sizing: border-box;
 }
 
+/* Utility classes for CSP compliance (replace inline styles) */
+.hidden-element {
+    display: none;
+}
+
+.small-font {
+    font-size: 0.8em;
+}
+
+.opacity-70 {
+    opacity: 0.7;
+}
+
 /* Performance optimization: will-change removed to fix memory budget */
 /* Apply transform3d for GPU acceleration without will-change overhead */
 
