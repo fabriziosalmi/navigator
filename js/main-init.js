@@ -16,6 +16,7 @@ import { LightBeamSystem } from './LightBeamSystem.js';
 import { VoiceCommandModule } from './VoiceCommandModule.js';
 import { NavigationHistoryHUD } from './NavigationHistoryHUD.js';
 import { GestureLED } from './GestureLED.js';
+import { InterfaceStatusHUD } from './InterfaceStatusHUD.js';
 import CONFIG from './config.js';
 
 // Debug logging system
@@ -87,6 +88,9 @@ const navHistory = new NavigationHistoryHUD(5);
 
 // Initialize Gesture LED (cybernetic feedback)
 const gestureLED = new GestureLED();
+
+// Initialize Interface Status HUD
+const interfaceHUD = new InterfaceStatusHUD();
 
 // Initialize voice command module (will be activated after camera starts)
 let voiceCommands = null;
@@ -443,6 +447,12 @@ window.addEventListener('keydown', (e) => {
         const isListening = voiceCommands.toggle();
         addDebugEntry(`🎤 Voice commands ${isListening ? 'ON' : 'OFF'}`, 'info');
     }
+    
+    // Interface HUD toggle
+    if (e.key.toLowerCase() === 'h') {
+        interfaceHUD.toggle();
+        addDebugEntry('🎛️ Interface HUD toggled', 'info');
+    }
 
     // Other shortcuts (f = fullscreen, v = webcam toggle)
     // Note: 'd' and 'a' are reserved for WASD navigation
@@ -576,6 +586,9 @@ hands.onResults((results) => {
         const hudHandText = document.getElementById('hud-hand-text');
         if (hudHandStatus) hudHandStatus.classList.add('active');
         if (hudHandText) hudHandText.textContent = 'Detected';
+        
+        // Update Interface Status HUD - gesture active
+        interfaceHUD.updateGesture(true, 'Tracking');
 
         // Get hand position for Hand Aura
         const palmBase = landmarks[0];
@@ -605,12 +618,27 @@ hands.onResults((results) => {
         }
         visualFX.updateHandPosition(handX, handY, auraMode);
 
-        // Log gesture detection
-        if (isPinch) addDebugEntry('👌 Pinch detected', 'gesture');
-        if (isFist) addDebugEntry('✊ Fist detected', 'gesture');
-        if (isThumbsUp) addDebugEntry('👍 Thumbs up detected', 'gesture');
-        if (isPoint) addDebugEntry('👆 Point detected', 'gesture');
-        if (isOpenHand) addDebugEntry('🖐️ Open hand detected', 'gesture');
+        // Log gesture detection and update Interface HUD
+        if (isPinch) {
+            addDebugEntry('👌 Pinch detected', 'gesture');
+            interfaceHUD.updateGesture(true, 'Pinch');
+        }
+        if (isFist) {
+            addDebugEntry('✊ Fist detected', 'gesture');
+            interfaceHUD.updateGesture(true, 'Fist');
+        }
+        if (isThumbsUp) {
+            addDebugEntry('👍 Thumbs up detected', 'gesture');
+            interfaceHUD.updateGesture(true, 'Thumbs Up');
+        }
+        if (isPoint) {
+            addDebugEntry('👆 Point detected', 'gesture');
+            interfaceHUD.updateGesture(true, 'Point');
+        }
+        if (isOpenHand) {
+            addDebugEntry('🖐️ Open hand detected', 'gesture');
+            interfaceHUD.updateGesture(true, 'Open Hand');
+        }
 
         // Detect locked gestures and provide feedback
         if (currentLevel < 2 && gestureDetector.detectPinch(landmarks, timestamp)) {
@@ -936,6 +964,20 @@ async function startExperience() {
         // Initialize voice commands
         voiceCommands = new VoiceCommandModule(navController, audioManager, navHistory, gestureLED);
         addDebugEntry('🎤 Voice commands ready (press M to toggle)', 'info');
+        
+        // Connect voice commands to Interface HUD
+        if (voiceCommands && voiceCommands.recognition) {
+            voiceCommands.recognition.onstart = () => {
+                interfaceHUD.updateVoice(true, 'Listening...');
+            };
+            voiceCommands.recognition.onend = () => {
+                interfaceHUD.updateVoice(false);
+            };
+            voiceCommands.recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                interfaceHUD.updateVoice(true, transcript);
+            };
+        }
 
         // Hide start screen
         document.getElementById('start-screen').classList.add('hidden');

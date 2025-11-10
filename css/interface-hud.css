@@ -1,0 +1,286 @@
+/* ==============================================
+   INTERFACE STATUS HUD
+   Visual indicators for active input methods
+   ============================================== */
+
+.interface-status-hud {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(10, 10, 20, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 15px 20px;
+    z-index: 9999;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.interface-status-hud.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(120%);
+}
+
+.interface-status-title {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.interface-indicators {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Individual Interface Indicator */
+.interface-indicator {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    cursor: default;
+    min-width: 70px;
+}
+
+.interface-indicator:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Inactive state - dimmed */
+.interface-indicator:not(.active) {
+    opacity: 0.4;
+}
+
+.interface-indicator:not(.active) .indicator-icon {
+    filter: grayscale(1);
+}
+
+/* Active state - glowing */
+.interface-indicator.active {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.4);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.interface-indicator.active .indicator-icon {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+/* Pulse animation on activation */
+.interface-indicator.pulse {
+    animation: indicatorPulse 0.3s ease-out;
+}
+
+@keyframes indicatorPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Icon */
+.indicator-icon {
+    font-size: 28px;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+/* Label */
+.indicator-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.interface-indicator.active .indicator-label {
+    color: rgba(0, 255, 255, 1);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Action indicator (shows what action was performed) */
+.indicator-action {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: rgba(0, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.indicator-action.show {
+    opacity: 1;
+    animation: actionFadeIn 0.3s ease-out;
+}
+
+@keyframes actionFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Glow effect */
+.indicator-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.interface-indicator.active .indicator-glow {
+    opacity: 1;
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* Specific interface colors */
+.interface-indicator[data-interface="keyboard"].active {
+    border-color: rgba(0, 200, 255, 0.4);
+}
+
+.interface-indicator[data-interface="keyboard"].active .indicator-icon {
+    filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.8));
+}
+
+.interface-indicator[data-interface="mouse"].active {
+    border-color: rgba(100, 255, 100, 0.4);
+}
+
+.interface-indicator[data-interface="mouse"].active .indicator-icon {
+    filter: drop-shadow(0 0 8px rgba(100, 255, 100, 0.8));
+}
+
+.interface-indicator[data-interface="voice"].active {
+    border-color: rgba(255, 100, 255, 0.4);
+}
+
+.interface-indicator[data-interface="voice"].active .indicator-icon {
+    filter: drop-shadow(0 0 8px rgba(255, 100, 255, 0.8));
+}
+
+.interface-indicator[data-interface="gesture"].active {
+    border-color: rgba(255, 200, 0, 0.4);
+}
+
+.interface-indicator[data-interface="gesture"].active .indicator-icon {
+    filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.8));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .interface-status-hud {
+        top: 10px;
+        right: 10px;
+        padding: 10px 12px;
+    }
+    
+    .interface-indicators {
+        gap: 10px;
+    }
+    
+    .interface-indicator {
+        min-width: 60px;
+        padding: 8px;
+    }
+    
+    .indicator-icon {
+        font-size: 24px;
+    }
+    
+    .indicator-label {
+        font-size: 9px;
+    }
+    
+    .interface-status-title {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .interface-status-hud {
+        top: 5px;
+        right: 5px;
+        padding: 8px 10px;
+    }
+    
+    .interface-indicators {
+        gap: 8px;
+    }
+    
+    .interface-indicator {
+        min-width: 50px;
+        padding: 6px;
+    }
+    
+    .indicator-icon {
+        font-size: 20px;
+    }
+    
+    .indicator-label {
+        font-size: 8px;
+    }
+}
