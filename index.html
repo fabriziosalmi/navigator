@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="css/performance-optimizations.css">
     <link rel="stylesheet" href="css/ux-refinements.css">
     <link rel="stylesheet" href="css/viewport-cleanup.css">
+    <link rel="stylesheet" href="css/monochrome-minimal.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -199,40 +200,6 @@
         <!-- Adaptive Level Progress -->
         <div class="hud-panel compact-panel adaptive-display" id="adaptive-hud-quantum">
             <!-- Populated by AdaptiveNavigationHUD -->
-        </div>
-
-        <!-- Status & Metrics -->
-        <div class="hud-panel compact-panel status-display">
-            <div class="hand-status" id="hud-hand-status">
-                <svg class="hand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11V6a1 1 0 0 1 2 0v5m0 0V5a1 1 0 0 1 2 0v6m0 0V4a1 1 0 0 1 2 0v7m0 0V5a1 1 0 0 1 2 0v8a5 5 0 0 1-10 0v-1"/>
-                </svg>
-                <span id="hud-hand-text">Searching</span>
-            </div>
-            
-            <!-- Gesture Legend Compact -->
-            <div class="gesture-legend-compact">
-                <div class="legend-item" data-gesture="swipe" title="Swipe left/right to navigate cards">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                </div>
-                <div class="legend-item" data-gesture="point" title="Point 2s to focus card">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 5v14m0 0l-7-7m7 7l7-7"/>
-                    </svg>
-                </div>
-                <div class="legend-item locked" data-gesture="pinch" title="Pinch (unlock at Level 2)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M3 12h3m12 0h3M12 3v3m0 12v3"/>
-                    </svg>
-                </div>
-            </div>
-            
-            <div class="debug-compact" id="hud-debug-ticker">
-                <span class="ticker-text" id="hud-ticker-text"></span>
-            </div>
         </div>
     </div>
 

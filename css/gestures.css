@@ -29,53 +29,16 @@
 }
 
 /* ==============================================
-   GESTURE INDICATOR - Bottom-left widget
+   GESTURE INDICATOR - Hidden (cleanup)
    ============================================== */
 
 #gesture-indicator {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    gap: 8px;
-    z-index: 150;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.85);
-    border: 2px solid rgba(0, 255, 255, 0.5);
-    border-radius: var(--radius-md);
-    backdrop-filter: var(--glass-blur);
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .gesture-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 10px;
-    background: rgba(20, 20, 40, 0.8);
-    border: 1px solid rgba(0, 255, 255, 0.3);
-    border-radius: var(--radius-sm);
-    cursor: help;
-    transition: all var(--transition-fast);
-    opacity: 0.5;
-}
-
-.gesture-hint.active {
-    opacity: 1;
-    border-color: var(--color-cyan);
-    box-shadow: var(--shadow-glow-cyan);
-    transform: scale(1.05);
-}
-
-.gesture-hint.disabled {
-    opacity: 0.2;
-    filter: grayscale(1);
-}
-
-.gesture-hint.locked {
-    opacity: 0.4;
-    border-color: #888;
-    filter: grayscale(0.7);
-    cursor: not-allowed;
+    display: none !important;
 }
 
 .gesture-hint.locked .gesture-icon {

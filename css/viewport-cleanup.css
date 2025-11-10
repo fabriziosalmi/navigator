@@ -20,8 +20,12 @@
 /* Hide gesture icon panels in bottom-left (those 4 icons) */
 .gesture-icon-panel,
 .gesture-controls,
-.gesture-indicator-panel {
+.gesture-indicator-panel,
+.gesture-legend,
+.gesture-legend-compact {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 /* GESTURE SYSTEM panel in top-right already hidden by ux-refinements.css */

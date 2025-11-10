@@ -1,0 +1,427 @@
+/* ==============================================
+   MONOCHROME MINIMAL DESIGN
+   Clean, simple, black & white interface
+   ============================================== */
+
+:root {
+    /* Monochrome Palette */
+    --mono-black: #000000;
+    --mono-gray-900: #0a0a0a;
+    --mono-gray-800: #1a1a1a;
+    --mono-gray-700: #2a2a2a;
+    --mono-gray-600: #3a3a3a;
+    --mono-gray-500: #5a5a5a;
+    --mono-gray-400: #7a7a7a;
+    --mono-gray-300: #9a9a9a;
+    --mono-gray-200: #cacaca;
+    --mono-gray-100: #e5e5e5;
+    --mono-white: #ffffff;
+    
+    /* Accent - Single subtle color */
+    --accent: #ffffff;
+    --accent-dim: rgba(255, 255, 255, 0.3);
+    
+    /* Transparent Layers */
+    --glass-dark: rgba(10, 10, 10, 0.8);
+    --glass-light: rgba(255, 255, 255, 0.05);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+}
+
+/* ==============================================
+   BODY - Pure Black Background
+   ============================================== */
+
+body {
+    background: var(--mono-black) !important;
+    color: var(--mono-white) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* ==============================================
+   HUD BARS - Minimal Glass
+   ============================================== */
+
+.top-hud-bar,
+.bottom-hud-bar {
+    background: linear-gradient(
+        to bottom,
+        var(--glass-dark) 0%,
+        rgba(10, 10, 10, 0.6) 100%
+    ) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.top-hud-bar {
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.bottom-hud-bar {
+    border-top: 1px solid var(--border-subtle) !important;
+}
+
+/* ==============================================
+   HUD PANELS - Minimal Style
+   ============================================== */
+
+.hud-panel,
+.compact-panel {
+    background: var(--glass-light) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.hud-panel:hover,
+.compact-panel:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ==============================================
+   CARDS - Clean Monochrome
+   ============================================== */
+
+.card {
+    background: var(--glass-dark) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 12px !important;
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.card.active {
+    border: 1px solid var(--accent-dim) !important;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.card-title {
+    color: var(--mono-white) !important;
+    font-weight: 600 !important;
+}
+
+.card-category {
+    color: var(--mono-gray-300) !important;
+}
+
+.card-description {
+    color: var(--mono-gray-200) !important;
+}
+
+/* ==============================================
+   TEXT - High Contrast
+   ============================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--mono-white) !important;
+    font-weight: 600 !important;
+}
+
+p, span, div {
+    color: var(--mono-gray-200) !important;
+}
+
+/* Labels & metadata */
+.label,
+.meta,
+.stat-label {
+    color: var(--mono-gray-400) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Values & data */
+.stat-value,
+.current-card,
+.total-cards,
+.layer-name {
+    color: var(--mono-white) !important;
+    font-weight: 600 !important;
+}
+
+/* ==============================================
+   BUTTONS - Minimal
+   ============================================== */
+
+button,
+.hud-nav {
+    background: var(--glass-light) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--mono-white) !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+button:hover,
+.hud-nav:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--accent-dim) !important;
+    transform: translateY(-1px) !important;
+}
+
+button:active,
+.hud-nav:active {
+    transform: translateY(0) !important;
+}
+
+/* ==============================================
+   ICONS - Monochrome
+   ============================================== */
+
+svg,
+.icon {
+    color: var(--mono-white) !important;
+    opacity: 0.8;
+}
+
+button:hover svg,
+.hud-nav:hover svg {
+    opacity: 1;
+}
+
+/* ==============================================
+   INTERFACE STATUS - Minimal
+   ============================================== */
+
+.interface-status-hud {
+    background: var(--glass-light) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+
+.interface-status-title {
+    color: var(--mono-gray-400) !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+}
+
+.interface-indicator {
+    background: transparent !important;
+    border: none !important;
+}
+
+.indicator-icon {
+    filter: grayscale(100%) !important;
+    opacity: 0.5;
+}
+
+.interface-indicator.active .indicator-icon {
+    filter: grayscale(0%) !important;
+    opacity: 1;
+}
+
+.indicator-label {
+    color: var(--mono-gray-400) !important;
+}
+
+.interface-indicator.active .indicator-label {
+    color: var(--mono-white) !important;
+}
+
+/* ==============================================
+   POSITION INFO - Clean
+   ============================================== */
+
+.position-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.layer-display,
+.card-position {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.separator {
+    color: var(--mono-gray-500) !important;
+    opacity: 0.5;
+}
+
+/* ==============================================
+   NAVIGATION CONTROLS - Minimal
+   ============================================== */
+
+.nav-controls {
+    display: flex;
+    gap: 6px;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.hud-nav {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 6px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-nav svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* ==============================================
+   ADAPTIVE DISPLAY - Compact
+   ============================================== */
+
+.adaptive-display {
+    font-size: 0.75rem !important;
+    color: var(--mono-gray-300) !important;
+}
+
+/* ==============================================
+   GESTURE LED - Minimal
+   ============================================== */
+
+.gesture-led {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: var(--mono-gray-600) !important;
+    box-shadow: none !important;
+}
+
+.gesture-led.active {
+    background: var(--mono-white) !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ==============================================
+   REMOVE ALL COLORS
+   ============================================== */
+
+/* Kill cyan */
+.color-cyan,
+[style*="color: cyan"],
+[style*="color: #00ffff"] {
+    color: var(--mono-white) !important;
+}
+
+/* Kill magenta */
+.color-magenta,
+[style*="color: magenta"],
+[style*="color: #ff00ff"] {
+    color: var(--mono-white) !important;
+}
+
+/* Kill all glows */
+[style*="text-shadow"],
+.glow,
+.neon-glow {
+    text-shadow: none !important;
+    box-shadow: none !important;
+}
+
+/* ==============================================
+   START SCREEN - Minimal
+   ============================================== */
+
+#start-screen {
+    background: var(--mono-black) !important;
+}
+
+.start-box {
+    background: var(--glass-dark) !important;
+    border: 1px solid var(--border-subtle) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+}
+
+#start-btn {
+    background: var(--mono-white) !important;
+    color: var(--mono-black) !important;
+    border: none !important;
+    font-weight: 600 !important;
+}
+
+#start-btn:hover {
+    background: var(--mono-gray-100) !important;
+}
+
+/* ==============================================
+   REMOVE GRADIENTS
+   ============================================== */
+
+[style*="linear-gradient"],
+[style*="radial-gradient"] {
+    background: var(--glass-dark) !important;
+}
+
+/* ==============================================
+   FOCUS STATES - Minimal
+   ============================================== */
+
+*:focus {
+    outline: 1px solid var(--accent-dim) !important;
+    outline-offset: 2px;
+}
+
+button:focus,
+.hud-nav:focus {
+    outline: 1px solid var(--mono-white) !important;
+}
+
+/* ==============================================
+   SCROLLBAR - Hidden
+   ============================================== */
+
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* ==============================================
+   ANIMATIONS - Subtle
+   ============================================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==============================================
+   RESPONSIVE - Maintain Minimal
+   ============================================== */
+
+@media (max-width: 768px) {
+    .hud-panel,
+    .compact-panel {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+    }
+    
+    .hud-nav {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
