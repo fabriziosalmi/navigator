@@ -30,16 +30,20 @@ jobs:
           # Necessario per commit e push
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Setup Node.js
+      # 2. Setup Node.js with pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
 
       # 3. Installazione dipendenze
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # 4. Cache Playwright browsers (per i test)
       - name: Get Playwright version
@@ -55,25 +59,25 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
 
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: pnpm exec playwright install-deps
 
       # 5. ESLint - Quality Gate
       - name: Run ESLint
-        run: npm run lint:ci
+        run: pnpm run lint:ci
 
       # 6. Run Tests - Quality Gate
       - name: Run tests
-        run: npm test
+        run: pnpm test
         env:
           CI: true
 
       # 7. Production Build
       - name: Build production bundle
-        run: npm run build
+        run: pnpm run build
         env:
           NODE_ENV: production
 

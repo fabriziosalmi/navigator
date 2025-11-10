@@ -27,16 +27,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
+      # 2. Setup Node.js with pnpm
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
 
       # 3. Installazione dipendenze
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # 4. Cache Playwright browsers
       - name: Get Playwright version
@@ -52,20 +56,20 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
 
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: pnpm exec playwright install-deps
 
       # 5. ESLint - Code Quality Check
       - name: Run ESLint
-        run: npm run lint:ci
+        run: pnpm run lint:ci
         continue-on-error: false
 
       # 6. Run Tests
       - name: Run Playwright tests
-        run: npm test
+        run: pnpm test
         env:
           CI: true
 
@@ -80,7 +84,7 @@ jobs:
 
       # 8. Production Build
       - name: Build production bundle
-        run: npm run build
+        run: pnpm run build
         env:
           NODE_ENV: production
 
