@@ -661,39 +661,63 @@ core.eventBus.on('intent:navigate', (payload) => {
 
 ---
 
-## Video Player with Voice Commands
+## Recipe #3: Video Player with Voice Commands
 
-**Goal**: Control a video player with voice commands ("play", "pause", "louder", "quieter").
+**Goal**: Control a video player with voice commands—demonstrates how voice input becomes just another plugin in the Navigator ecosystem.
 
-### Step 1: Setup
+> **Architectural Focus**: This recipe shows how to separate **voice recognition** (input layer) from **media control** (application layer). The `VoiceInputPlugin` is generic—it could control videos, music players, or smart home devices.
+
+---
+
+### 🎬 The Result
+
+A voice-controlled video player where:
+- 🎤 **"Play"** = Start video
+- 🎤 **"Pause"** = Stop video
+- 🎤 **"Louder"** = Increase volume
+- 🎤 **"Quieter"** = Decrease volume
+- 🎯 **Plugin** = Generic voice command detector (knows nothing about videos)
+- 🧠 **App** = Video control logic (knows nothing about Web Speech API)
+
+---
+
+### 🧂 Ingredients
 
 ```bash
-npx @navigator.menu/cli create-app voice-video-player
-cd voice-video-player
-npm install
+@navigator.menu/core              # The orchestrator
+Web Speech API                    # Browser built-in (no install needed!)
 ```
 
-### Step 2: Voice Control Plugin
+**Browser Support**: Chrome, Edge, Safari (check [caniuse.com](https://caniuse.com/speech-recognition))
+
+---
+
+### 👨‍🍳 Step 1: Create the Generic VoiceInputPlugin
+
+This plugin's **only responsibility** is detecting voice commands and emitting standardized media intents.
 
 ```javascript
-// js/VoiceControlPlugin.js
-import { BasePlugin, NipValidator } from '@navigator.menu/pdk';
+// plugins/VoiceInputPlugin.js
+import { BasePlugin } from '@navigator.menu/core';
 
-export class VoiceControlPlugin extends BasePlugin {
+export class VoiceInputPlugin extends BasePlugin {
   constructor() {
-    super('voice-control');
+    super('voice-input');
     this.recognition = null;
   }
 
-  async init() {
+  async init(core) {
+    this.core = core;
+    
     // Check for Web Speech API support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      console.error('Speech recognition not supported');
-      return;
+      console.error('❌ Speech recognition not supported in this browser');
+      return Promise.reject('Speech recognition not available');
     }
 
+    // LAYER 1: Setup raw input capture
     this.recognition = new SpeechRecognition();
     this.recognition.continuous = true;
     this.recognition.interimResults = false;
@@ -702,39 +726,63 @@ export class VoiceControlPlugin extends BasePlugin {
     this.recognition.onresult = (event) => {
       const last = event.results.length - 1;
       const command = event.results[last][0].transcript.toLowerCase().trim();
+      const confidence = event.results[last][0].confidence;
       
-      this.processCommand(command);
+      this.processCommand(command, confidence);
+    };
+
+    this.recognition.onerror = (event) => {
+      console.error('Voice recognition error:', event.error);
     };
 
     this.recognition.start();
-    console.log('Voice control activated!');
+    console.log('🎤 Voice recognition activated!');
+    
+    return Promise.resolve();
   }
 
-  processCommand(command) {
-    const video = document.getElementById('video-player');
+  processCommand(command, confidence) {
+    // LAYER 2: Translate voice to standardized intents (NOT media-specific!)
     
     if (command.includes('play')) {
-      video.play();
-      this.emitEvent('voice:command:play');
-    } else if (command.includes('pause') || command.includes('stop')) {
-      video.pause();
-      this.emitEvent('voice:command:pause');
-    } else if (command.includes('louder') || command.includes('volume up')) {
-      video.volume = Math.min(video.volume + 0.1, 1);
-      this.emitEvent('voice:command:volume_up');
-    } else if (command.includes('quieter') || command.includes('volume down')) {
-      video.volume = Math.max(video.volume - 0.1, 0);
-      this.emitEvent('voice:command:volume_down');
+      this.core.eventBus.emit('intent:media_play', {
+        source: 'voice',
+        command: command,
+        confidence: confidence,
+        timestamp: Date.now()
+      });
+    } 
+    else if (command.includes('pause') || command.includes('stop')) {
+      this.core.eventBus.emit('intent:media_pause', {
+        source: 'voice',
+        command: command,
+        confidence: confidence,
+        timestamp: Date.now()
+      });
+    } 
+    else if (command.includes('louder') || command.includes('volume up')) {
+      this.core.eventBus.emit('intent:media_volume', {
+        source: 'voice',
+        direction: 'up',
+        amount: 0.1,
+        command: command,
+        confidence: confidence,
+        timestamp: Date.now()
+      });
+    } 
+    else if (command.includes('quieter') || command.includes('volume down')) {
+      this.core.eventBus.emit('intent:media_volume', {
+        source: 'voice',
+        direction: 'down',
+        amount: 0.1,
+        command: command,
+        confidence: confidence,
+        timestamp: Date.now()
+      });
     }
-  }
-
-  emitEvent(type) {
-    const event = NipValidator.createEvent(
-      type,
-      this.name,
-      { timestamp: Date.now() }
-    );
-    console.log('Voice command:', type);
+    else {
+      console.log('🎤 Unrecognized command:', command);
+    }
   }
 
   async destroy() {
@@ -745,68 +793,247 @@ export class VoiceControlPlugin extends BasePlugin {
 }
 ```
 
-### Step 3: HTML
+**🎯 Notice**: This plugin doesn't know what a "video player" is. It detects voice commands and emits `intent:media_*` events. You could use this same plugin to control Spotify, YouTube, or a podcast app.
+
+---
+
+### 👨‍🍳 Step 2: Build the Video Player Application Layer
+
+Now the **business logic**—this is where video-specific code lives.
+
+```javascript
+// main.js
+import { NavigatorCore } from '@navigator.menu/core';
+import { VoiceInputPlugin } from './plugins/VoiceInputPlugin.js';
+
+// ==========================================
+// LAYER 3: APPLICATION LOGIC (Video-specific)
+// ==========================================
+
+const video = document.getElementById('video-player');
+const statusDisplay = document.getElementById('status-display');
+
+function updateStatus(message) {
+  statusDisplay.textContent = message;
+  setTimeout(() => {
+    statusDisplay.textContent = 'Listening for commands...';
+  }, 2000);
+}
+
+// ==========================================
+// INITIALIZE NAVIGATOR
+// ==========================================
+
+const core = new NavigatorCore();
+core.registerPlugin(new VoiceInputPlugin());
+
+// LAYER 3: Subscribe to intents (not raw voice events!)
+core.eventBus.on('intent:media_play', (payload) => {
+  if (payload.source === 'voice') {
+    video.play();
+    updateStatus(`✅ Playing (${Math.round(payload.confidence * 100)}% confident)`);
+  }
+});
+
+core.eventBus.on('intent:media_pause', (payload) => {
+  if (payload.source === 'voice') {
+    video.pause();
+    updateStatus(`✅ Paused (${Math.round(payload.confidence * 100)}% confident)`);
+  }
+});
+
+core.eventBus.on('intent:media_volume', (payload) => {
+  if (payload.source === 'voice') {
+    if (payload.direction === 'up') {
+      video.volume = Math.min(video.volume + payload.amount, 1);
+      updateStatus(`🔊 Volume: ${Math.round(video.volume * 100)}%`);
+    } else {
+      video.volume = Math.max(video.volume - payload.amount, 0);
+      updateStatus(`🔉 Volume: ${Math.round(video.volume * 100)}%`);
+    }
+  }
+});
+
+// Start the engine
+core.start().then(() => {
+  console.log('✅ Voice-controlled video player ready!');
+  updateStatus('Listening for commands...');
+}).catch((error) => {
+  updateStatus('❌ Voice recognition not available');
+  console.error(error);
+});
+
+// Optional: Add keyboard support by just registering another plugin!
+// import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+// core.registerPlugin(new KeyboardPlugin());
+// 
+// core.eventBus.on('intent:media_play', (payload) => {
+//   if (payload.source === 'keyboard' && payload.key === ' ') {
+//     video.paused ? video.play() : video.pause();
+//   }
+// });
+```
+
+---
+
+### 👨‍🍳 Step 3: HTML Structure
 
 ```html
 <!-- index.html -->
-<div class="video-container">
-  <video id="video-player" controls>
-    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-  </video>
-  
-  <div class="voice-status">
-    <span class="pulse"></span>
-    Listening for commands...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigator Voice Player</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .video-container {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    #video-player {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .voice-status {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-size: 1.2rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .pulse {
+      width: 16px;
+      height: 16px;
+      background: #00d4ff;
+      border-radius: 50%;
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .commands-list {
+      margin-top: 2rem;
+      text-align: left;
+      background: rgba(255,255,255,0.1);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .commands-list h3 {
+      margin-top: 0;
+      color: #00d4ff;
+    }
+
+    .commands-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .commands-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .commands-list li:last-child {
+      border-bottom: none;
+    }
+
+    .commands-list li::before {
+      content: '🎤';
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <video id="video-player" controls>
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    
+    <div class="voice-status">
+      <span class="pulse"></span>
+      <span id="status-display">Initializing...</span>
+    </div>
+    
+    <div class="commands-list">
+      <h3>💡 Try saying:</h3>
+      <ul>
+        <li><strong>"Play"</strong> - Start the video</li>
+        <li><strong>"Pause"</strong> or <strong>"Stop"</strong> - Pause the video</li>
+        <li><strong>"Louder"</strong> or <strong>"Volume up"</strong> - Increase volume</li>
+        <li><strong>"Quieter"</strong> or <strong>"Volume down"</strong> - Decrease volume</li>
+      </ul>
+    </div>
   </div>
   
-  <div class="commands-list">
-    <h3>Try saying:</h3>
-    <ul>
-      <li>"Play"</li>
-      <li>"Pause"</li>
-      <li>"Louder"</li>
-      <li>"Quieter"</li>
-    </ul>
-  </div>
-</div>
-
-<style>
-.video-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  text-align: center;
-}
-
-#video-player {
-  width: 100%;
-  border-radius: 12px;
-}
-
-.voice-status {
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: #00d4ff;
-}
-
-.pulse {
-  width: 12px;
-  height: 12px;
-  background: #00d4ff;
-  border-radius: 50%;
-  animation: pulse 1.5s ease infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
-}
-</style>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
 ```
 
-**Try it**: Run `npm run dev` and say "play" or "pause"!
+---
+
+### 🍽️ What You Just Built
+
+Congratulations! You've built a voice-controlled video player following **The Navigator Way**:
+
+1. ✅ **VoiceInputPlugin** (Input Layer): Detects voice, emits `intent:media_*`
+2. ✅ **NavigatorCore** (Orchestration Layer): Routes events via Event Bus
+3. ✅ **Video Control** (Application Layer): Listens to intents, controls video element
+
+**The Power Move**: Want to add keyboard shortcuts?
+
+```javascript
+// Just add this - video control code stays unchanged!
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+core.registerPlugin(new KeyboardPlugin());
+
+core.eventBus.on('intent:media_play', (payload) => {
+  video.paused ? video.play() : video.pause();  // Works for BOTH voice and keyboard!
+});
+```
+
+**Zero refactoring needed**. Voice and keyboard control the same video through the same intents.
+
+---
+
+### 💡 Key Takeaways
+
+- 🔌 **Plugin is generic**: `VoiceInputPlugin` knows nothing about video players
+- 🧠 **App owns logic**: Video control lives in application layer
+- 🎯 **Intent-based**: App listens to `intent:media_play`, not raw speech events
+- 🔄 **Multi-modal ready**: Add keyboard/gesture without touching video code
+- 📊 **Confidence scores**: Plugin passes recognition confidence to app layer
 
 ---
 
