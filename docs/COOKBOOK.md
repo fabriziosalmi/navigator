@@ -1324,72 +1324,198 @@ core.eventBus.on('intent:navigate', (payload) => {
 
 ---
 
-## Next.js Integration
+---
 
-**Goal**: Use Navigator in a Next.js app with SSR considerations.
+## Recipe #5: Navigator + Next.js (SSR-Compatible Integration)
 
-### Step 1: Create Next.js App
+**Goal**: Use Navigator in a Next.js app with proper SSR/client-side handling—demonstrates framework integration best practices.
+
+> **Architectural Focus**: This recipe shows how to integrate Navigator into **server-rendered React applications** while maintaining clean architecture. The plugin initializes client-side only, emits intents, and the React component owns state.
+
+---
+
+### 🎬 The Result
+
+A Next.js application where:
+- ⚡ **SSR-safe**: Navigator initializes only on client side
+- 🎯 **React Hooks**: useNavigator custom hook for clean integration
+- 🔄 **Intent-based state**: Component reacts to Navigator intents
+- 📦 **Dynamic imports**: Proper code splitting with `next/dynamic`
+- 🧠 **App owns logic**: React state driven by Navigator events
+
+---
+
+### 🧂 Ingredients
+
+```bash
+@navigator.menu/core              # The orchestrator
+@navigator.menu/plugin-keyboard   # Example input plugin
+next                              # React framework
+react                             # UI library
+```
+
+---
+
+### 👨‍🍳 Step 1: Create Next.js App
 
 ```bash
 npx create-next-app@latest navigator-nextjs --typescript
 cd navigator-nextjs
-npm install @navigator.menu/pdk
+npm install @navigator.menu/core @navigator.menu/plugin-keyboard
 ```
 
-### Step 2: Client-Only Component
+---
+
+### 👨‍🍳 Step 2: Custom Hook (Client-Side Navigator)
+
+Create a reusable hook that handles Navigator lifecycle:
 
 ```typescript
-// components/NavigatorCarousel.tsx
+// hooks/useNavigator.ts
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { CoreMock } from '@navigator.menu/pdk/testing';
-import { BasePlugin } from '@navigator.menu/pdk';
+import { useEffect, useRef, useState } from 'react';
+import { NavigatorCore } from '@navigator.menu/core';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 
-class SimplePlugin extends BasePlugin {
-  constructor() {
-    super('simple-plugin');
-  }
-
-  async init() {
-    console.log('Plugin initialized in Next.js!');
-  }
-}
-
-export default function NavigatorCarousel() {
-  const coreRef = useRef<any>();
+export function useNavigator() {
+  const coreRef = useRef<NavigatorCore | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Initialize Navigator only on client side
-    const core = new CoreMock();
-    const plugin = new SimplePlugin();
+    // ==========================================
+    // LAYER 2: Initialize NavigatorCore (client-side only)
+    // ==========================================
+    const core = new NavigatorCore();
     
-    core.registerPlugin(plugin);
-    core.init();
-    
-    coreRef.current = core;
+    // LAYER 1: Register input plugins
+    core.registerPlugin(new KeyboardPlugin());
 
+    // LAYER 3: Subscribe to intents (app logic)
+    core.eventBus.on('intent:navigate', (payload) => {
+      if (payload.source === 'keyboard') {
+        setCurrentIndex((prev) => {
+          if (payload.direction === 'right') return (prev + 1) % 5;
+          if (payload.direction === 'left') return (prev - 1 + 5) % 5;
+          return prev;
+        });
+      }
+    });
+
+    core.start().then(() => {
+      coreRef.current = core;
+      setIsReady(true);
+      console.log('✅ Navigator initialized in Next.js!');
+    });
+
+    // Cleanup on unmount
     return () => {
       core.destroy();
     };
   }, []);
 
+  return { core: coreRef.current, currentIndex, isReady };
+}
+```
+
+---
+
+### 👨‍🍳 Step 3: Client Component (UI Layer)
+
+```typescript
+// components/NavigatorCarousel.tsx
+'use client';
+
+import { useNavigator } from '@/hooks/useNavigator';
+
+const ITEMS = [
+  { id: 1, title: 'Slide 1', color: 'bg-blue-500' },
+  { id: 2, title: 'Slide 2', color: 'bg-purple-500' },
+  { id: 3, title: 'Slide 3', color: 'bg-pink-500' },
+  { id: 4, title: 'Slide 4', color: 'bg-orange-500' },
+  { id: 5, title: 'Slide 5', color: 'bg-green-500' },
+];
+
+export default function NavigatorCarousel() {
+  // ==========================================
+  // LAYER 3: Application state driven by Navigator intents
+  // ==========================================
+  const { currentIndex, isReady } = useNavigator();
+
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl text-gray-500">Initializing Navigator...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Navigator in Next.js</h1>
-      <p>Check console for initialization message</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-50">
+      <div className="max-w-2xl w-full">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
+          Navigator + Next.js
+        </h1>
+
+        {/* Carousel Display */}
+        <div className="relative h-64 rounded-2xl overflow-hidden shadow-2xl">
+          {ITEMS.map((item, idx) => (
+            <div
+              key={item.id}
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${item.color} ${
+                idx === currentIndex
+                  ? 'opacity-100 scale-100'
+                  : 'opacity-0 scale-95 pointer-events-none'
+              }`}
+            >
+              <h2 className="text-5xl font-bold text-white">{item.title}</h2>
+            </div>
+          ))}
+        </div>
+
+        {/* Controls Hint */}
+        <div className="mt-8 p-6 bg-white rounded-xl shadow-lg border-2 border-gray-200">
+          <h3 className="text-lg font-semibold mb-3 text-gray-700">
+            🎮 Controls
+          </h3>
+          <ul className="space-y-2 text-gray-600">
+            <li className="flex items-center gap-2">
+              <kbd className="px-3 py-1 bg-gray-100 rounded border border-gray-300 font-mono text-sm">
+                ←
+              </kbd>
+              <span>Previous slide</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <kbd className="px-3 py-1 bg-gray-100 rounded border border-gray-300 font-mono text-sm">
+                →
+              </kbd>
+              <span>Next slide</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Current Index Display */}
+        <div className="mt-4 text-center text-gray-500">
+          Slide {currentIndex + 1} of {ITEMS.length}
+        </div>
+      </div>
     </div>
   );
 }
 ```
 
-### Step 3: Use in Page
+---
+
+### 👨‍🍳 Step 4: Page with Dynamic Import
 
 ```typescript
 // app/page.tsx
 import dynamic from 'next/dynamic';
 
-// Dynamic import with SSR disabled
+// ==========================================
+// SSR-safe: Disable server-side rendering for Navigator
+// ==========================================
 const NavigatorCarousel = dynamic(
   () => import('@/components/NavigatorCarousel'),
   { ssr: false }
@@ -1397,47 +1523,139 @@ const NavigatorCarousel = dynamic(
 
 export default function Home() {
   return (
-    <main className="min-h-screen p-8">
+    <main>
       <NavigatorCarousel />
     </main>
   );
 }
 ```
 
-**Key Points**:
-- ✅ Use `'use client'` directive
-- ✅ Dynamic import with `{ ssr: false }`
-- ✅ Initialize in `useEffect` (client-side only)
+---
+
+### 🍽️ What You Just Built
+
+Congratulations! You've integrated Navigator into Next.js following **The Navigator Way**:
+
+1. ✅ **useNavigator Hook** (Orchestration): Manages NavigatorCore lifecycle
+2. ✅ **KeyboardPlugin** (Input Layer): Detects arrow keys, emits `intent:navigate`
+3. ✅ **React Component** (Application Layer): Listens to intents, updates `currentIndex` state
+4. ✅ **SSR-Safe**: Dynamic import + client-side initialization
+
+**The Power Move**: Want to add touch swipe support?
+
+```typescript
+// In useNavigator.ts, add:
+import { TouchGesturePlugin } from '@navigator.menu/plugin-touch-gesture';
+
+// Register plugin
+core.registerPlugin(new TouchGesturePlugin());
+
+// Existing listener already handles it!
+core.eventBus.on('intent:navigate', (payload) => {
+  if (payload.source === 'keyboard' || payload.source === 'touch_swipe') {
+    setCurrentIndex((prev) => {
+      if (payload.direction === 'right') return (prev + 1) % 5;
+      if (payload.direction === 'left') return (prev - 1 + 5) % 5;
+      return prev;
+    });
+  }
+});
+```
+
+**Zero changes to React component**. Touch and keyboard both drive the same state.
 
 ---
 
-## Custom Plugin: Shake to Undo
+### 💡 Key Takeaways
 
-**Goal**: Build a plugin that detects device shake and triggers undo action.
+- 🔌 **SSR-safe pattern**: `'use client'` + dynamic imports + `useEffect` initialization
+- 🎯 **Intent-driven React**: State updates via Navigator events, not raw DOM events
+- 🧠 **Hook encapsulation**: `useNavigator` manages complexity, components stay simple
+- 🔄 **Multi-modal ready**: Add input plugins without changing component code
+- ⚡ **Next.js optimized**: Proper code splitting and client-side hydration
 
-### Step 1: Plugin Code
+---
+
+---
+
+## Recipe #6: Shake to Undo Plugin (DeviceMotion API)
+
+**Goal**: Build a reusable plugin that detects device shake gestures and triggers undo actions—demonstrates sensor-based input handling.
+
+> **Architectural Focus**: This recipe shows how to create a **sensor-based input plugin** that emits standardized intents. The plugin detects accelerometer data, the app decides what "undo" means in its context.
+
+---
+
+### 🎬 The Result
+
+A mobile-ready plugin where:
+- 📱 **Shake detection**: Uses DeviceMotion API to detect device shaking
+- 🎯 **Intent emission**: Emits `intent:undo` when shake threshold exceeded
+- ⚙️ **Configurable**: Customizable threshold and cooldown period
+- 🔌 **Generic**: Plugin knows nothing about what "undo" does
+- 🧠 **App decides**: Application layer implements undo logic
+
+---
+
+### 🧂 Ingredients
+
+```bash
+@navigator.menu/core              # The orchestrator
+@navigator.menu/pdk               # BasePlugin class
+```
+
+---
+
+### 👨‍🍳 Step 1: Create the Plugin
+
+The **input layer**—detects shake motion, emits intent.
 
 ```typescript
-// ShakeToUndoPlugin.ts
-import { BasePlugin, NipValidator } from '@navigator.menu/pdk';
+// plugins/ShakeDetectionPlugin.ts
+import { BasePlugin } from '@navigator.menu/pdk';
 
-export class ShakeToUndoPlugin extends BasePlugin {
+// ==========================================
+// LAYER 1: INPUT PLUGIN (Generic Shake Detector)
+// ==========================================
+
+export class ShakeDetectionPlugin extends BasePlugin {
   private lastShake = 0;
-  private shakeThreshold = 15; // Acceleration threshold
-  private shakeTimeout = 1000; // Minimum time between shakes
+  private shakeThreshold: number;
+  private shakeCooldown: number;
+  private boundHandler: ((e: DeviceMotionEvent) => void) | null = null;
 
-  constructor() {
-    super('shake-to-undo');
+  constructor(config = { threshold: 15, cooldown: 1000 }) {
+    super('shake-detection');
+    this.shakeThreshold = config.threshold;  // Acceleration threshold
+    this.shakeCooldown = config.cooldown;    // Min ms between shakes
   }
 
   async init() {
+    // Check if DeviceMotion API is available
     if (!window.DeviceMotionEvent) {
-      console.warn('Device motion not supported');
+      console.warn('⚠️  DeviceMotion API not supported on this device');
       return;
     }
 
-    window.addEventListener('devicemotion', this.handleMotion.bind(this));
-    console.log('Shake detection active!');
+    // Request permission on iOS 13+
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceMotionEvent as any).requestPermission();
+        if (permission !== 'granted') {
+          console.warn('⚠️  DeviceMotion permission denied');
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Error requesting DeviceMotion permission:', error);
+        return;
+      }
+    }
+
+    // Bind event handler
+    this.boundHandler = this.handleMotion.bind(this);
+    window.addEventListener('devicemotion', this.boundHandler);
+    
+    console.log('✅ Shake detection active! (threshold:', this.shakeThreshold, ')');
   }
 
   handleMotion(event: DeviceMotionEvent) {
@@ -1445,89 +1663,354 @@ export class ShakeToUndoPlugin extends BasePlugin {
     
     if (!x || !y || !z) return;
 
+    // Calculate total acceleration
     const acceleration = Math.sqrt(x * x + y * y + z * z);
     const now = Date.now();
 
+    // Check if threshold exceeded and cooldown period passed
     if (acceleration > this.shakeThreshold && 
-        now - this.lastShake > this.shakeTimeout) {
+        now - this.lastShake > this.shakeCooldown) {
       
       this.lastShake = now;
-      this.triggerUndo();
+      this.emitShakeIntent(acceleration);
     }
   }
 
-  triggerUndo() {
-    const event = NipValidator.createEvent(
-      'custom:shake:undo',
-      this.name,
-      { timestamp: Date.now() }
-    );
+  emitShakeIntent(acceleration: number) {
+    // ==========================================
+    // EMIT INTENT: Plugin doesn't know what "undo" means!
+    // ==========================================
+    this.core.eventBus.emit('intent:undo', {
+      source: 'shake',
+      strength: acceleration,
+      timestamp: Date.now()
+    });
 
-    console.log('🎯 Shake detected! Undo triggered.');
-    
-    // Emit event for other plugins to listen
-    // core.eventBus.emit('shake:undo', event);
+    console.log('🎯 Shake detected! Acceleration:', acceleration.toFixed(2));
   }
 
   async destroy() {
-    window.removeEventListener('devicemotion', this.handleMotion);
+    if (this.boundHandler) {
+      window.removeEventListener('devicemotion', this.boundHandler);
+      this.boundHandler = null;
+    }
   }
 }
 ```
 
-### Step 2: Test the Plugin
+---
 
-```typescript
-// tests/ShakeToUndoPlugin.spec.ts
-import { describe, it, expect } from 'vitest';
-import { CoreMock } from '@navigator.menu/pdk/testing';
-import { ShakeToUndoPlugin } from './ShakeToUndoPlugin';
+### 👨‍🍳 Step 2: Application Layer (Undo Logic)
 
-describe('ShakeToUndoPlugin', () => {
-  it('should initialize without errors', async () => {
-    const core = new CoreMock();
-    const plugin = new ShakeToUndoPlugin();
-    
-    core.registerPlugin(plugin);
-    await core.init();
-    
-    expect(core.getPlugin('shake-to-undo')).toBe(plugin);
+The **business logic**—implements what "undo" means in this app.
+
+```javascript
+// main.js
+import { NavigatorCore } from '@navigator.menu/core';
+import { ShakeDetectionPlugin } from './plugins/ShakeDetectionPlugin.js';
+
+// ==========================================
+// LAYER 3: APPLICATION LOGIC (Drawing App Example)
+// ==========================================
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Drawing state
+let isDrawing = false;
+let history = [];
+let currentPath = [];
+
+// Drawing handlers
+canvas.addEventListener('mousedown', (e) => {
+  isDrawing = true;
+  currentPath = [{ x: e.clientX, y: e.clientY }];
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!isDrawing) return;
+  
+  const point = { x: e.clientX, y: e.clientY };
+  currentPath.push(point);
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.moveTo(currentPath[currentPath.length - 2].x, currentPath[currentPath.length - 2].y);
+  ctx.lineTo(point.x, point.y);
+  ctx.strokeStyle = '#00d4ff';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (currentPath.length > 0) {
+    history.push([...currentPath]);
+    console.log('📝 Stroke saved. History size:', history.length);
+  }
+  isDrawing = false;
+  currentPath = [];
+});
+
+// Application-level undo function
+function undoLastStroke() {
+  if (history.length === 0) {
+    console.log('❌ Nothing to undo');
+    return;
+  }
+
+  // Remove last stroke
+  history.pop();
+  
+  // Redraw entire canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  history.forEach(path => {
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.stroke();
   });
 
-  it('should detect shake motion', () => {
-    const plugin = new ShakeToUndoPlugin();
+  console.log('↩️  Undo! History size:', history.length);
+}
+
+// ==========================================
+// INITIALIZE NAVIGATOR
+// ==========================================
+
+const core = new NavigatorCore();
+
+// LAYER 1: Register shake detection plugin
+core.registerPlugin(new ShakeDetectionPlugin({
+  threshold: 20,  // Higher = less sensitive
+  cooldown: 1000  // 1 second between shakes
+}));
+
+// LAYER 3: Subscribe to undo intent
+core.eventBus.on('intent:undo', (payload) => {
+  if (payload.source === 'shake') {
+    undoLastStroke();
     
-    // Simulate shake event
+    // Visual feedback
+    canvas.classList.add('shake-feedback');
+    setTimeout(() => canvas.classList.remove('shake-feedback'), 300);
+  }
+});
+
+core.start().then(() => {
+  console.log('✅ Shake-to-undo ready! Draw and shake to undo.');
+});
+
+// Optional: Add keyboard undo support!
+// import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+// core.registerPlugin(new KeyboardPlugin());
+// 
+// core.eventBus.on('intent:undo', (payload) => {
+//   if (payload.source === 'keyboard' && payload.key === 'z' && payload.ctrlKey) {
+//     undoLastStroke();
+//   }
+// });
+```
+
+---
+
+### 👨‍🍳 Step 3: HTML + Styling
+
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shake to Undo Drawing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #1a1a1a;
+    }
+
+    #canvas {
+      display: block;
+      background: #2a2a2a;
+      cursor: crosshair;
+      transition: transform 0.3s ease;
+    }
+
+    #canvas.shake-feedback {
+      transform: scale(0.98);
+      filter: brightness(1.2);
+    }
+
+    .instructions {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    .instructions h2 {
+      margin: 0 0 1rem 0;
+      color: #00d4ff;
+      font-size: 1.2rem;
+    }
+
+    .instructions ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .instructions li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .icon {
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h2>🎨 Drawing App</h2>
+    <ul>
+      <li><span class="icon">🖱️</span> Draw with mouse/touch</li>
+      <li><span class="icon">📱</span> Shake device to undo</li>
+      <li><span class="icon">↩️</span> Last stroke removed</li>
+    </ul>
+  </div>
+
+  <canvas id="canvas"></canvas>
+  
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
+```
+
+---
+
+### 🍽️ What You Just Built
+
+Congratulations! You've built a sensor-based input system following **The Navigator Way**:
+
+1. ✅ **ShakeDetectionPlugin** (Input Layer): Detects motion, emits `intent:undo`
+2. ✅ **NavigatorCore** (Orchestration Layer): Routes shake events via Event Bus
+3. ✅ **Drawing App** (Application Layer): Implements `undoLastStroke()` business logic
+
+**The Power Move**: Want to add keyboard undo (Ctrl+Z)?
+
+```javascript
+// Just register KeyboardPlugin - no changes to shake plugin!
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+core.registerPlugin(new KeyboardPlugin());
+
+core.eventBus.on('intent:undo', (payload) => {
+  // Works for BOTH shake and keyboard!
+  if (payload.source === 'shake' || 
+      (payload.source === 'keyboard' && payload.ctrlKey && payload.key === 'z')) {
+    undoLastStroke();
+  }
+});
+```
+
+**Zero changes to existing code**. Shake and Ctrl+Z both trigger the same undo function.
+
+---
+
+### 🧪 Testing the Plugin
+
+```typescript
+// tests/ShakeDetectionPlugin.spec.ts
+import { describe, it, expect, beforeEach } from 'vitest';
+import { NavigatorCore } from '@navigator.menu/core';
+import { ShakeDetectionPlugin } from './ShakeDetectionPlugin';
+
+describe('ShakeDetectionPlugin', () => {
+  let core: NavigatorCore;
+  let plugin: ShakeDetectionPlugin;
+
+  beforeEach(async () => {
+    core = new NavigatorCore();
+    plugin = new ShakeDetectionPlugin({ threshold: 15, cooldown: 1000 });
+    core.registerPlugin(plugin);
+    await core.start();
+  });
+
+  it('should register successfully', () => {
+    expect(core.getPlugin('shake-detection')).toBe(plugin);
+  });
+
+  it('should emit intent:undo when shake detected', (done) => {
+    core.eventBus.on('intent:undo', (payload) => {
+      expect(payload.source).toBe('shake');
+      expect(payload.strength).toBeGreaterThan(0);
+      done();
+    });
+
+    // Simulate strong shake
     const mockEvent = {
-      accelerationIncludingGravity: {
-        x: 20, y: 20, z: 20
-      }
+      accelerationIncludingGravity: { x: 20, y: 20, z: 20 }
     } as DeviceMotionEvent;
 
-    const spy = jest.spyOn(plugin, 'triggerUndo');
     plugin.handleMotion(mockEvent);
+  });
+
+  it('should respect cooldown period', () => {
+    const plugin = new ShakeDetectionPlugin({ threshold: 10, cooldown: 5000 });
     
-    expect(spy).toHaveBeenCalled();
+    let emitCount = 0;
+    core.eventBus.on('intent:undo', () => emitCount++);
+
+    // First shake
+    plugin.handleMotion({
+      accelerationIncludingGravity: { x: 15, y: 15, z: 15 }
+    } as DeviceMotionEvent);
+
+    // Immediate second shake (should be ignored)
+    plugin.handleMotion({
+      accelerationIncludingGravity: { x: 15, y: 15, z: 15 }
+    } as DeviceMotionEvent);
+
+    expect(emitCount).toBe(1);  // Only first shake counted
   });
 });
 ```
 
-### Step 3: Usage
+---
 
-```javascript
-import { CoreMock } from '@navigator.menu/pdk/testing';
-import { ShakeToUndoPlugin } from './ShakeToUndoPlugin';
+### 💡 Key Takeaways
 
-const core = new CoreMock();
-const plugin = new ShakeToUndoPlugin();
-
-core.registerPlugin(plugin);
-core.init();
-
-// Shake your device to trigger undo!
-```
-
-**Try it**: Open on mobile device and shake to trigger undo action.
+- 🔌 **Generic plugin**: ShakeDetectionPlugin knows nothing about drawing or undo logic
+- 🎯 **Intent-based**: Plugin emits `intent:undo`, app defines what undo means
+- ⚙️ **Configurable**: Threshold and cooldown are constructor parameters
+- 🧪 **Testable**: Plugin can be tested in isolation without DOM/canvas
+- 🔄 **Multi-modal ready**: Add keyboard/voice undo without changing shake plugin
+- 📱 **iOS-compatible**: Handles iOS 13+ permission requirements
 
 ---
 
