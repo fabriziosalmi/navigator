@@ -1037,102 +1037,290 @@ core.eventBus.on('intent:media_play', (payload) => {
 
 ---
 
-## Navigator + Three.js (3D Cube)
+## Recipe #4: Navigator + Three.js (3D Rotating Cube)
 
-**Goal**: Control a rotating 3D cube with gestures and keyboard.
+**Goal**: Control a 3D rotating cube with keyboard and gestures—demonstrates Navigator's power in 3D interactive applications.
 
-### Step 1: Setup
+> **Architectural Focus**: This recipe shows how to separate **input detection** (keyboard/touch) from **3D rendering logic**. Plugins emit rotation intents, application layer owns the rotation speed state.
+
+---
+
+### 🎬 The Result
+
+An interactive 3D cube where:
+- ⌨️ **Arrow keys** = Adjust rotation speed
+- 👆 **Touch swipe** = Control Y-axis rotation
+- 🔄 **Space** = Reset to default rotation
+- 🎯 **Plugins** = Generic input detectors (reusable for any 3D scene)
+- 🧠 **App** = Three.js scene + rotation logic
+
+---
+
+### 🧂 Ingredients
 
 ```bash
-npx @navigator.menu/cli create-app threejs-navigator
-cd threejs-navigator
-npm install three
+@navigator.menu/core              # The orchestrator
+@navigator.menu/plugin-keyboard   # Keyboard input
+three                             # 3D rendering library
 ```
 
-### Step 2: Three.js Integration
+---
+
+### 👨‍🍳 Step 1: Install Dependencies
+
+```bash
+npm install @navigator.menu/core @navigator.menu/plugin-keyboard three
+```
+
+---
+
+### 👨‍🍳 Step 2: Build the Application Layer
+
+The **business logic**—Three.js scene setup and rotation control.
 
 ```javascript
-// js/main.js
+// main.js
 import * as THREE from 'three';
-import { CoreMock } from '@navigator.menu/pdk/testing';
-import { BasePlugin } from '@navigator.menu/pdk';
+import { NavigatorCore } from '@navigator.menu/core';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+
+// ==========================================
+// LAYER 3: APPLICATION LOGIC (Three.js-specific)
+// ==========================================
 
 let cube;
 let rotationSpeed = { x: 0.01, y: 0.01 };
+const SPEED_INCREMENT = 0.01;
 
-class ThreeJSPlugin extends BasePlugin {
-  constructor() {
-    super('threejs-renderer');
-  }
+// Setup Three.js scene
+function initThreeJS() {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-  async init() {
-    // Setup Three.js scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    
+  // Create colorful cube
+  const geometry = new THREE.BoxGeometry(2, 2, 2);
+  const material = new THREE.MeshNormalMaterial();
+  cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  camera.position.z = 5;
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  });
 
-    // Create cube
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
-    const material = new THREE.MeshNormalMaterial();
-    cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-
-    camera.position.z = 5;
-
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-      
-      cube.rotation.x += rotationSpeed.x;
-      cube.rotation.y += rotationSpeed.y;
-      
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Keyboard controls
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') rotationSpeed.x += 0.01;
-      if (e.key === 'ArrowDown') rotationSpeed.x -= 0.01;
-      if (e.key === 'ArrowLeft') rotationSpeed.y -= 0.01;
-      if (e.key === 'ArrowRight') rotationSpeed.y += 0.01;
-      if (e.key === ' ') { // Space to reset
-        rotationSpeed.x = 0.01;
-        rotationSpeed.y = 0.01;
-      }
-    });
-
-    // Gesture controls (touch)
-    let touchStartX = 0;
-    document.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      const touchX = e.touches[0].clientX;
-      const diff = (touchX - touchStartX) / 100;
-      rotationSpeed.y = diff;
-    });
-
-    console.log('Three.js scene ready!');
-  }
+  return { scene, camera, renderer };
 }
 
-// Initialize
-const core = new CoreMock();
-const plugin = new ThreeJSPlugin();
+// Application-level rotation control
+function adjustRotation(axis, direction) {
+  const delta = direction === 'increase' ? SPEED_INCREMENT : -SPEED_INCREMENT;
+  
+  if (axis === 'x') {
+    rotationSpeed.x += delta;
+  } else if (axis === 'y') {
+    rotationSpeed.y += delta;
+  }
+  
+  console.log(`🎮 Rotation speed: X=${rotationSpeed.x.toFixed(3)}, Y=${rotationSpeed.y.toFixed(3)}`);
+}
 
-core.registerPlugin(plugin);
-core.init();
+function resetRotation() {
+  rotationSpeed.x = 0.01;
+  rotationSpeed.y = 0.01;
+  console.log('🔄 Rotation reset to default');
+}
+
+// ==========================================
+// INITIALIZE NAVIGATOR
+// ==========================================
+
+const core = new NavigatorCore();
+core.registerPlugin(new KeyboardPlugin());
+
+// LAYER 3: Subscribe to intents (not raw keyboard events!)
+core.eventBus.on('intent:navigate', (payload) => {
+  if (payload.source === 'keyboard') {
+    switch (payload.direction) {
+      case 'up':
+        adjustRotation('x', 'increase');
+        break;
+      case 'down':
+        adjustRotation('x', 'decrease');
+        break;
+      case 'left':
+        adjustRotation('y', 'decrease');
+        break;
+      case 'right':
+        adjustRotation('y', 'increase');
+        break;
+    }
+  }
+});
+
+core.eventBus.on('intent:select', (payload) => {
+  if (payload.source === 'keyboard' && payload.key === ' ') {
+    resetRotation();
+  }
+});
+
+// Start Navigator and Three.js
+core.start().then(() => {
+  console.log('✅ Navigator initialized!');
+  
+  const { scene, camera, renderer } = initThreeJS();
+  
+  // Animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+    
+    // Apply rotation (controlled by Navigator intents)
+    cube.rotation.x += rotationSpeed.x;
+    cube.rotation.y += rotationSpeed.y;
+    
+    renderer.render(scene, camera);
+  }
+  
+  animate();
+  console.log('🎨 Three.js scene ready! Use arrow keys to control rotation.');
+});
+
+// Optional: Add touch support by registering TouchGesturePlugin!
+// import { TouchGesturePlugin } from './plugins/TouchGesturePlugin.js';
+// core.registerPlugin(new TouchGesturePlugin());
+// 
+// core.eventBus.on('intent:navigate', (payload) => {
+//   if (payload.source === 'touch_swipe') {
+//     adjustRotation('y', payload.direction === 'left' ? 'increase' : 'decrease');
+//   }
+// });
 ```
 
-**Try it**: 
-- Desktop: Use arrow keys to control rotation
-- Mobile: Swipe to rotate the cube
-- Press Space to reset
+---
+
+### 👨‍🍳 Step 3: HTML Structure
+
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigator + Three.js</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #000;
+    }
+
+    .controls-hint {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      z-index: 100;
+    }
+
+    .controls-hint h3 {
+      margin: 0 0 1rem 0;
+      color: #00d4ff;
+      font-size: 1.2rem;
+    }
+
+    .controls-hint ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .controls-hint li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .key {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      min-width: 60px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls-hint">
+    <h3>🎮 Controls</h3>
+    <ul>
+      <li><span class="key">↑ ↓</span> Rotate X-axis</li>
+      <li><span class="key">← →</span> Rotate Y-axis</li>
+      <li><span class="key">Space</span> Reset rotation</li>
+    </ul>
+  </div>
+  
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
+```
+
+---
+
+### 🍽️ What You Just Built
+
+Congratulations! You've built an interactive 3D scene following **The Navigator Way**:
+
+1. ✅ **KeyboardPlugin** (Input Layer): Detects keypresses, emits `intent:navigate`
+2. ✅ **NavigatorCore** (Orchestration Layer): Routes events via Event Bus
+3. ✅ **Three.js Scene** (Application Layer): Listens to intents, updates rotation
+
+**The Power Move**: Want to add touch/gesture control?
+
+```javascript
+// Just add this - Three.js code stays unchanged!
+import { TouchGesturePlugin } from './plugins/TouchGesturePlugin.js';
+core.registerPlugin(new TouchGesturePlugin());
+
+core.eventBus.on('intent:navigate', (payload) => {
+  if (payload.source === 'touch_swipe') {
+    adjustRotation('y', payload.direction === 'left' ? 'increase' : 'decrease');
+  }
+});
+```
+
+**Zero changes to Three.js code**. Touch and keyboard both control rotation through the same intents.
+
+---
+
+### 💡 Key Takeaways
+
+- 🔌 **Plugins are generic**: KeyboardPlugin knows nothing about 3D or Three.js
+- 🧠 **App owns state**: `rotationSpeed` lives in application layer, not plugin
+- 🎯 **Intent-based**: Scene reacts to `intent:navigate`, not `keydown` events
+- 🔄 **Multi-modal ready**: Add touch/voice/gamepad with minimal code
+- 🎨 **Framework agnostic**: Same pattern works with Babylon.js, PlayCanvas, etc.
 
 ---
 
