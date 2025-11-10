@@ -68,11 +68,14 @@ php -S localhost:8080
 
 ## 📖 Documentation
 
+📚 **[Complete Documentation Index](docs/docs/INDEX.md)** - Full documentation catalog
+
+### Quick Links
 - **[Getting Started](docs/docs/GETTING_STARTED.md)** - Installation, first steps, troubleshooting
 - **[Features](docs/docs/FEATURES.md)** - Complete feature breakdown and configuration
 - **[Architecture](docs/docs/ARCHITECTURE.md)** - Technical deep-dive, module reference
-- **[Testing](docs/docs/TEST_RESULTS.md)** - Playwright test suite results (36/43 passing)
-- **[Optimization](docs/docs/OPTIMIZATION_GUIDE.md)** - Performance tuning guide
+- **[Cookbook](docs/docs/COOKBOOK.md)** - Recipes and development patterns
+- **[Validation System](VALIDATION.md)** - Pre-push quality gates and CI/CD
 
 ---
 
