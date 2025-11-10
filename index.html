@@ -8,7 +8,7 @@
     <!-- Content Security Policy - Strict Security -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'none';
-        script-src 'self' https://cdn.jsdelivr.net;
+        script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
         style-src 'self' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
         img-src 'self' https://images.unsplash.com data: blob:;
@@ -18,7 +18,6 @@
         manifest-src 'self';
         base-uri 'self';
         form-action 'none';
-        frame-ancestors 'none';
         object-src 'none';
         upgrade-insecure-requests;
     ">
@@ -92,14 +91,10 @@
         <div class="bg-glow bg-glow-3"></div>
     </div>
 
-    <!-- Light Trails Canvas (Akira/Tron style) -->
-    <canvas id="light-trails-canvas"></canvas>
-
-    <!-- Data Streams Canvas (visible data flow) -->
-    <canvas id="data-streams-canvas"></canvas>
-    
-    <!-- Akira-style Light Beams Canvas -->
-    <canvas id="light-beams-canvas"></canvas>
+    <!-- Particle effect canvases disabled for performance optimization -->
+    <!-- <canvas id="light-trails-canvas"></canvas> -->
+    <!-- <canvas id="data-streams-canvas"></canvas> -->
+    <!-- <canvas id="light-beams-canvas"></canvas> -->
 
     <!-- Cards Viewport -->
     <div id="cards-viewport"></div>

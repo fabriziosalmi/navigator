@@ -22,7 +22,7 @@ export class AdaptiveNavigationHUD {
                 <span class="next-level" id="next-level-text">→ L2</span>
             </div>
             <div class="progress-track">
-                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                <div class="progress-fill" id="progress-fill"></div>
             </div>
             <div class="progress-metrics">
                 <div class="metric-item">

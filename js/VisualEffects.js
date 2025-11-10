@@ -323,20 +323,10 @@ export class VisualEffects {
      * Animation loop
      */
     startAnimation() {
-        const animate = () => {
-            if (!this.enabled) return;
-            
-            this.updateTrails();
-            this.updateStreams();
-            this.updateRipples();
-            this.updateKamehamehaFocus();
-            this.updateSingularity();
-            this.updateHandAura();
-            
-            this.animationFrame = requestAnimationFrame(animate);
-        };
-        
-        animate();
+        // Disabled all particle effects for performance
+        // No trails, streams, ripples, kamehameha, singularity or hand aura
+        // Keep the instance available but don't animate
+        console.log('VisualEffects: Particle system disabled for performance');
     }
 
     /**
