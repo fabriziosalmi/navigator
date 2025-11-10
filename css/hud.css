@@ -340,20 +340,20 @@
 
 .gesture-legend-compact {
     display: flex;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 4px 8px;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
+    border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .legend-item {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: help;
@@ -361,8 +361,8 @@
 }
 
 .legend-item svg {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     color: rgba(255, 255, 255, 0.5);
     transition: all var(--transition-fast);
 }

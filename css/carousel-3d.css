@@ -7,9 +7,9 @@
 /* Override default card sizing */
 .card {
     width: 85vw !important;
-    max-width: 1200px !important;
-    height: 75vh !important;
-    max-height: 800px !important;
+    max-width: 1100px !important;
+    height: 65vh !important;
+    max-height: 650px !important;
     /* Reset default fixed sizes from cards.css */
 }
 
@@ -32,9 +32,9 @@
 .card {
     position: absolute;
     width: 85vw !important;
-    max-width: 1200px !important;
-    height: 75vh !important;
-    max-height: 800px !important;
+    max-width: 1100px !important;
+    height: 65vh !important;
+    max-height: 650px !important;
     left: 50%;
     top: 50%;
     transform-style: preserve-3d;

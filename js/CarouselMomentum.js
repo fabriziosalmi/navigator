@@ -141,6 +141,12 @@ export class CarouselMomentum {
         
         this.isMomentumActive = true;
         
+        // Add visual feedback class
+        const viewport = document.getElementById('cards-viewport');
+        if (viewport) {
+            viewport.classList.add('momentum-active');
+        }
+        
         console.log('🎡 Momentum activated! Initial velocity:', this.momentumVelocity.toFixed(3));
         
         // Start animation loop
@@ -153,6 +159,12 @@ export class CarouselMomentum {
     stopMomentum() {
         this.isMomentumActive = false;
         this.momentumVelocity = 0;
+        
+        // Remove visual feedback class
+        const viewport = document.getElementById('cards-viewport');
+        if (viewport) {
+            viewport.classList.remove('momentum-active');
+        }
         
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);

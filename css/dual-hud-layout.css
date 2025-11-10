@@ -98,8 +98,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 30px;
-    gap: 30px;
+    padding: 0 20px;
+    gap: 20px;
     
     z-index: var(--z-hud-bottom);
     pointer-events: none;

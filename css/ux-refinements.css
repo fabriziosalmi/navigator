@@ -1,0 +1,223 @@
+/* ==============================================
+   UX/UI REFINEMENTS
+   Fix visual issues and improve clarity
+   ============================================== */
+
+/* Hide redundant elements in bottom HUD */
+.gesture-legend-compact {
+    display: none !important; /* Already shown in gesture status panel */
+}
+
+.debug-compact {
+    display: none !important; /* Debug info not needed in production UI */
+}
+
+#hud-hand-status {
+    display: none !important; /* Duplicate of gesture system panel */
+}
+
+/* Simplify status display */
+.status-display {
+    display: none !important; /* All info already in other panels */
+}
+
+/* Keep only essential bottom HUD elements */
+.bottom-hud-bar .gesture-led,
+.bottom-hud-bar .position-info,
+.bottom-hud-bar .nav-controls,
+.bottom-hud-bar .adaptive-display {
+    display: flex !important; /* Keep these */
+}
+
+/* Compact adaptive display */
+.adaptive-display {
+    max-width: 200px;
+    font-size: 0.8rem;
+}
+
+/* ==============================================
+   REFINED CARD BORDERS - Subtle Glow
+   ============================================== */
+
+.card.active {
+    border: 1px solid rgba(255, 0, 255, 0.3) !important;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 0, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Softer card shadows */
+.card {
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card.previous,
+.card.next {
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ==============================================
+   TOP HUD SPACING - Consistent Gaps
+   ============================================== */
+
+.top-hud-bar {
+    gap: 15px !important;
+    padding: 0 15px !important;
+}
+
+.top-hud-bar .hud-panel {
+    margin: 0 !important;
+}
+
+/* ==============================================
+   IMPROVED TEXT READABILITY
+   ============================================== */
+
+.interface-status-hud {
+    font-size: 0.85rem !important;
+}
+
+.interface-status-title {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+}
+
+.indicator-label {
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.indicator-icon {
+    font-size: 1.2rem !important;
+}
+
+/* ==============================================
+   GESTURE STATUS PANEL - Remove Redundancy
+   ============================================== */
+
+.gesture-status-panel {
+    display: none !important; /* Info duplicated in bottom bar */
+}
+
+/* ==============================================
+   CAMERA INDICATOR - Better Integration
+   ============================================== */
+
+/* Move camera status into position-info panel */
+.position-info::after {
+    content: '📹';
+    margin-left: 8px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+/* ==============================================
+   MOMENTUM SCROLL FEEDBACK
+   ============================================== */
+
+/* Add motion blur class when momentum is active */
+#cards-viewport.momentum-active .card.active {
+    filter: blur(0.5px);
+    transition: filter 0.15s ease-out;
+}
+
+#cards-viewport.momentum-active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(0, 255, 255, 0.5) 50%,
+        transparent 100%
+    );
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: speedLine 0.3s ease-out forwards;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+@keyframes speedLine {
+    0% {
+        opacity: 0;
+        transform: translateY(-50%) scaleX(0);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scaleX(1.5);
+    }
+}
+
+/* ==============================================
+   COMPACT BOTTOM PANELS
+   ============================================== */
+
+.position-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+}
+
+.layer-display,
+.card-position {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.layer-name {
+    font-weight: 700;
+    color: var(--color-cyan);
+}
+
+.layer-meta,
+.separator {
+    opacity: 0.6;
+    font-size: 0.75rem;
+}
+
+/* ==============================================
+   NAV CONTROLS - Compact Buttons
+   ============================================== */
+
+.nav-controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+.hud-nav {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+}
+
+.hud-nav svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ==============================================
+   GESTURE LED - Smaller & Subtle
+   ============================================== */
+
+.gesture-led {
+    width: 8px !important;
+    height: 8px !important;
+    margin-right: 8px;
+}
