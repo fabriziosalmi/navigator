@@ -1,0 +1,210 @@
+/* ==============================================
+   CLEAN VIEWPORT - Hide All Non-Essential Elements
+   Only card matrix + HUD bars visible
+   ============================================== */
+
+/* Hide ALL legacy UI elements */
+#layer-tabs,
+#layer-wow-label,
+#dynamic-background,
+.bg-glow,
+#particle-canvas,
+#data-stream-canvas,
+#light-beam-canvas {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Hide gesture icon panels in bottom-left (those 4 icons) */
+.gesture-icon-panel,
+.gesture-controls,
+.gesture-indicator-panel {
+    display: none !important;
+}
+
+/* GESTURE SYSTEM panel in top-right already hidden by ux-refinements.css */
+
+/* Ensure ONLY these elements are visible */
+/* Hiding handled by specific selectors above */
+
+/* ==============================================
+   CARD VISIBILITY - Only Show Relevant Cards
+   ============================================== */
+
+/* Hide all cards by default */
+.card {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Show ONLY active + adjacent cards (same layer) */
+.card.active,
+.card.previous,
+.card.next,
+.card.far-previous,
+.card.far-next {
+    display: block;
+    pointer-events: auto;
+}
+
+/* Active card - fully visible */
+.card.active {
+    opacity: 1;
+    z-index: 100;
+}
+
+/* Adjacent cards - visible but secondary */
+.card.previous,
+.card.next {
+    opacity: 0.7;
+    z-index: 50;
+}
+
+/* Far cards - barely visible */
+.card.far-previous,
+.card.far-next {
+    opacity: 0.4;
+    z-index: 30;
+}
+
+/* ==============================================
+   LAYER VISIBILITY - Background Layers
+   ============================================== */
+
+/* Hide all layers by default */
+.layer-container,
+.layer {
+    display: none;
+    opacity: 0;
+}
+
+/* Show ONLY active layer */
+.layer-container.active,
+.layer.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Show background layer (behind active) - very subtle */
+.layer-container.background,
+.layer.background {
+    display: block;
+    opacity: 0.15;
+    filter: blur(8px) brightness(0.4) saturate(0.5);
+    transform: translateZ(-800px) scale(0.8);
+    pointer-events: none;
+}
+
+/* Hide forward layers completely */
+.layer-container.foreground,
+.layer.foreground {
+    display: none !important;
+}
+
+/* ==============================================
+   VIEWPORT CLEANUP - Pure Card Focus
+   ============================================== */
+
+#cards-viewport {
+    background: transparent;
+    overflow: hidden;
+}
+
+/* Remove any overlays or effects */
+#cards-viewport::before,
+#cards-viewport::after {
+    display: none;
+}
+
+/* Clean container - no decorations */
+#cards-container {
+    background: none;
+    border: none;
+    outline: none;
+}
+
+/* ==============================================
+   HUD CLEANUP - Remove Extras
+   ============================================== */
+
+/* Hide any floating panels not in HUD bars */
+.floating-panel,
+.side-panel,
+.corner-indicator {
+    display: none !important;
+}
+
+/* Keep ONLY these HUD elements visible */
+.top-hud-bar,
+.bottom-hud-bar {
+    display: flex !important;
+}
+
+/* Hide video feed preview if exists */
+video#webcam {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* ==============================================
+   START SCREEN - Keep Functional
+   ============================================== */
+
+#start-screen {
+    /* Keep as is - needed for initialization */
+    display: flex;
+}
+
+#start-screen.hidden-element {
+    display: none;
+}
+
+/* ==============================================
+   DEBUGGING - Optional Toggle
+   ============================================== */
+
+/* Add class to body to show debug elements */
+body.debug-mode #dynamic-background,
+body.debug-mode video#video-feed {
+    display: block !important;
+    opacity: 0.3 !important;
+}
+
+/* ==============================================
+   CONFIRM DIALOGS - Keep Functional (handled elsewhere)
+   ============================================== */
+
+/* Hide if not active */
+.confirm-dialog:not(.active),
+#confirm-dialog-overlay:not(.active) {
+    display: none !important;
+}
+
+/* ==============================================
+   FINAL CLEANUP - Nuclear Option
+   ============================================== */
+
+/* Force hide common stray elements */
+canvas:not([id*="mediapipe"]) {
+    display: none !important;
+}
+
+/* Hide MediaPipe canvas */
+canvas[class*="mediapipe"],
+canvas[id*="mediapipe"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -9999;
+}

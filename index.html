@@ -40,6 +40,7 @@
     <link rel="stylesheet" href="css/dual-hud-layout.css">
     <link rel="stylesheet" href="css/performance-optimizations.css">
     <link rel="stylesheet" href="css/ux-refinements.css">
+    <link rel="stylesheet" href="css/viewport-cleanup.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -85,29 +86,16 @@
         </div>
     </div>
 
-    <!-- Layer WOW Label - Hidden (integrated in HUD) -->
-    <div id="layer-wow-label" class="hidden-element">
-        <div class="wow-text">WOW</div>
-        <div class="wow-layer-name">Videos</div>
-        <div class="wow-icon">🎬</div>
-    </div>    <!-- Dynamic Background Effects -->
-    <div id="dynamic-background">
-        <div class="bg-glow bg-glow-1"></div>
-        <div class="bg-glow bg-glow-2"></div>
-        <div class="bg-glow bg-glow-3"></div>
+    <!-- ===================================================
+         CENTRAL CONTENT AREA - Fullwidth Viewport
+         Cards matrix with 3D carousel
+         =================================================== -->
+    <div id="cards-viewport">
+        <div id="cards-container">
+            <!-- Cards will be rendered here -->
+        </div>
     </div>
 
-    <!-- Particle effect canvases disabled for performance optimization -->
-    <!-- <canvas id="light-trails-canvas"></canvas> -->
-    <!-- <canvas id="data-streams-canvas"></canvas> -->
-    <!-- <canvas id="light-beams-canvas"></canvas> -->
-
-    <!-- Cards Viewport -->
-    <div id="cards-viewport"></div>
-
-    <!-- Snap Indicators - Hidden for modern UI -->
-    <div class="snap-indicator left hidden-element">👈</div>
-    <div class="snap-indicator right hidden-element">👉</div>
     <!-- ===================================================
          TOP HUD BAR - Fullwidth
          Left: Interface Status | Center: History | Right: Gesture Status
@@ -246,13 +234,6 @@
                 <span class="ticker-text" id="hud-ticker-text"></span>
             </div>
         </div>
-    </div>
-
-    <!-- Layer WOW Label -->
-    <div id="layer-wow-label" class="hidden-element">
-        <div class="wow-text">WOW</div>
-        <div class="wow-layer-name">Videos</div>
-        <div class="wow-icon">🎬</div>
     </div>
 
     <!-- Gesture Info - Hidden (integrated in HUD) -->
