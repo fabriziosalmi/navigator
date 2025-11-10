@@ -63,7 +63,7 @@
   },
   "pnpm": {
     "overrides": {
-      "ajv": "^8.17.1"
+      "ajv": "8.12.0"
     }
   },
   "size-limit": [
