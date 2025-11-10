@@ -19,8 +19,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage"
+    "test": "vitest --run --passWithNoTests",
+    "test:coverage": "vitest --coverage --passWithNoTests"
   },
   "keywords": [
     "navigator",
