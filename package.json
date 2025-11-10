@@ -23,7 +23,10 @@
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
     "docs:dev": "pnpm --filter documentation start",
-    "docs:build": "pnpm --filter documentation build"
+    "docs:build": "pnpm --filter documentation build",
+    "validate": "bash ./scripts/validate-ecosystem.sh",
+    "validate:ci": "bash ./scripts/validate-ecosystem.sh --ci",
+    "prepare": "husky"
   },
   "keywords": [
     "gesture-control",
@@ -44,19 +47,37 @@
     "@changesets/cli": "^2.27.1",
     "@playwright/test": "^1.56.1",
     "@rollup/plugin-yaml": "^4.1.2",
+    "@size-limit/preset-small-lib": "^11.2.0",
     "@types/node": "^20.11.0",
     "ajv": "^8.17.1",
     "eslint": "^8.57.0",
+    "husky": "^9.1.7",
     "prettier": "^3.2.4",
     "rollup-plugin-visualizer": "^6.0.5",
+    "size-limit": "^11.2.0",
     "terser": "^5.36.0",
     "typescript": "^5.3.3",
     "vite": "^5.4.10",
-    "vitest": "^1.2.0"
+    "vitest": "^1.2.0",
+    "wait-on": "^7.2.0"
   },
   "pnpm": {
     "overrides": {
       "ajv": "^8.17.1"
     }
-  }
+  },
+  "size-limit": [
+    {
+      "path": "packages/core/dist/index.js",
+      "limit": "15 KB"
+    },
+    {
+      "path": "packages/react/dist/index.js",
+      "limit": "1 KB"
+    },
+    {
+      "path": "packages/plugin-keyboard/dist/index.js",
+      "limit": "2 KB"
+    }
+  ]
 }
