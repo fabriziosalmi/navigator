@@ -46,7 +46,8 @@ export class VisualEffects {
         this.streamsCanvas = document.getElementById('data-streams-canvas');
         
         if (!this.trailsCanvas || !this.streamsCanvas) {
-            console.error('Visual effects canvases not found');
+            console.log('VisualEffects: Canvases not found, particle system disabled for performance');
+            this.enabled = false;
             return;
         }
 

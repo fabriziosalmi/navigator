@@ -7,6 +7,16 @@
 export class LightBeamSystem {
     constructor(canvasId = 'light-beams-canvas') {
         this.canvas = document.getElementById(canvasId);
+        
+        // Disable if canvas not found (performance optimization)
+        if (!this.canvas) {
+            console.log('⚡ Light Beam System: Canvas not found, system disabled for performance');
+            this.enabled = false;
+            this.ctx = null;
+            this.beams = [];
+            return;
+        }
+        
         this.ctx = this.canvas.getContext('2d');
         this.beams = [];
         this.enabled = true;
@@ -21,6 +31,7 @@ export class LightBeamSystem {
     }
     
     resize() {
+        if (!this.canvas) return;
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
     }
@@ -143,6 +154,8 @@ export class LightBeamSystem {
      * Render all beams
      */
     render() {
+        if (!this.ctx || !this.canvas) return;
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         for (const beam of this.beams) {
@@ -186,6 +199,8 @@ export class LightBeamSystem {
      * Animation loop
      */
     animate() {
+        if (!this.enabled || !this.ctx) return;
+        
         this.update();
         this.render();
         requestAnimationFrame(() => this.animate());
