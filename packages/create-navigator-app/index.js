@@ -153,8 +153,8 @@ navigator:
   # Plugins configuration
   plugins:
 ${Object.entries(pluginConfig).map(([key, value]) =>
-  `    ${key}:\n      enabled: ${value.enabled}`
-).join('\n')}
+        `    ${key}:\n      enabled: ${value.enabled}`
+    ).join('\n')}
 `;
 }
 

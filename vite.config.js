@@ -1,10 +1,19 @@
 import { defineConfig } from 'vite';
 import yaml from '@rollup/plugin-yaml';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   // Plugin per supportare l'import di file YAML (come config.yaml)
-  plugins: [yaml()],
+  plugins: [
+    yaml(),
+    visualizer({
+      filename: './dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true
+    })
+  ],
 
   // Base path per GitHub Pages
   // Se il repository si chiama "navigator", il sito sarà su username.github.io/navigator
