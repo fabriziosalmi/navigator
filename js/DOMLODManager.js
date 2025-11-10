@@ -61,7 +61,9 @@ export class DOMLODManager {
      * @param {number} timestamp - Current timestamp
      */
     update(currentIndex, timestamp = Date.now()) {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
 
         // Throttle updates
         if (timestamp - this.lastUpdateTime < this.updateThrottle) {
@@ -97,7 +99,9 @@ export class DOMLODManager {
      * @returns {number} - Minimum distance (accounting for wrap-around)
      */
     calculateDistance(cardIndex, currentIndex) {
-        if (this.totalCards === 0) return Infinity;
+        if (this.totalCards === 0) {
+            return Infinity;
+        }
 
         // Calculate direct distance
         const directDistance = Math.abs(cardIndex - currentIndex);

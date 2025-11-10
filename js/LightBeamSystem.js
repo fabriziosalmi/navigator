@@ -31,7 +31,9 @@ export class LightBeamSystem {
     }
     
     resize() {
-        if (!this.canvas) return;
+        if (!this.canvas) {
+            return;
+        }
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
     }
@@ -42,7 +44,9 @@ export class LightBeamSystem {
      * @param {number} intensity - 0-1, affects length and brightness
      */
     createBeam(direction = 'right', intensity = 1.0) {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
         
         const centerY = window.innerHeight / 2;
         const spread = 200; // Vertical spread of beams
@@ -72,7 +76,9 @@ export class LightBeamSystem {
      * @param {number} intensity - 0-1
      */
     createVerticalBeam(direction = 'down', intensity = 1.0) {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
         
         const centerX = window.innerWidth / 2;
         const spread = 300;
@@ -154,7 +160,9 @@ export class LightBeamSystem {
      * Render all beams
      */
     render() {
-        if (!this.ctx || !this.canvas) return;
+        if (!this.ctx || !this.canvas) {
+            return;
+        }
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
@@ -199,7 +207,9 @@ export class LightBeamSystem {
      * Animation loop
      */
     animate() {
-        if (!this.enabled || !this.ctx) return;
+        if (!this.enabled || !this.ctx) {
+            return;
+        }
         
         this.update();
         this.render();

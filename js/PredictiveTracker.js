@@ -44,7 +44,9 @@ export class PredictiveTracker {
 
         // Calcola delta time
         const deltaTime = (timestamp - this.lastTimestamp) / 1000; // secondi
-        if (deltaTime <= 0) return this.predictedPosition || { ...position, velocity: { x: 0, y: 0 }, acceleration: { x: 0, y: 0 }, confidence: 0 };
+        if (deltaTime <= 0) {
+            return this.predictedPosition || { ...position, velocity: { x: 0, y: 0 }, acceleration: { x: 0, y: 0 }, confidence: 0 };
+        }
 
         // Aggiungi posizione allo storico
         this.positionHistory.push({ ...position, time: timestamp });
@@ -192,7 +194,9 @@ export class PredictiveTracker {
      * Applica exponential smoothing per ridurre jitter
      */
     applySmoothing(targetPos, currentPos) {
-        if (!currentPos) return { ...targetPos };
+        if (!currentPos) {
+            return { ...targetPos };
+        }
 
         const x = currentPos.x + (targetPos.x - currentPos.x) * this.smoothingFactor;
         const y = currentPos.y + (targetPos.y - currentPos.y) * this.smoothingFactor;

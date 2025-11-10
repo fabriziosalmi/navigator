@@ -50,9 +50,11 @@ export class ConfigLoader {
         const lines = yamlText.split('\n');
         const stack = [{ obj: config, indent: -1 }];
 
-        for (let line of lines) {
+        for (const line of lines) {
             // Skip comments and empty lines
-            if (line.trim().startsWith('#') || line.trim() === '') continue;
+            if (line.trim().startsWith('#') || line.trim() === '') {
+                continue;
+            }
 
             const indent = line.search(/\S/);
             const trimmed = line.trim();
@@ -97,11 +99,17 @@ export class ConfigLoader {
         value = value.split('#')[0].trim();
 
         // Boolean
-        if (value === 'true') return true;
-        if (value === 'false') return false;
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;
+        }
 
         // Null
-        if (value === 'null' || value === '~') return null;
+        if (value === 'null' || value === '~') {
+            return null;
+        }
 
         // Number
         if (!isNaN(value) && value !== '') {

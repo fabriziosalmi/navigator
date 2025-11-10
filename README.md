@@ -2,7 +2,7 @@
 
 > A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback.
 
-![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
+![CI Status](https://github.com/fabriziosalmi/navigator/workflows/CI%20Pipeline/badge.svg) ![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
 
 ---
 
@@ -22,10 +22,30 @@
 
 ## 🚀 Quick Start
 
-### 1. Start Local Server
+### Modern Development (Recommended)
 
 ```bash
-# Python (recommended)
+# Install dependencies
+npm install
+
+# Start dev server with HMR (Hot Module Replacement)
+npm run dev
+# → Opens at http://localhost:3000
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Traditional Static Server
+
+```bash
+# Python
 python3 -m http.server 8080
 
 # Node.js
@@ -35,30 +55,24 @@ npx http-server -p 8080
 php -S localhost:8080
 ```
 
-### 2. Open Browser
+### Start Navigating
 
-```
-http://localhost:8080
-```
+1. Click **"🚀 Start Experience"**
+2. Grant camera/microphone permissions
+3. Hold hand in front of webcam
+4. Swipe left/right to navigate!
 
-### 3. Start Navigating
-
-- Click **"� Start Experience"**
-- Grant camera/microphone permissions
-- Hold hand in front of webcam
-- Swipe left/right to navigate!
-
-**Full guide**: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
+**Full guide**: [docs/docs/GETTING_STARTED.md](docs/docs/GETTING_STARTED.md)
 
 ---
 
 ## 📖 Documentation
 
-- **[Getting Started](docs/GETTING_STARTED.md)** - Installation, first steps, troubleshooting
-- **[Features](docs/FEATURES.md)** - Complete feature breakdown and configuration
-- **[Architecture](docs/ARCHITECTURE.md)** - Technical deep-dive, module reference
-- **[Testing](docs/TEST_RESULTS.md)** - Playwright test suite results (36/43 passing)
-- **[Optimization](docs/OPTIMIZATION_GUIDE.md)** - Performance tuning guide
+- **[Getting Started](docs/docs/GETTING_STARTED.md)** - Installation, first steps, troubleshooting
+- **[Features](docs/docs/FEATURES.md)** - Complete feature breakdown and configuration
+- **[Architecture](docs/docs/ARCHITECTURE.md)** - Technical deep-dive, module reference
+- **[Testing](docs/docs/TEST_RESULTS.md)** - Playwright test suite results (36/43 passing)
+- **[Optimization](docs/docs/OPTIMIZATION_GUIDE.md)** - Performance tuning guide
 
 ---
 

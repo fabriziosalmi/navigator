@@ -14,7 +14,9 @@ export class GestureLED {
      * Activate LED with cyan pulse
      */
     pulse() {
-        if (!this.ledElement) return;
+        if (!this.ledElement) {
+            return;
+        }
 
         // Clear any existing timeout
         if (this.activeTimeout) {

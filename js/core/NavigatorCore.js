@@ -511,7 +511,9 @@ export class NavigatorCore {
 
     _startPerformanceMonitoring() {
         const updateFps = () => {
-            if (!this.isRunning) return;
+            if (!this.isRunning) {
+                return;
+            }
 
             const now = performance.now();
             this.frameCount++;

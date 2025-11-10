@@ -223,7 +223,9 @@ export class GestureInputPlugin extends BasePlugin {
 
     _startDetectionLoop() {
         const detect = () => {
-            if (!this.isRunning) return;
+            if (!this.isRunning) {
+                return;
+            }
 
             // Detection happens in MediaPipe callback
             // This is just for frame counting and performance
@@ -397,7 +399,9 @@ export class GestureInputPlugin extends BasePlugin {
     }
 
     _drawResults(results) {
-        if (!this.canvasElement || !this.canvasCtx) return;
+        if (!this.canvasElement || !this.canvasCtx) {
+            return;
+        }
 
         this.canvasCtx.save();
         this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);

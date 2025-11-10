@@ -113,7 +113,9 @@ export class AudioFeedbackPlugin extends BasePlugin {
     // ========================================
 
     _playNavigationSound(direction) {
-        if (!this._shouldPlaySound('card_navigate')) return;
+        if (!this._shouldPlaySound('card_navigate')) {
+            return;
+        }
 
         const volume = this.getConfig('sounds.navigation', 0.4);
         const spatialEnabled = this.getConfig('spatial.enabled', true);
@@ -147,7 +149,9 @@ export class AudioFeedbackPlugin extends BasePlugin {
     }
 
     _playSuccessSound() {
-        if (!this._shouldPlaySound('success')) return;
+        if (!this._shouldPlaySound('success')) {
+            return;
+        }
 
         const volume = this.getConfig('sounds.success', 0.5);
         this.audioManager.playSuccessSound(volume);
@@ -156,7 +160,9 @@ export class AudioFeedbackPlugin extends BasePlugin {
     }
 
     _playErrorSound() {
-        if (!this._shouldPlaySound('error_sound')) return;
+        if (!this._shouldPlaySound('error_sound')) {
+            return;
+        }
 
         const volume = this.getConfig('sounds.error', 0.3);
         this.audioManager.playErrorSound(volume);
@@ -165,7 +171,9 @@ export class AudioFeedbackPlugin extends BasePlugin {
     }
 
     _playDetectionSound(type = 'detected') {
-        if (!this._shouldPlaySound('gesture_detect')) return;
+        if (!this._shouldPlaySound('gesture_detect')) {
+            return;
+        }
 
         const volume = this.getConfig('sounds.navigation', 0.4) * 0.5; // Quieter
         
@@ -181,7 +189,9 @@ export class AudioFeedbackPlugin extends BasePlugin {
     }
 
     _playLayerChangeSound() {
-        if (!this._shouldPlaySound('layer_change')) return;
+        if (!this._shouldPlaySound('layer_change')) {
+            return;
+        }
 
         const volume = this.getConfig('sounds.navigation', 0.4);
         // Layer change is more significant - play a different sound

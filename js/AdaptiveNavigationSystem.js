@@ -168,7 +168,9 @@ export class AdaptiveNavigationSystem {
      * Update average gesture speed (gestures per minute)
      */
     updateAverageSpeed() {
-        if (this.gestureTimings.length < 2) return;
+        if (this.gestureTimings.length < 2) {
+            return;
+        }
         
         const avgInterval = this.gestureTimings.reduce((a, b) => a + b, 0) / this.gestureTimings.length;
         const gesturesPerMinute = (60000 / avgInterval);
@@ -181,7 +183,9 @@ export class AdaptiveNavigationSystem {
      * Update gesture stability based on execution time variance
      */
     updateStability() {
-        if (this.stabilityBuffer.length < 2) return;
+        if (this.stabilityBuffer.length < 2) {
+            return;
+        }
         
         const mean = this.stabilityBuffer.reduce((a, b) => a + b, 0) / this.stabilityBuffer.length;
         const variance = this.stabilityBuffer.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / this.stabilityBuffer.length;
@@ -196,7 +200,9 @@ export class AdaptiveNavigationSystem {
      * Get current accuracy (successful gestures / total gestures)
      */
     getAccuracy() {
-        if (this.metrics.totalGestures === 0) return 1.0;
+        if (this.metrics.totalGestures === 0) {
+            return 1.0;
+        }
         return this.metrics.successfulGestures / this.metrics.totalGestures;
     }
     
@@ -204,7 +210,9 @@ export class AdaptiveNavigationSystem {
      * Get recent accuracy (last N gestures)
      */
     getRecentAccuracy() {
-        if (this.performanceWindow.length === 0) return 1.0;
+        if (this.performanceWindow.length === 0) {
+            return 1.0;
+        }
         const successes = this.performanceWindow.filter(g => g.success).length;
         return successes / this.performanceWindow.length;
     }
@@ -253,7 +261,9 @@ export class AdaptiveNavigationSystem {
         const threshold = this.thresholds.downgrade;
         
         // Don't downgrade from L1
-        if (this.currentLevel === 1) return;
+        if (this.currentLevel === 1) {
+            return;
+        }
         
         // Downgrade on excessive errors or poor performance
         if (
@@ -268,7 +278,9 @@ export class AdaptiveNavigationSystem {
      * Upgrade to specified level
      */
     upgradeLevel(newLevel) {
-        if (newLevel <= this.currentLevel || newLevel > 3) return;
+        if (newLevel <= this.currentLevel || newLevel > 3) {
+            return;
+        }
         
         const oldLevel = this.currentLevel;
         this.currentLevel = newLevel;
@@ -292,7 +304,9 @@ export class AdaptiveNavigationSystem {
      * Downgrade by one level
      */
     downgradeLevel() {
-        if (this.currentLevel === 1) return;
+        if (this.currentLevel === 1) {
+            return;
+        }
         
         const oldLevel = this.currentLevel;
         this.currentLevel = Math.max(1, this.currentLevel - 1);
@@ -383,7 +397,9 @@ export class AdaptiveNavigationSystem {
      * Get progress toward next level (0-1)
      */
     getProgressToNextLevel() {
-        if (this.currentLevel === 3) return 1.0; // Max level
+        if (this.currentLevel === 3) {
+            return 1.0;
+        } // Max level
         
         const threshold = this.currentLevel === 1 
             ? this.thresholds.L1_to_L2 
@@ -402,7 +418,9 @@ export class AdaptiveNavigationSystem {
      * Manually set level (for testing or user override)
      */
     setLevel(level) {
-        if (level < 1 || level > 3) return;
+        if (level < 1 || level > 3) {
+            return;
+        }
         const oldLevel = this.currentLevel;
         this.currentLevel = level;
         

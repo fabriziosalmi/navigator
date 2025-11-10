@@ -68,7 +68,9 @@ export class GestureDetector {
                 Math.pow(tip.x - palmBase.x, 2) +
                 Math.pow(tip.y - palmBase.y, 2)
             );
-            if (distanceToPalm < CONFIG.gestures.fistThreshold) curledCount++;
+            if (distanceToPalm < CONFIG.gestures.fistThreshold) {
+                curledCount++;
+            }
         });
 
         const rawDetection = curledCount >= 3;
@@ -100,7 +102,9 @@ export class GestureDetector {
 
         fingerTips.forEach(tipIndex => {
             const tip = landmarks[tipIndex];
-            if (tip.y > indexMCP.y) curledCount++;
+            if (tip.y > indexMCP.y) {
+                curledCount++;
+            }
         });
 
         const rawDetection = thumbPointingUp && curledCount >= 3;
@@ -191,7 +195,9 @@ export class GestureDetector {
      * Get thumbs up duration
      */
     getThumbsUpDuration() {
-        if (!this.thumbsUpStartTime) return 0;
+        if (!this.thumbsUpStartTime) {
+            return 0;
+        }
         return Date.now() - this.thumbsUpStartTime;
     }
 
@@ -288,7 +294,9 @@ export class GestureDetector {
      * Get focus mode duration
      */
     getFocusDuration() {
-        if (!this.pointStartTime) return 0;
+        if (!this.pointStartTime) {
+            return 0;
+        }
         return Date.now() - this.pointStartTime;
     }
 
@@ -321,7 +329,9 @@ export class GestureDetector {
      * Get singularity duration
      */
     getSingularityDuration() {
-        if (!this.fistStartTime) return 0;
+        if (!this.fistStartTime) {
+            return 0;
+        }
         return Date.now() - this.fistStartTime;
     }
 
@@ -370,7 +380,9 @@ export class GestureDetector {
      * Ottieni info debug dello stabilizer
      */
     getStabilizerDebugInfo(gestureName) {
-        if (!this.stabilizer) return null;
+        if (!this.stabilizer) {
+            return null;
+        }
         return this.stabilizer.getGestureDebugInfo(gestureName);
     }
 
@@ -378,7 +390,9 @@ export class GestureDetector {
      * Ottieni info debug di tutti i gesti stabilizzati
      */
     getAllStabilizerDebugInfo() {
-        if (!this.stabilizer) return null;
+        if (!this.stabilizer) {
+            return null;
+        }
         return this.stabilizer.getAllDebugInfo();
     }
 
@@ -386,7 +400,9 @@ export class GestureDetector {
      * Ottieni stability score di un gesto
      */
     getGestureStability(gestureName) {
-        if (!this.stabilizer) return 0;
+        if (!this.stabilizer) {
+            return 0;
+        }
         return this.stabilizer.getStability(gestureName);
     }
 
@@ -394,7 +410,9 @@ export class GestureDetector {
      * Verifica se un gesto è stabilizzato
      */
     isGestureStabilized(gestureName) {
-        if (!this.stabilizer) return false;
+        if (!this.stabilizer) {
+            return false;
+        }
         return this.stabilizer.isStabilized(gestureName);
     }
 
@@ -421,7 +439,9 @@ export class GestureDetector {
      * Ottieni statistiche aggregate stabilizer
      */
     getStabilizerStats() {
-        if (!this.stabilizer) return null;
+        if (!this.stabilizer) {
+            return null;
+        }
         return this.stabilizer.getStats();
     }
 }

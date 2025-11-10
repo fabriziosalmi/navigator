@@ -1,0 +1,114 @@
+name: CI Pipeline
+
+# Trigger su push e pull request
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+# Permessi necessari
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  # Job principale di CI
+  quality-checks:
+    name: Quality Checks (Lint, Test, Build)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      # 1. Checkout del codice
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # 3. Installazione dipendenze
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Cache Playwright browsers
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      # 5. ESLint - Code Quality Check
+      - name: Run ESLint
+        run: npm run lint:ci
+        continue-on-error: false
+
+      # 6. Run Tests
+      - name: Run Playwright tests
+        run: npm test
+        env:
+          CI: true
+
+      # 7. Upload test results on failure
+      - name: Upload Playwright test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      # 8. Production Build
+      - name: Build production bundle
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # 9. Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+      # 10. Build size report
+      - name: Report build size
+        run: |
+          echo "### Build Size Report 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          du -sh dist/* | awk '{printf "| %s | %s |\n", $2, $1}' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Total build size: $(du -sh dist | awk '{print $1}')" >> $GITHUB_STEP_SUMMARY
+
+      # 11. Success summary
+      - name: CI Success Summary
+        if: success()
+        run: |
+          echo "### ✅ CI Pipeline Passed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✓ Code linting passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✓ All tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✓ Production build successful" >> $GITHUB_STEP_SUMMARY

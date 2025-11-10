@@ -31,7 +31,9 @@ export class NavigationController {
     }
 
     initLayers() {
-        if (!this.viewport) return;
+        if (!this.viewport) {
+            return;
+        }
 
         this.viewport.innerHTML = '';
         
@@ -55,7 +57,7 @@ export class NavigationController {
                 // Render media based on type
                 let mediaHTML = '';
                 if (cardData.media) {
-                    switch(cardData.media.type) {
+                    switch (cardData.media.type) {
                         case 'video':
                             mediaHTML = `
                                 <video class="card-media" autoplay loop muted playsinline>
@@ -111,7 +113,9 @@ export class NavigationController {
         const currentCardIndex = this.layerManager.getCurrentCardIndex();
         
         const layerContainer = document.getElementById(`layer-${currentLayer}`);
-        if (!layerContainer) return;
+        if (!layerContainer) {
+            return;
+        }
 
         // Layer depth positioning handled by external update3DLayerPositions()
         // Just update active state
@@ -132,7 +136,7 @@ export class NavigationController {
         cards.forEach((card, index) => {
             // Remove all position classes
             card.classList.remove('active', 'previous', 'next', 'far-previous', 'far-next', 
-                                 'center', 'left', 'right', 'hidden', 'fullscreen');
+                'center', 'left', 'right', 'hidden', 'fullscreen');
             
             const diff = index - currentCardIndex;
             
@@ -186,7 +190,9 @@ export class NavigationController {
     }
 
     navigateCard(direction) {
-        if (this.confirmationPending) return false;
+        if (this.confirmationPending) {
+            return false;
+        }
         
         const success = this.layerManager.navigateCard(direction);
         
@@ -200,7 +206,9 @@ export class NavigationController {
     }
 
     navigateLayer(direction) {
-        if (this.confirmationPending) return false;
+        if (this.confirmationPending) {
+            return false;
+        }
         
         const success = this.layerManager.navigateLayer(direction);
         
@@ -213,7 +221,9 @@ export class NavigationController {
     }
 
     switchToLayer(layerName) {
-        if (this.confirmationPending) return false;
+        if (this.confirmationPending) {
+            return false;
+        }
         
         const success = this.layerManager.setLayer(layerName);
         
@@ -226,7 +236,9 @@ export class NavigationController {
     }
 
     toggleFullscreen() {
-        if (this.confirmationPending) return;
+        if (this.confirmationPending) {
+            return;
+        }
         
         this.showConfirmation(
             'Fullscreen Mode',
@@ -240,7 +252,9 @@ export class NavigationController {
         const currentCardIndex = this.layerManager.getCurrentCardIndex();
         const layerContainer = document.getElementById(`layer-${currentLayer}`);
         
-        if (!layerContainer) return;
+        if (!layerContainer) {
+            return;
+        }
 
         const cards = layerContainer.querySelectorAll('.card');
         const currentCard = cards[currentCardIndex];
@@ -260,7 +274,9 @@ export class NavigationController {
     }
 
     deleteCurrentCard() {
-        if (this.confirmationPending) return;
+        if (this.confirmationPending) {
+            return;
+        }
         
         this.showConfirmation(
             'Delete Card',
@@ -274,7 +290,9 @@ export class NavigationController {
         const currentCardIndex = this.layerManager.getCurrentCardIndex();
         const layerContainer = document.getElementById(`layer-${currentLayer}`);
         
-        if (!layerContainer) return;
+        if (!layerContainer) {
+            return;
+        }
 
         const cards = layerContainer.querySelectorAll('.card');
         const currentCard = cards[currentCardIndex];

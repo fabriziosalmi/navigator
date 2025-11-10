@@ -141,7 +141,9 @@ export class KeyboardInputPlugin extends BasePlugin {
 
     _getKeyCombo() {
         const keys = Array.from(this.pressedKeys).sort();
-        if (keys.length < 2) return null;
+        if (keys.length < 2) {
+            return null;
+        }
 
         // Build combo string (e.g., "Ctrl+d")
         const modifiers = [];
@@ -155,7 +157,9 @@ export class KeyboardInputPlugin extends BasePlugin {
             }
         }
 
-        if (regular.length === 0) return null;
+        if (regular.length === 0) {
+            return null;
+        }
 
         return [...modifiers, ...regular].join('+');
     }

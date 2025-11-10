@@ -63,7 +63,9 @@ export class VisualEffects {
     }
 
     resize() {
-        if (!this.trailsCanvas || !this.streamsCanvas) return;
+        if (!this.trailsCanvas || !this.streamsCanvas) {
+            return;
+        }
         
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -170,7 +172,9 @@ export class VisualEffects {
      * Update and render light trails
      */
     updateTrails() {
-        if (!this.trailsCtx) return;
+        if (!this.trailsCtx) {
+            return;
+        }
         
         const ctx = this.trailsCtx;
         const w = window.innerWidth;
@@ -232,7 +236,9 @@ export class VisualEffects {
      * Update and render data streams
      */
     updateStreams() {
-        if (!this.streamsCtx) return;
+        if (!this.streamsCtx) {
+            return;
+        }
         
         const ctx = this.streamsCtx;
         const w = window.innerWidth;
@@ -286,7 +292,9 @@ export class VisualEffects {
      * Update and render ripples
      */
     updateRipples() {
-        if (!this.streamsCtx) return;
+        if (!this.streamsCtx) {
+            return;
+        }
         
         const ctx = this.streamsCtx;
         
@@ -400,7 +408,9 @@ export class VisualEffects {
     }
 
     updateKamehamehaFocus() {
-        if (!this.focusBeam && this.focusParticles.length === 0) return;
+        if (!this.focusBeam && this.focusParticles.length === 0) {
+            return;
+        }
 
         const ctx = this.streamsCtx;
         const w = window.innerWidth;
@@ -508,7 +518,9 @@ export class VisualEffects {
     }
 
     startSingularityExplosion(gridPositions) {
-        if (!this.singularityPoint) return;
+        if (!this.singularityPoint) {
+            return;
+        }
 
         const center = this.singularityPoint;
 
@@ -532,7 +544,9 @@ export class VisualEffects {
     }
 
     updateSingularity() {
-        if (this.singularityParticles.length === 0) return;
+        if (this.singularityParticles.length === 0) {
+            return;
+        }
 
         const ctx = this.streamsCtx;
 
@@ -638,7 +652,9 @@ export class VisualEffects {
     }
 
     updateHandAura() {
-        if (!this.handAura.active || this.handAura.particles.length === 0) return;
+        if (!this.handAura.active || this.handAura.particles.length === 0) {
+            return;
+        }
 
         const ctx = this.streamsCtx;
 

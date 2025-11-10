@@ -280,24 +280,32 @@ export class VoiceCommandModule {
                 this.navigationController.navigateToLayer(
                     this.navigationController.currentLayer - 1
                 );
-                if (this.historyHUD) this.historyHUD.addAction('layer-up', 'voice');
+                if (this.historyHUD) {
+                    this.historyHUD.addAction('layer-up', 'voice');
+                }
                 break;
                 
             case 'layer-down':
                 this.navigationController.navigateToLayer(
                     this.navigationController.currentLayer + 1
                 );
-                if (this.historyHUD) this.historyHUD.addAction('layer-down', 'voice');
+                if (this.historyHUD) {
+                    this.historyHUD.addAction('layer-down', 'voice');
+                }
                 break;
                 
             case 'card-left':
                 this.navigationController.navigateInDirection('left');
-                if (this.historyHUD) this.historyHUD.addAction('card-left', 'voice');
+                if (this.historyHUD) {
+                    this.historyHUD.addAction('card-left', 'voice');
+                }
                 break;
                 
             case 'card-right':
                 this.navigationController.navigateInDirection('right');
-                if (this.historyHUD) this.historyHUD.addAction('card-right', 'voice');
+                if (this.historyHUD) {
+                    this.historyHUD.addAction('card-right', 'voice');
+                }
                 break;
                 
             default:
@@ -309,7 +317,9 @@ export class VoiceCommandModule {
      * Flash indicator on successful command
      */
     flashIndicator() {
-        if (!this.indicator) return;
+        if (!this.indicator) {
+            return;
+        }
         
         // Pulse animation
         this.indicator.style.background = 'rgba(0, 255, 153, 0.4)';

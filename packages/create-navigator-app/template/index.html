@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigator App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .keys {
+            display: inline-flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .key {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: monospace;
+        }
+
+        .status {
+            margin-top: 3rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Navigator</h1>
+        <p>Multi-modal navigation system</p>
+
+        <div class="cards">
+            <div class="card" id="card-1">
+                <h3>Card 1</h3>
+                <p>Welcome!</p>
+            </div>
+            <div class="card active" id="card-2">
+                <h3>Card 2</h3>
+                <p>Current</p>
+            </div>
+            <div class="card" id="card-3">
+                <h3>Card 3</h3>
+                <p>Next</p>
+            </div>
+        </div>
+
+        <div class="keys">
+            <span class="key">←</span>
+            <span class="key">→</span>
+            <span>or</span>
+            <span class="key">A</span>
+            <span class="key">D</span>
+        </div>
+
+        <div class="status">
+            <p id="status">Press arrow keys to navigate</p>
+        </div>
+    </div>
+
+    <script type="module">
+        let currentIndex = 1;
+        const cards = document.querySelectorAll('.card');
+        const status = document.getElementById('status');
+
+        function updateCards() {
+            cards.forEach((card, i) => {
+                card.classList.toggle('active', i === currentIndex);
+                card.style.opacity = i === currentIndex ? '1' : '0.5';
+                card.style.transform = i === currentIndex ? 'scale(1.1)' : 'scale(1)';
+            });
+
+            status.textContent = `Card ${currentIndex + 1} of ${cards.length}`;
+        }
+
+        function navigate(direction) {
+            if (direction === 'next' && currentIndex < cards.length - 1) {
+                currentIndex++;
+            } else if (direction === 'prev' && currentIndex > 0) {
+                currentIndex--;
+            }
+            updateCards();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                navigate('next');
+            } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                navigate('prev');
+            }
+        });
+
+        // Initialize
+        updateCards();
+
+        console.log('🌌 Navigator initialized');
+        console.log('📖 Documentation: https://fabriziosalmi.github.io/navigator/');
+    </script>
+</body>
+</html>

@@ -105,7 +105,9 @@ export class InterfaceStatusHUD {
      */
     activateInterface(interfaceName, action = '') {
         const iface = this.interfaces[interfaceName];
-        if (!iface || !iface.element) return;
+        if (!iface || !iface.element) {
+            return;
+        }
         
         // Mark as active
         iface.active = true;
@@ -139,7 +141,9 @@ export class InterfaceStatusHUD {
      */
     deactivateInterface(interfaceName) {
         const iface = this.interfaces[interfaceName];
-        if (!iface || !iface.element) return;
+        if (!iface || !iface.element) {
+            return;
+        }
         
         iface.active = false;
         iface.element.classList.remove('active');

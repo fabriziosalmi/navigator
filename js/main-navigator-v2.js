@@ -264,7 +264,9 @@ function setupDebugListeners(core) {
 
 function updateDebugPanel(stats, performanceState) {
     const debugPanel = document.getElementById('debug-panel');
-    if (!debugPanel) return;
+    if (!debugPanel) {
+        return;
+    }
 
     debugPanel.innerHTML = `
         <h3>Navigator v2.0 Debug</h3>

@@ -187,7 +187,9 @@ export class EventBus {
             let timeoutId;
 
             const unsubscribe = this.once(eventName, (event) => {
-                if (timeoutId) clearTimeout(timeoutId);
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
                 resolve(event);
             });
 
@@ -279,7 +281,9 @@ export class EventBus {
 
     _sortHandlersByPriority(eventName) {
         const handlers = this.listeners.get(eventName);
-        if (!handlers) return;
+        if (!handlers) {
+            return;
+        }
 
         const handlersArray = Array.from(handlers)
             .sort((a, b) => (b._priority || 0) - (a._priority || 0));

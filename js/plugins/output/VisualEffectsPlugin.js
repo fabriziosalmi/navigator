@@ -206,10 +206,14 @@ export class VisualEffectsPlugin extends BasePlugin {
 
     _applyCardBlur() {
         const container = document.querySelector('#layer-system');
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         const activeLayer = container.querySelector('.layer-container.active');
-        if (!activeLayer) return;
+        if (!activeLayer) {
+            return;
+        }
 
         const cards = activeLayer.querySelectorAll('.card');
         const currentIndex = this.getState('navigation.currentCardIndex', 0);
@@ -220,7 +224,9 @@ export class VisualEffectsPlugin extends BasePlugin {
 
         cards.forEach((card, index) => {
             const media = card.querySelector('.card-media');
-            if (!media) return;
+            if (!media) {
+                return;
+            }
 
             if (index === currentIndex) {
                 // Active card - no blur
@@ -237,10 +243,14 @@ export class VisualEffectsPlugin extends BasePlugin {
     // ========================================
 
     _updateGestureLED(state) {
-        if (!this.getConfig('gestureLED.enabled', true)) return;
+        if (!this.getConfig('gestureLED.enabled', true)) {
+            return;
+        }
 
         const led = document.querySelector('.gesture-led');
-        if (!led) return;
+        if (!led) {
+            return;
+        }
 
         // Remove all state classes
         led.classList.remove('idle', 'detecting', 'success', 'error');

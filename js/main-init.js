@@ -208,8 +208,12 @@ function updateQuantumHUD(layerName) {
     if (wowLabel) {
         const wowLayerName = wowLabel.querySelector('.wow-layer-name');
         const wowIcon = wowLabel.querySelector('.wow-icon');
-        if (wowLayerName) wowLayerName.textContent = config.label;
-        if (wowIcon) wowIcon.textContent = config.icon;
+        if (wowLayerName) {
+            wowLayerName.textContent = config.label;
+        }
+        if (wowIcon) {
+            wowIcon.textContent = config.icon;
+        }
     }
 }
 
@@ -253,7 +257,9 @@ const layerManager = new LayerManager({
 
         // Update quantum HUD card counter
         const hudCurrentCard = document.getElementById('hud-current-card');
-        if (hudCurrentCard) hudCurrentCard.textContent = index + 1;
+        if (hudCurrentCard) {
+            hudCurrentCard.textContent = index + 1;
+        }
 
         // Highlight sound with spatial position
         const cardX = direction > 0 ? 0.3 : -0.3;
@@ -278,7 +284,9 @@ let velocityDecayTimer = null;
 
 function updateDynamicBackground() {
     // Skip if dynamic background is disabled
-    if (!dynamicBg) return;
+    if (!dynamicBg) {
+        return;
+    }
     
     const now = Date.now();
     const timeSinceLastNav = now - lastNavigationTime;
@@ -360,7 +368,9 @@ const domLODManager = new DOMLODManager({
 function updateDOMLOD() {
     const currentLayerName = layerManager.getCurrentLayer();
     const layerContainer = document.getElementById(`layer-${currentLayerName}`);
-    if (!layerContainer) return;
+    if (!layerContainer) {
+        return;
+    }
 
     const cards = layerContainer.querySelectorAll('.card');
     const currentCardIndex = layerManager.getCurrentCardIndex();
@@ -411,7 +421,9 @@ function update3DLayerPositions() {
 
     layerNames.forEach((layerName, index) => {
         const layerContainer = document.getElementById(`layer-${layerName}`);
-        if (!layerContainer) return;
+        if (!layerContainer) {
+            return;
+        }
 
         // Remove all position classes
         layerContainer.classList.remove('active', 'front-1', 'back-1', 'back-2', 'far-back');
@@ -507,13 +519,17 @@ cardsViewport.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 cardsViewport.addEventListener('touchmove', (e) => {
-    if (!isTouchActive) return;
+    if (!isTouchActive) {
+        return;
+    }
     const touch = e.touches[0];
     carouselMomentum.updateGesture(touch.clientX, touch.clientY);
 }, { passive: true });
 
 cardsViewport.addEventListener('touchend', () => {
-    if (!isTouchActive) return;
+    if (!isTouchActive) {
+        return;
+    }
     carouselMomentum.endGesture();
     isTouchActive = false;
 }, { passive: true });
@@ -532,12 +548,16 @@ cardsViewport.addEventListener('mousedown', (e) => {
 });
 
 cardsViewport.addEventListener('mousemove', (e) => {
-    if (!isMouseDown) return;
+    if (!isMouseDown) {
+        return;
+    }
     carouselMomentum.updateGesture(e.clientX, e.clientY);
 });
 
 cardsViewport.addEventListener('mouseup', () => {
-    if (!isMouseDown) return;
+    if (!isMouseDown) {
+        return;
+    }
     carouselMomentum.endGesture();
     isMouseDown = false;
 });
@@ -602,9 +622,13 @@ window.addEventListener('keydown', (e) => {
 
     // Other shortcuts (f = fullscreen, v = webcam toggle)
     // Note: 'd' and 'a' are reserved for WASD navigation
-    if (e.key === 'f') navController.toggleFullscreen();
+    if (e.key === 'f') {
+        navController.toggleFullscreen();
+    }
     // if (e.key === 'd') navController.deleteCurrentCard(); // Disabled - conflicts with WASD
-    if (e.key === 'v') document.getElementById('webcam').classList.toggle('visible');
+    if (e.key === 'v') {
+        document.getElementById('webcam').classList.toggle('visible');
+    }
 });
 
 /**
@@ -730,8 +754,12 @@ hands.onResults((results) => {
         // Update quantum HUD hand status
         const hudHandStatus = document.getElementById('hud-hand-status');
         const hudHandText = document.getElementById('hud-hand-text');
-        if (hudHandStatus) hudHandStatus.classList.add('active');
-        if (hudHandText) hudHandText.textContent = 'Detected';
+        if (hudHandStatus) {
+            hudHandStatus.classList.add('active');
+        }
+        if (hudHandText) {
+            hudHandText.textContent = 'Detected';
+        }
         
         // Update Interface Status HUD - gesture active
         interfaceHUD.updateGesture(true, 'Tracking');
@@ -959,7 +987,7 @@ hands.onResults((results) => {
                     { x: window.innerWidth * 0.3, y: window.innerHeight * 0.4 },
                     { x: window.innerWidth * 0.5, y: window.innerHeight * 0.4 },
                     { x: window.innerWidth * 0.7, y: window.innerHeight * 0.4 },
-                    { x: window.innerWidth * 0.3, y: window.innerHeight * 0.6 },
+                    { x: window.innerWidth * 0.3, y: window.innerHeight * 0.6 }
                 ];
 
                 visualFX.startSingularityExplosion(gridPositions);
@@ -1063,8 +1091,12 @@ hands.onResults((results) => {
         // Update quantum HUD hand status
         const hudHandStatus = document.getElementById('hud-hand-status');
         const hudHandText = document.getElementById('hud-hand-text');
-        if (hudHandStatus) hudHandStatus.classList.remove('active');
-        if (hudHandText) hudHandText.textContent = 'Searching';
+        if (hudHandStatus) {
+            hudHandStatus.classList.remove('active');
+        }
+        if (hudHandText) {
+            hudHandText.textContent = 'Searching';
+        }
 
         gridLock.reset();
         thumbsUpStartTime = null;

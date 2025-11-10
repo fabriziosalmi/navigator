@@ -47,7 +47,9 @@ export class GestureStabilizer {
      */
     updateGesture(gestureName, detected, timestamp = Date.now()) {
         const state = this.gestures[gestureName];
-        if (!state) return detected;
+        if (!state) {
+            return detected;
+        }
 
         // Aggiorna storia
         state.history.push(detected);
@@ -157,7 +159,9 @@ export class GestureStabilizer {
      */
     getGestureDebugInfo(gestureName) {
         const state = this.gestures[gestureName];
-        if (!state) return null;
+        if (!state) {
+            return null;
+        }
 
         return {
             stability: (state.stability * 100).toFixed(1) + '%',

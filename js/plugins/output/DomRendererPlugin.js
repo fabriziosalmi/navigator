@@ -138,8 +138,12 @@ export class DomRendererPlugin extends BasePlugin {
         let newIndex = currentIndex + direction;
         
         // Wrap around
-        if (newIndex < 0) newIndex = totalCards - 1;
-        if (newIndex >= totalCards) newIndex = 0;
+        if (newIndex < 0) {
+            newIndex = totalCards - 1;
+        }
+        if (newIndex >= totalCards) {
+            newIndex = 0;
+        }
 
         // Update state
         this.setState('navigation.currentCardIndex', newIndex);
@@ -173,8 +177,12 @@ export class DomRendererPlugin extends BasePlugin {
         let newLayer = currentLayer + direction;
         
         // Wrap around
-        if (newLayer < 0) newLayer = totalLayers - 1;
-        if (newLayer >= totalLayers) newLayer = 0;
+        if (newLayer < 0) {
+            newLayer = totalLayers - 1;
+        }
+        if (newLayer >= totalLayers) {
+            newLayer = 0;
+        }
 
         // Update state
         this.setState('navigation.currentLayer', newLayer);
@@ -241,7 +249,9 @@ export class DomRendererPlugin extends BasePlugin {
     // ========================================
 
     _renderLayers() {
-        if (!this.container) return;
+        if (!this.container) {
+            return;
+        }
 
         // Use LayerManager to build the DOM
         const layerNames = Object.keys(this.layerManager.layers);
@@ -305,7 +315,9 @@ export class DomRendererPlugin extends BasePlugin {
     }
 
     _updateLayerDisplay(layerIndex) {
-        if (!this.container) return;
+        if (!this.container) {
+            return;
+        }
 
         const layers = this.container.querySelectorAll('.layer-container');
         
@@ -321,10 +333,14 @@ export class DomRendererPlugin extends BasePlugin {
     }
 
     _updateCardDisplay(cardIndex) {
-        if (!this.container) return;
+        if (!this.container) {
+            return;
+        }
 
         const activeLayer = this.container.querySelector('.layer-container.active');
-        if (!activeLayer) return;
+        if (!activeLayer) {
+            return;
+        }
 
         const cards = activeLayer.querySelectorAll('.card');
         

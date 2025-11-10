@@ -36,7 +36,9 @@ export class AudioManager {
      * MUST be called after user interaction (e.g., button click)
      */
     init() {
-        if (this.isInitialized) return;
+        if (this.isInitialized) {
+            return;
+        }
         
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -99,7 +101,9 @@ export class AudioManager {
      * Creates and caches noise buffers for snare and hi-hat sounds.
      */
     createNoiseBuffers() {
-        if (!this.audioContext) return;
+        if (!this.audioContext) {
+            return;
+        }
         const sampleRate = this.audioContext.sampleRate;
 
         // Snare buffer
@@ -123,7 +127,9 @@ export class AudioManager {
      * Start ambient background sound (drum breakbeat/drumnbass loop)
      */
     startAmbient() {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         // Create master gain for the beat
         this.ambientGain = this.audioContext.createGain();
@@ -144,7 +150,9 @@ export class AudioManager {
      * Schedule recursive drum loop
      */
     scheduleDrumLoop(beatInterval, patternLength) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const now = this.audioContext.currentTime;
 
@@ -182,7 +190,9 @@ export class AudioManager {
      * Play kick drum (low punch)
      */
     playKick(time) {
-        if (!this.audioContext || !this.ambientGain || !this.isInitialized) return;
+        if (!this.audioContext || !this.ambientGain || !this.isInitialized) {
+            return;
+        }
 
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
@@ -205,7 +215,9 @@ export class AudioManager {
      * Play snare drum (sharp crack)
      */
     playSnare(time) {
-        if (!this.isReady() || !this.ambientGain || !this.snareNoiseBuffer) return;
+        if (!this.isReady() || !this.ambientGain || !this.snareNoiseBuffer) {
+            return;
+        }
 
         // Noise component from cached buffer
         const noise = this.audioContext.createBufferSource();
@@ -247,7 +259,9 @@ export class AudioManager {
      * Play hi-hat (crisp metallic)
      */
     playHiHat(time, volume = 0.1) {
-        if (!this.isReady() || !this.ambientGain || !this.hihatNoiseBuffer) return;
+        if (!this.isReady() || !this.ambientGain || !this.hihatNoiseBuffer) {
+            return;
+        }
 
         // Noise component from cached buffer
         const noise = this.audioContext.createBufferSource();
@@ -273,8 +287,11 @@ export class AudioManager {
      * Play bassline (sub bass)
      */
     playBassline() {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
+        const time = this.audioContext.currentTime;
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
 
@@ -381,7 +398,9 @@ export class AudioManager {
      * @param {boolean} isPanning - True if panning is active, false to stop.
      */
     playCameraPan(intensity, isPanning) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const now = this.audioContext.currentTime;
 
@@ -423,7 +442,9 @@ export class AudioManager {
      * Play a simple beep
      */
     playBeep(frequency, duration, type = 'sine', volume = 0.1) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
         
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
@@ -445,7 +466,9 @@ export class AudioManager {
      * Play frequency sweep
      */
     playFrequencySweep(startFreq, endFreq, duration, type = 'sine', volume = 0.1) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
         
         const osc = this.audioContext.createOscillator();
         const gain = this.audioContext.createGain();
@@ -514,16 +537,6 @@ export class AudioManager {
         // }
         return this.isEnabled;
     }
-    
-    /**
-     * Resume audio context (needed for user interaction)
-     */
-    async resume() {
-        if (this.audioContext && this.audioContext.state === 'suspended') {
-            await this.audioContext.resume();
-            console.log('Audio context resumed');
-        }
-    }
 
     /**
      * 3D SPATIAL AUDIO - Highlight sound (ronzio energetico)
@@ -532,7 +545,9 @@ export class AudioManager {
      * @param {number} y - Position Y (-1 to 1, bottom to top)
      */
     playHighlight(x = 0, y = 0) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const panner = this.create3DPanner(x, y, -2);
 
@@ -567,7 +582,9 @@ export class AudioManager {
      * @param {number} y - Position Y
      */
     playGrab(x = 0, y = 0) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const panner = this.create3DPanner(x, y, -1);
 
@@ -611,7 +628,9 @@ export class AudioManager {
      * @param {number} velocity - Movement velocity (0-1)
      */
     playWhoosh(x = 0, y = 0, velocity = 0.5) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const panner = this.create3DPanner(x, y, -1);
 
@@ -653,7 +672,9 @@ export class AudioManager {
      * @param {number} y - Position Y
      */
     playDataPing(x = 0, y = 0) {
-        if (!this.isReady()) return;
+        if (!this.isReady()) {
+            return;
+        }
 
         const panner = this.create3DPanner(x, y, -1);
 

@@ -1,0 +1,34 @@
+{
+  "name": "create-navigator-app",
+  "version": "1.0.0",
+  "description": "Create Navigator apps with zero configuration",
+  "type": "module",
+  "bin": {
+    "create-navigator-app": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "template"
+  ],
+  "keywords": [
+    "navigator",
+    "gesture-control",
+    "create-app",
+    "cli",
+    "scaffold"
+  ],
+  "author": "Fabrizio Salmi",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/create-navigator-app"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2",
+    "kolorist": "^1.8.0"
+  }
+}

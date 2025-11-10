@@ -54,7 +54,9 @@ export class NavigationHistoryHUD {
      * @param {string} source - Input source (gesture, keyboard, voice)
      */
     addAction(action, source = 'gesture') {
-        if (!this.container) return;
+        if (!this.container) {
+            return;
+        }
         
         // Create history entry
         const entry = {

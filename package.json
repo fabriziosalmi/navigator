@@ -4,16 +4,35 @@
   "description": "A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback. Built with MediaPipe Hands, Web Speech API, and a fully modular ES6+ architecture optimized for performance and user experience.",
   "main": "index.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug"
+    "test:debug": "playwright test --debug",
+    "lint": "eslint . --ext .js --report-unused-disable-directives",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:ci": "eslint . --ext .js --report-unused-disable-directives --max-warnings 200"
   },
-  "keywords": [],
+  "keywords": [
+    "gesture-control",
+    "mediapipe",
+    "navigation",
+    "web-application",
+    "hands-tracking"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "@playwright/test": "^1.56.1"
+    "@playwright/test": "^1.56.1",
+    "@rollup/plugin-yaml": "^4.1.2",
+    "eslint": "^8.57.0",
+    "terser": "^5.36.0",
+    "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }

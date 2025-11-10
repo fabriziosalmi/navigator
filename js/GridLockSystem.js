@@ -248,7 +248,9 @@ export class GridLockSystem {
      * Ottieni info debug sul predictive tracker
      */
     getPredictiveDebugInfo() {
-        if (!this.predictor) return null;
+        if (!this.predictor) {
+            return null;
+        }
         return this.predictor.getDebugInfo();
     }
 

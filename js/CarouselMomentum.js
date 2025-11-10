@@ -64,7 +64,9 @@ export class CarouselMomentum {
      * Update gesture position and calculate velocity
      */
     updateGesture(x, y) {
-        if (!this.isTracking) return;
+        if (!this.isTracking) {
+            return;
+        }
         
         const now = Date.now();
         const deltaTime = now - this.lastTime;
@@ -92,7 +94,9 @@ export class CarouselMomentum {
      * End gesture and determine if momentum should activate
      */
     endGesture() {
-        if (!this.isTracking) return;
+        if (!this.isTracking) {
+            return;
+        }
         
         const totalDistance = Math.abs(this.currentX - this.startX);
         const totalTime = Date.now() - this.gestureStartTime;
@@ -137,7 +141,7 @@ export class CarouselMomentum {
     startMomentum(velocity) {
         // Cap velocity
         this.momentumVelocity = Math.max(-this.config.maxVelocity, 
-                                         Math.min(this.config.maxVelocity, velocity));
+            Math.min(this.config.maxVelocity, velocity));
         
         this.isMomentumActive = true;
         
@@ -176,7 +180,9 @@ export class CarouselMomentum {
      * Momentum animation loop with physics
      */
     animateMomentum() {
-        if (!this.isMomentumActive) return;
+        if (!this.isMomentumActive) {
+            return;
+        }
         
         // Apply friction (deceleration)
         this.momentumVelocity *= this.config.friction;
