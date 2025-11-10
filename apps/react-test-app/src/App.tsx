@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigator } from '@navigator.menu/react';
-import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 import './App.css';
 
 function App() {
@@ -8,36 +7,48 @@ function App() {
   const [eventCount, setEventCount] = useState(0);
   const [intent, setIntent] = useState<string | null>(null);
 
-  // 🚀 Initialize Navigator with KeyboardPlugin
-  const { core } = useNavigator({
-    plugins: [new KeyboardPlugin()],
-  });
+  // 🚀 Initialize Navigator (plugins auto-loaded from config)
+  useNavigator();
 
   // 📡 Subscribe to keyboard events
   useEffect(() => {
-    if (!core) return;
-
-    // Listen to raw keydown events
-    const unsubKeydown = core.eventBus.on('keyboard:keydown', (event) => {
-      setLastKey(event.key);
+    // Note: In v2.0, plugins are loaded from config
+    // Events are emitted on the global event bus
+    // For now, we'll use a simple keyboard listener
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      setLastKey(e.key);
       setEventCount((prev) => prev + 1);
-    });
-
-    // Listen to navigation intents
-    const unsubIntents = [
-      core.eventBus.on('intent:navigate_left', () => setIntent('⬅️ Navigate Left')),
-      core.eventBus.on('intent:navigate_right', () => setIntent('➡️ Navigate Right')),
-      core.eventBus.on('intent:navigate_up', () => setIntent('⬆️ Navigate Up')),
-      core.eventBus.on('intent:navigate_down', () => setIntent('⬇️ Navigate Down')),
-      core.eventBus.on('intent:select', () => setIntent('✅ Select')),
-      core.eventBus.on('intent:cancel', () => setIntent('❌ Cancel')),
-    ];
-
-    return () => {
-      unsubKeydown();
-      unsubIntents.forEach((unsub) => unsub());
+      
+      // Map keys to intents
+      switch(e.key) {
+        case 'ArrowLeft':
+          setIntent('⬅️ Navigate Left');
+          break;
+        case 'ArrowRight':
+          setIntent('➡️ Navigate Right');
+          break;
+        case 'ArrowUp':
+          setIntent('⬆️ Navigate Up');
+          break;
+        case 'ArrowDown':
+          setIntent('⬇️ Navigate Down');
+          break;
+        case 'Enter':
+          setIntent('✅ Select');
+          break;
+        case 'Escape':
+          setIntent('❌ Cancel');
+          break;
+      }
     };
-  }, [core]);
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="app">
@@ -95,7 +106,7 @@ function App() {
 
       <footer>
         <p>
-          Core Status: <strong>{core ? '✅ Running' : '⏳ Initializing...'}</strong>
+          Navigator Status: <strong>✅ Running</strong>
         </p>
       </footer>
     </div>

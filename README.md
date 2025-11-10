@@ -2,7 +2,7 @@
 
 > A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback.
 
-![CI Status](https://github.com/fabriziosalmi/navigator/workflows/CI%20Pipeline/badge.svg) ![Status](https://img.shields.io/badge/Status-Production_Ready-green) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
+![CI Status](https://github.com/fabriziosalmi/navigator/workflows/CI%20Pipeline/badge.svg) ![Status](https://img.shields.io/badge/Status-BETA-orange) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
 
 ---
 

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigator E2E Test App</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #root {
+        width: 100%;
+        max-width: 600px;
+        padding: 2rem;
+      }
+
+      .container {
+        background: white;
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        margin: 0 0 0.5rem 0;
+        color: #667eea;
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        color: #666;
+        margin: 0 0 2rem 0;
+      }
+
+      .status-card {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .status-label {
+        font-size: 0.875rem;
+        color: #718096;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .status-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2d3748;
+        font-family: monospace;
+      }
+
+      .status-value.active {
+        color: #48bb78;
+      }
+
+      .instructions {
+        background: #fffaf0;
+        border-left: 4px solid #f6ad55;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1.5rem;
+      }
+
+      .instructions p {
+        margin: 0.5rem 0;
+        color: #744210;
+      }
+
+      .key-hint {
+        display: inline-block;
+        background: #2d3748;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.875rem;
+        margin: 0 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

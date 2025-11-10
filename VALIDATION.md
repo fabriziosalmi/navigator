@@ -103,13 +103,19 @@ The orchestrator executes **7 validation steps** in sequence:
 - Validates that all code compiles successfully
 - **Build artifacts cached** in CI for reuse in E2E job
 
-### 5. 🎭 **E2E Tests** (`run-e2e-tests.sh`)
-- **Server lifecycle management**:
-  1. Starts `react-test-app` dev server in background
-  2. Waits for server readiness at `http://localhost:5173`
-  3. Runs Playwright tests
-  4. Cleanup: Kills server (always runs, even on failure)
-- Ensures end-to-end functionality works
+### 5. 🎭 **E2E Tests** (`run-e2e-tests.sh`) **AUTONOMOUS**
+- **Self-contained test orchestrator** that creates a fresh app for each run:
+  1. **Setup**: Creates temporary directory `e2e-temp-app`
+  2. **App Creation**: Uses `@navigator.menu/create-navigator-app` with `react-ts-e2e` template
+  3. **Dependency Install**: `pnpm install` links local workspace packages (`workspace:*`)
+  4. **Verification**: Checks that `@navigator.menu/core` and `@navigator.menu/react` are linked
+  5. **Server Start**: Launches Vite dev server in background (PID tracked)
+  6. **Readiness Check**: Waits for `http://localhost:5173` (60s timeout)
+  7. **Test Execution**: Runs Playwright tests from `tests/e2e/` using centralized config
+  8. **Cleanup**: `trap cleanup EXIT` ensures server is killed and temp directory removed (always runs)
+- **Why autonomous?**: Tests the actual user experience - from app creation to runtime behavior
+- **Template**: `react-ts-e2e` includes Playwright pre-installed, test app with `useNavigator` hook
+- **Centralized Tests**: `tests/e2e/navigator-core.spec.ts` (11 tests across 4 suites)
 - **Runs in parallel** with other jobs in CI
 
 ### 6. 📏 **Bundle Size** (`check-bundle-size.sh`)

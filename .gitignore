@@ -36,6 +36,13 @@ tmp/
 temp/
 *.tmp
 
+# E2E temporary test app
+tests/e2e-temp-app/
+
+# Playwright test artifacts
+playwright-report/
+test-results/
+
 # Backup files
 *.bak
 *-old.*
