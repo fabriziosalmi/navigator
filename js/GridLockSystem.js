@@ -31,6 +31,71 @@ export class GridLockSystem {
         // Predictive Tracking
         this.predictiveEnabled = config.predictiveEnabled !== undefined ? config.predictiveEnabled : true;
         this.predictor = new PredictiveTracker(config.predictiveConfig || {});
+
+        // Cognitive state awareness
+        this.cognitiveState = 'neutral';
+        this.baseThreshold = this.threshold;
+        this.baseThresholdVertical = this.thresholdVertical;
+        this.baseLockDuration = this.lockDuration;
+    }
+
+    /**
+     * Adapt parameters based on cognitive state
+     */
+    setCognitiveState(state) {
+        if (state === this.cognitiveState) {
+            return;
+        }
+
+        const oldState = this.cognitiveState;
+        this.cognitiveState = state;
+
+        console.log(`[GridLock] Adapting for cognitive state: ${oldState} → ${state}`);
+
+        switch (state) {
+            case 'frustrated':
+                // More forgiving - lower thresholds, longer cooldown
+                this.threshold = this.baseThreshold * 0.7;
+                this.thresholdVertical = this.baseThresholdVertical * 0.7;
+                this.lockDuration = this.baseLockDuration * 1.5;
+                this.directionChangeDelay = 500; // Allow faster direction changes
+                console.log('[GridLock] Frustrated mode: -30% threshold, +50% cooldown');
+                break;
+
+            case 'concentrated':
+                // More responsive - lower thresholds, shorter cooldown
+                this.threshold = this.baseThreshold * 0.8;
+                this.thresholdVertical = this.baseThresholdVertical * 0.8;
+                this.lockDuration = this.baseLockDuration * 0.7;
+                this.directionChangeDelay = 600;
+                console.log('[GridLock] Concentrated mode: -20% threshold, -30% cooldown');
+                break;
+
+            case 'exploring':
+                // Very permissive - much lower thresholds
+                this.threshold = this.baseThreshold * 0.6;
+                this.thresholdVertical = this.baseThresholdVertical * 0.6;
+                this.lockDuration = this.baseLockDuration;
+                this.directionChangeDelay = 400; // Very responsive
+                console.log('[GridLock] Exploring mode: -40% threshold, fast direction changes');
+                break;
+
+            case 'learning':
+                // Normal but slightly forgiving
+                this.threshold = this.baseThreshold * 0.9;
+                this.thresholdVertical = this.baseThresholdVertical * 0.9;
+                this.lockDuration = this.baseLockDuration * 1.1;
+                this.directionChangeDelay = 700;
+                console.log('[GridLock] Learning mode: -10% threshold, +10% cooldown');
+                break;
+
+            default: // neutral
+                // Reset to base values
+                this.threshold = this.baseThreshold;
+                this.thresholdVertical = this.baseThresholdVertical;
+                this.lockDuration = this.baseLockDuration;
+                this.directionChangeDelay = 800;
+        }
     }
 
     reset() {

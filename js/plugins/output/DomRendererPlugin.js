@@ -41,6 +41,10 @@ export class DomRendererPlugin extends BasePlugin {
         this.layerManager = null;
         this.container = null;
         this.isTransitioning = false;
+        
+        // Cognitive state awareness
+        this.cognitiveState = 'neutral';
+        this.transitionSpeedMultiplier = 1.0;
     }
 
     async onInit() {
@@ -75,6 +79,9 @@ export class DomRendererPlugin extends BasePlugin {
         this.on('intent:select_card', () => this._selectCard());
         this.on('intent:toggle_fullscreen', () => this._toggleFullscreen());
         this.on('intent:go_back', () => this._goBack());
+
+        // Listen to cognitive state changes
+        this.on('cognitive_state:change', (data) => this._onCognitiveStateChange(data));
 
         // Listen to state changes for reactive rendering
         this.watchState('navigation.currentLayer', (layer) => {
@@ -117,6 +124,80 @@ export class DomRendererPlugin extends BasePlugin {
 
         this.layerManager = null;
         this.container = null;
+    }
+
+    // ========================================
+    // Cognitive State Adaptation
+    // ========================================
+
+    _onCognitiveStateChange(data) {
+        const { from, to } = data;
+        this.cognitiveState = to;
+
+        this.log(`🎨 Adapting rendering for state: ${to}`);
+
+        // Update CSS classes on container
+        if (this.container) {
+            this.container.classList.remove(
+                'state-frustrated',
+                'state-concentrated',
+                'state-exploring',
+                'state-learning',
+                'state-neutral'
+            );
+            this.container.classList.add(`state-${to}`);
+        }
+
+        // Adjust animation speeds
+        switch (to) {
+            case 'frustrated':
+                // Slower, calmer animations
+                this.transitionSpeedMultiplier = 1.5;
+                this._applyAnimationSpeed(this.transitionSpeedMultiplier);
+                this.log('Slowed animations by 50% (frustrated)');
+                break;
+
+            case 'concentrated':
+                // Faster, snappier animations
+                this.transitionSpeedMultiplier = 0.6;
+                this._applyAnimationSpeed(this.transitionSpeedMultiplier);
+                this.log('Sped up animations by 40% (concentrated)');
+                break;
+
+            case 'exploring':
+                // Normal speed
+                this.transitionSpeedMultiplier = 1.0;
+                this._applyAnimationSpeed(this.transitionSpeedMultiplier);
+                break;
+
+            case 'learning':
+                // Slightly slower for clarity
+                this.transitionSpeedMultiplier = 1.2;
+                this._applyAnimationSpeed(this.transitionSpeedMultiplier);
+                this.log('Slowed animations by 20% (learning)');
+                break;
+
+            default:
+                // Neutral
+                this.transitionSpeedMultiplier = 1.0;
+                this._applyAnimationSpeed(1.0);
+        }
+
+        // Emit for other systems to react
+        this.emit('renderer:cognitive_adapted', {
+            state: to,
+            speedMultiplier: this.transitionSpeedMultiplier
+        });
+    }
+
+    _applyAnimationSpeed(multiplier) {
+        const baseDuration = this.getConfig('transitionDuration', 600);
+        const adjustedDuration = baseDuration * multiplier;
+
+        // Update CSS variable for all transitions
+        if (this.container) {
+            this.container.style.setProperty('--transition-duration', `${adjustedDuration}ms`);
+        }
     }
 
     // ========================================

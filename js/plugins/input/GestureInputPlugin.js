@@ -74,6 +74,9 @@ export class GestureInputPlugin extends BasePlugin {
         // Listen for idle system events
         this.on('idle:start', () => this._pauseTracking());
         this.on('idle:end', () => this._resumeTracking());
+
+        // Listen for cognitive state changes
+        this.on('cognitive_state:change', (data) => this._onCognitiveStateChange(data));
     }
 
     async onStart() {
@@ -258,6 +261,21 @@ export class GestureInputPlugin extends BasePlugin {
         }
 
         this.setPluginState('paused', false);
+    }
+
+    // ========================================
+    // Cognitive State Adaptation
+    // ========================================
+
+    _onCognitiveStateChange(data) {
+        const { to } = data;
+        
+        this.log(`🧠 Adapting gesture input for state: ${to}`);
+
+        // Propagate to GridLock if available
+        if (this.gestureDetector && this.gestureDetector.gridLock) {
+            this.gestureDetector.gridLock.setCognitiveState(to);
+        }
     }
 
     // ========================================

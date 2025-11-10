@@ -3,7 +3,7 @@
 # ============================================
 # Optimized plugin-based configuration with schema validation
 # Schema: config.schema.json
-# Version: 2.0.0 (Post Phase 3 Optimization)
+# Version: 2.0.0 (Post Phase 4 Optimization and cognitive intelligence system integration)
 
 # ============================================
 # PLUGINS - Core & Plugin Architecture
@@ -100,6 +100,64 @@ plugins:
     options:
       idle_timeout_ms: 15000              # 15 seconds
       check_interval_ms: 1000             # Check every second
+
+  # ===== INTELLIGENCE PLUGINS (Priority: 60) =====
+
+  - name: "CognitiveModelPlugin"
+    enabled: true
+    priority: 60
+    options:
+      # Session history
+      history_window_size: 50
+      state_switch_threshold: 3           # Signals needed to switch state
+
+      # Frustration detection
+      frustration_error_rate: 0.40        # 40% error rate triggers
+      frustration_time_window_ms: 5000    # 5s window for error clusters
+      frustration_cluster_size: 3         # 3+ errors in cluster
+
+      # Concentration detection
+      concentration_speed_threshold_ms: 400     # Actions faster than 400ms
+      concentration_success_rate: 0.90          # 90% success required
+      concentration_consistency: 0.85           # Timing consistency
+
+      # Exploration detection
+      exploration_variety_threshold: 0.60       # 60% action variety
+      exploration_pause_threshold_ms: 1000      # 1s pauses indicate thinking
+
+      # Learning detection
+      learning_improvement_window: 20           # Compare over 20 actions
+      learning_improvement_threshold: 0.15      # 15% improvement
+
+  - name: "IntentPredictorPlugin"
+    enabled: true
+    priority: 60
+    options:
+      # Prediction confidence thresholds
+      min_confidence_to_predict: 0.70     # 70% minimum
+      stable_confidence_threshold: 0.95   # 95% = very stable
+      pre_render_threshold: 0.85          # 85% = pre-render target
+
+      # Trajectory sampling
+      sample_rate_ms: 50                  # Sample every 50ms
+      min_samples_for_prediction: 3       # Need 3+ samples
+
+      # Signature matching weights
+      velocity_weight: 0.4
+      direction_weight: 0.4
+      acceleration_weight: 0.2
+
+      # Adaptive thresholds per cognitive state
+      adaptive_thresholds:
+        frustrated:
+          min_confidence: 0.60
+          early_prediction_bonus: 0.1
+        concentrated:
+          min_confidence: 0.75
+          velocity_weight: 0.5
+        exploring:
+          min_confidence: 0.50
+          stable_threshold: 0.90
 
   # ===== LOGIC PLUGINS (Priority: 50) =====
 
