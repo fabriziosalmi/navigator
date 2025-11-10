@@ -69,10 +69,13 @@ describe('KeyboardPlugin', () => {
     it('should clean up on destroy', async () => {
       await core.registerPlugin(plugin).init();
       await core.start();
+      
+      // Spy BEFORE destroy
+      const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+      
       await core.destroy();
 
-      // Verify no listeners remain
-      const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+      // Verify listeners were removed
       expect(removeEventListenerSpy).toHaveBeenCalled();
     });
   });

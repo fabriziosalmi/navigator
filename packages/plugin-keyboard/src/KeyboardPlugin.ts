@@ -85,6 +85,8 @@ export class KeyboardPlugin implements INavigatorPlugin {
   }
 
   async destroy?(): Promise<void> {
+    // Ensure listeners are removed if still running
+    await this.stop?.();
     this.pressedKeys.clear();
     this.core = null;
   }
