@@ -4,6 +4,7 @@
  */
 
 import { errorHandler } from './ErrorHandler.js';
+import { configLoader, getConfig } from './ConfigLoader.js';
 import { AudioManager } from './AudioManager.js';
 import { LayerManager } from './LayerManager.js';
 import { GridLockSystem } from './GridLockSystem.js';
@@ -64,6 +65,82 @@ const audioManager = new AudioManager();
 
 // Initialize Adaptive Navigation System
 const adaptiveNav = new AdaptiveNavigationSystem();
+
+/**
+ * Apply configuration values from YAML to existing CONFIG object
+ * This bridges config.yaml with legacy CONFIG usage
+ */
+function applyConfigValues() {
+    console.log('🔧 Applying configuration values...');
+    
+    // Apply performance settings
+    CONFIG.performance = CONFIG.performance || {};
+    CONFIG.performance.targetFPS = getConfig('performance.target_fps', 60);
+    CONFIG.performance.idleTimeout = getConfig('performance.idle_timeout_ms', 15000);
+    
+    // Apply gesture settings
+    CONFIG.camera = CONFIG.camera || {};
+    CONFIG.camera.minDetectionConfidence = getConfig('gestures.detection.min_detection_confidence', 0.7);
+    CONFIG.camera.minTrackingConfidence = getConfig('gestures.detection.min_tracking_confidence', 0.5);
+    CONFIG.camera.modelComplexity = getConfig('gestures.detection.model_complexity', 1);
+    CONFIG.camera.maxNumHands = getConfig('gestures.detection.max_num_hands', 1);
+    
+    // Apply navigation settings
+    CONFIG.navigation = CONFIG.navigation || {};
+    CONFIG.navigation.transitionDuration = getConfig('navigation.cards.transition_duration_ms', 600);
+    CONFIG.navigation.momentumEnabled = getConfig('navigation.momentum.enabled', true);
+    CONFIG.navigation.momentumFriction = getConfig('navigation.momentum.friction', 0.92);
+    
+    // Apply gesture recognition
+    CONFIG.gestures = CONFIG.gestures || {};
+    CONFIG.gestures.minSwipeDistance = getConfig('gestures.recognition.swipe.min_distance', 0.08);
+    CONFIG.gestures.maxSwipeTime = getConfig('gestures.recognition.swipe.max_time_ms', 800);
+    CONFIG.gestures.swipeCooldown = getConfig('gestures.recognition.swipe.cooldown_ms', 300);
+    CONFIG.gestures.thumbsUpDuration = getConfig('gestures.recognition.thumbs_up.hold_duration_ms', 1000);
+    CONFIG.gestures.confirmCooldown = getConfig('gestures.recognition.thumbs_up.cooldown_ms', 2000);
+    CONFIG.gestures.shakeThreshold = getConfig('gestures.recognition.shake.threshold_count', 3);
+    CONFIG.gestures.shakeTimeWindow = getConfig('gestures.recognition.shake.time_window_ms', 1500);
+    
+    // Apply grid lock settings
+    CONFIG.gridLock = CONFIG.gridLock || {};
+    CONFIG.gridLock.enabled = getConfig('gestures.grid_lock.enabled', true);
+    CONFIG.gridLock.cellSize = getConfig('gestures.grid_lock.cell_size', 0.15);
+    CONFIG.gridLock.accumulatorDecay = getConfig('gestures.grid_lock.accumulator_decay', 0.85);
+    CONFIG.gridLock.intentThreshold = getConfig('gestures.grid_lock.intent_threshold', 0.3);
+    CONFIG.gridLock.deadZone = getConfig('gestures.grid_lock.dead_zone', 0.05);
+    
+    // Apply audio settings
+    CONFIG.audio = CONFIG.audio || {};
+    CONFIG.audio.enabled = getConfig('audio.enabled', true);
+    CONFIG.audio.masterVolume = getConfig('audio.master_volume', 0.3);
+    CONFIG.audio.spatialEnabled = getConfig('audio.spatial_audio.enabled', true);
+    CONFIG.audio.spatialRolloff = getConfig('audio.spatial_audio.rolloff_factor', 1.5);
+    
+    // Apply visual effects
+    CONFIG.visualEffects = CONFIG.visualEffects || {};
+    CONFIG.visualEffects.enabled = getConfig('visual_effects.enabled', true);
+    CONFIG.visualEffects.performanceMode = getConfig('visual_effects.performance_mode', 'medium');
+    CONFIG.visualEffects.particleCount = getConfig('visual_effects.particles.max_count', 100);
+    CONFIG.visualEffects.blurAmount = getConfig('visual_effects.blur.inactive_cards_px', 12);
+    
+    // Apply UI settings
+    CONFIG.ui = CONFIG.ui || {};
+    CONFIG.ui.debug = getConfig('ui.debug.enabled', false);
+    CONFIG.ui.consoleLogging = getConfig('ui.debug.console_logging', true);
+    
+    // Apply LOD settings
+    CONFIG.lod = CONFIG.lod || {};
+    CONFIG.lod.enabled = getConfig('performance.lod.enabled', true);
+    CONFIG.lod.nearDistance = getConfig('performance.lod.near_distance', 2);
+    CONFIG.lod.mediumDistance = getConfig('performance.lod.medium_distance', 4);
+    
+    console.log('✅ Configuration applied:', {
+        fps: CONFIG.performance.targetFPS,
+        gestureConf: CONFIG.camera.minDetectionConfidence,
+        audio: CONFIG.audio.masterVolume,
+        debug: CONFIG.ui.debug
+    });
+}
 
 // Move adaptive HUD to quantum HUD
 const adaptiveHUD = new AdaptiveNavigationHUD(adaptiveNav);
@@ -200,6 +277,9 @@ let lastNavigationTime = 0;
 let velocityDecayTimer = null;
 
 function updateDynamicBackground() {
+    // Skip if dynamic background is disabled
+    if (!dynamicBg) return;
+    
     const now = Date.now();
     const timeSinceLastNav = now - lastNavigationTime;
 
@@ -210,19 +290,21 @@ function updateDynamicBackground() {
         navigationVelocity = Math.max(0, navigationVelocity - 0.5);
     }
 
-    // Apply effects based on velocity
-    if (navigationVelocity > 5) {
-        dynamicBg.classList.add('high-velocity');
-        dynamicBg.classList.add('active');
-    } else if (navigationVelocity > 2) {
-        dynamicBg.classList.remove('high-velocity');
-        dynamicBg.classList.add('active');
-    } else if (navigationVelocity > 0.5) {
-        dynamicBg.classList.remove('high-velocity');
-        dynamicBg.classList.add('active');
-    } else {
-        dynamicBg.classList.remove('high-velocity');
-        dynamicBg.classList.remove('active');
+    // Apply effects based on velocity (only if element exists)
+    if (dynamicBg) {
+        if (navigationVelocity > 5) {
+            dynamicBg.classList.add('high-velocity');
+            dynamicBg.classList.add('active');
+        } else if (navigationVelocity > 2) {
+            dynamicBg.classList.remove('high-velocity');
+            dynamicBg.classList.add('active');
+        } else if (navigationVelocity > 0.5) {
+            dynamicBg.classList.remove('high-velocity');
+            dynamicBg.classList.add('active');
+        } else {
+            dynamicBg.classList.remove('high-velocity');
+            dynamicBg.classList.remove('active');
+        }
     }
 
     // Clear existing timer
@@ -234,8 +316,10 @@ function updateDynamicBackground() {
     velocityDecayTimer = setTimeout(() => {
         if (Date.now() - lastNavigationTime > 2000) {
             navigationVelocity = 0;
-            dynamicBg.classList.remove('high-velocity');
-            dynamicBg.classList.remove('active');
+            if (dynamicBg) {
+                dynamicBg.classList.remove('high-velocity');
+                dynamicBg.classList.remove('active');
+            }
         }
     }, 2000);
 }
@@ -997,6 +1081,14 @@ let cameraStarted = false;
 
 async function startExperience() {
     try {
+        // Load configuration first
+        console.log('📦 Loading configuration...');
+        await configLoader.load();
+        configLoader.validate();
+        
+        // Apply config values to existing CONFIG object
+        applyConfigValues();
+        
         // Resume audio
         await audioManager.resume();
 

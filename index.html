@@ -149,21 +149,23 @@
 
     <!-- ===================================================
          BOTTOM HUD BAR - Fullwidth
-         Quantum HUD with Interface Status + Position + Navigation + Adaptive Progress
+         Organized in 5 columns: Input Methods | Position | Navigation | Gesture Status | Adaptive Progress
          =================================================== -->
     <div class="bottom-hud-bar">
-        <!-- Gesture LED Indicator -->
+        <!-- Gesture LED Indicator (floating) -->
         <div class="gesture-led" id="gesture-led"></div>
         
-        <!-- Interface Status (moved from top, compact version) -->
-        <div class="hud-panel compact-panel interface-status-compact">
+        <!-- Column 1: Input Methods & Interface Status -->
+        <div class="hud-panel compact-panel input-methods-panel">
+            <div class="panel-title">INPUT METHODS</div>
             <div id="interface-status-container">
                 <!-- InterfaceStatusHUD will mount here -->
             </div>
         </div>
         
-        <!-- Layer & Position Info -->
+        <!-- Column 2: Layer & Position Info -->
         <div class="hud-panel compact-panel position-info">
+            <div class="panel-title">POSITION</div>
             <div class="layer-display">
                 <span class="layer-name" id="hud-layer-name">Videos</span>
                 <span class="layer-meta" id="hud-layer-meta">Layer 1/6</span>
@@ -175,7 +177,7 @@
             </div>
         </div>
 
-        <!-- Central Navigation Controls -->
+        <!-- Column 3: Central Navigation Controls -->
         <div class="hud-panel nav-controls">
             <button class="hud-nav" id="prev-btn" data-action="prev" title="Previous card">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -199,7 +201,27 @@
             </button>
         </div>
 
-        <!-- Adaptive Level Progress -->
+        <!-- Column 4: Gesture System Status -->
+        <div class="hud-panel compact-panel gesture-status-panel">
+            <div class="panel-title">GESTURE SYSTEM</div>
+            <div class="gesture-status-content">
+                <div class="gesture-stat">
+                    <span class="stat-label">Hand</span>
+                    <span class="status-dot inactive" id="hand-status"></span>
+                    <span class="stat-value" id="hand-state">Searching</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Current</span>
+                    <span class="stat-value" id="gesture-type">None</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Grid Lock</span>
+                    <span class="stat-value" id="grid-lock">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 5: Adaptive Level Progress -->
         <div class="hud-panel compact-panel adaptive-display" id="adaptive-hud-quantum">
             <!-- Populated by AdaptiveNavigationHUD -->
         </div>
