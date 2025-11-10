@@ -6,6 +6,89 @@
 
 ---
 
+## 🧭 The Navigator Way: Three Core Principles
+
+Before diving into the recipes, understand the **architectural philosophy** that makes Navigator different from every other UI framework:
+
+### Principle #1: Input Plugins Capture, They Don't Act
+
+**What This Means**: Input plugins (keyboard, gesture, voice) have **one job only**: translate physical world inputs into standardized digital events on the Event Bus.
+
+- ✅ **They DO**: Detect keypresses, touches, voice commands
+- ✅ **They DO**: Emit standardized NIP (Navigator Intent Protocol) events
+- ❌ **They DON'T**: Know what your application does
+- ❌ **They DON'T**: Manipulate DOM or application state
+- ❌ **They DON'T**: Contain business logic
+
+**Example**: A `KeyboardPlugin` doesn't know if pressing "ArrowLeft" will navigate a carousel, move a 3D camera, or undo text. It just emits `intent:navigate({ direction: 'left' })`.
+
+### Principle #2: Your Application Listens to Intents, Not Inputs
+
+**What This Means**: Your application code **never** directly listens to `keydown`, `touchstart`, or `voice` events. Instead, it subscribes to **intent events** from the Event Bus.
+
+- ✅ **You DO**: Listen to `intent:navigate`, `intent:select`, `intent:media_play`
+- ✅ **You DO**: Update your application state in response to intents
+- ❌ **You DON'T**: Use `document.addEventListener('keydown', ...)`
+- ❌ **You DON'T**: Put input detection logic in your components
+
+**Why This Matters**: Your carousel component works identically whether controlled by keyboard, gestures, or voice. Change input method = **zero code changes** in your app.
+
+### Principle #3: The Core is the Decoupled Heart
+
+**What This Means**: All communication flows through the `NavigatorCore` Event Bus. Input plugins and your application **never directly communicate**.
+
+```
+┌─────────────────┐
+│  Keyboard      │───┐
+│  Plugin        │   │
+└─────────────────┘   │
+                      ▼
+┌─────────────────┐   ┌──────────────┐   ┌─────────────────┐
+│  Gesture       │──▶│ Navigator    │──▶│  Your App      │
+│  Plugin        │   │ Core         │   │  (React/Vue/   │
+└─────────────────┘   │ (Event Bus)  │   │   Vanilla)     │
+                      └──────────────┘   └─────────────────┘
+┌─────────────────┐   ▲
+│  Voice         │───┘
+│  Plugin        │
+└─────────────────┘
+```
+
+**The Result**: 
+- 🔄 **Hot-swappable inputs**: Change `KeyboardPlugin` to `GesturePlugin` without touching app code
+- 🧪 **Testable**: Mock the Event Bus to test your app without real input devices
+- 🎯 **Maintainable**: Each layer has a single responsibility
+- 🚀 **Scalable**: Add new input methods (gamepad, eye-tracking) without refactoring
+
+---
+
+## 📚 The Three-Layer Architecture in Every Recipe
+
+Every recipe in this cookbook follows the same pattern:
+
+```typescript
+// LAYER 1: Input Plugins (Capture)
+const keyboardPlugin = new KeyboardPlugin();  // Captures keypresses
+const gesturePlugin = new GesturePlugin();    // Captures touch/swipes
+
+// LAYER 2: Core (Orchestrate)
+const core = new NavigatorCore();
+core.registerPlugin(keyboardPlugin);
+core.registerPlugin(gesturePlugin);
+
+// LAYER 3: Application (Act)
+core.eventBus.on('intent:navigate', (payload) => {
+  // YOUR business logic here
+  // Could be: navigate carousel, rotate 3D object, change video timestamp
+});
+
+core.start();
+```
+
+**This is not just a pattern. It's a philosophy.** Once you internalize this, you'll see how it makes complex UIs trivial to build and maintain.
+
+---
+
 ## Table of Contents
 
 1. [**Getting Started with React**](#getting-started-with-react) ⭐ **START HERE**
@@ -281,24 +364,109 @@ Now that you've mastered the basics, try these challenges:
 
 ---
 
-## Image Carousel with Gestures
+## Recipe #2: Image Carousel with Touch Gestures
 
-**Goal**: Build a touch-controlled image carousel with swipe gestures.
+**Goal**: Build a touch-controlled image carousel that demonstrates the Navigator Way—plugins capture, core orchestrates, app acts.
 
-### Step 1: Setup
+> **Architectural Focus**: This recipe shows how to separate **input detection** (swipe gestures) from **business logic** (carousel navigation). The `TouchGesturePlugin` is completely reusable—it could control a carousel, a menu, or a 3D scene without modification.
+
+---
+
+### 🎬 The Result
+
+A smooth, gesture-controlled carousel where:
+- ← **Swipe left** = Next image
+- → **Swipe right** = Previous image
+- 🎯 **Plugin** = Generic touch detector (knows nothing about carousels)
+- 🧠 **App** = Carousel logic (knows nothing about touch events)
+
+---
+
+### 🧂 Ingredients
 
 ```bash
-npx @navigator.menu/cli create-app image-carousel
-cd image-carousel
-npm install
+@navigator.menu/core                    # The orchestrator
+@navigator.menu/plugin-touch-gesture    # Generic swipe detector (we'll create this!)
 ```
 
-### Step 2: Add Images
+---
+
+### 👨‍🍳 Step 1: Create the Generic TouchGesturePlugin
+
+This plugin's **only responsibility** is detecting swipes and emitting standardized navigation intents.
 
 ```javascript
-// js/main.js
-import { CoreMock } from '@navigator.menu/pdk/testing';
-import { BasePlugin, NipValidator } from '@navigator.menu/pdk';
+// plugins/TouchGesturePlugin.js
+import { BasePlugin } from '@navigator.menu/core';
+
+export class TouchGesturePlugin extends BasePlugin {
+  constructor() {
+    super('touch-gesture');
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+    this.minSwipeDistance = 50;
+  }
+
+  async init(core) {
+    this.core = core;
+    
+    // LAYER 1: Capture raw input
+    document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+    document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+    
+    return Promise.resolve();
+  }
+
+  handleTouchStart(e) {
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+  }
+
+  handleTouchEnd(e) {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const diffX = this.touchStartX - touchEndX;
+    const diffY = this.touchStartY - touchEndY;
+    
+    // Detect horizontal swipe (ignore vertical scrolling)
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > this.minSwipeDistance) {
+      const direction = diffX > 0 ? 'left' : 'right';
+      
+      // LAYER 2: Emit standardized intent (NOT carousel-specific!)
+      this.core.eventBus.emit('intent:navigate', {
+        target: 'element',
+        direction: direction,
+        source: 'touch_swipe',
+        distance: Math.abs(diffX),
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  async destroy() {
+    document.removeEventListener('touchstart', this.handleTouchStart);
+    document.removeEventListener('touchend', this.handleTouchEnd);
+  }
+}
+```
+
+**🎯 Notice**: This plugin doesn't know what a "carousel" is. It just detects swipes and emits `intent:navigate`. You could use this same plugin to control a 3D scene, a menu, or a game.
+
+---
+
+### 👨‍🍳 Step 2: Build the Carousel Application Layer
+
+Now the **business logic**—this is where carousel-specific code lives.
+
+```javascript
+// main.js
+import { NavigatorCore } from '@navigator.menu/core';
+import { TouchGesturePlugin } from './plugins/TouchGesturePlugin.js';
+
+// ==========================================
+// LAYER 3: APPLICATION LOGIC (Carousel-specific)
+// ==========================================
 
 const images = [
   'https://picsum.photos/800/600?random=1',
@@ -309,125 +477,187 @@ const images = [
 
 let currentIndex = 0;
 
-class GestureCarouselPlugin extends BasePlugin {
-  constructor() {
-    super('gesture-carousel');
+function navigate(direction) {
+  if (direction === 'left') {
+    currentIndex = (currentIndex + 1) % images.length;
+  } else if (direction === 'right') {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
   }
-
-  async init() {
-    // Listen for swipe events
-    document.addEventListener('touchstart', this.handleTouchStart.bind(this));
-    document.addEventListener('touchend', this.handleTouchEnd.bind(this));
-  }
-
-  handleTouchStart(e) {
-    this.touchStartX = e.touches[0].clientX;
-  }
-
-  handleTouchEnd(e) {
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = this.touchStartX - touchEndX;
-    
-    if (Math.abs(diff) > 50) { // Minimum swipe distance
-      const direction = diff > 0 ? 'left' : 'right';
-      this.emitSwipeEvent(direction);
-    }
-  }
-
-  emitSwipeEvent(direction) {
-    const event = NipValidator.createEvent(
-      `input:gesture:swipe_${direction}`,
-      this.name,
-      {
-        distance: 100,
-        duration_ms: 300,
-        velocity: 0.5,
-        confidence: 0.9
-      }
-    );
-    
-    // Trigger navigation
-    if (direction === 'left') {
-      currentIndex = (currentIndex + 1) % images.length;
-    } else {
-      currentIndex = (currentIndex - 1 + images.length) % images.length;
-    }
-    
-    updateCarousel();
-  }
+  updateCarousel();
 }
 
 function updateCarousel() {
   const img = document.getElementById('carousel-image');
+  const indexDisplay = document.getElementById('carousel-index');
+  
   img.src = images[currentIndex];
+  indexDisplay.textContent = `${currentIndex + 1} / ${images.length}`;
+  
+  // Nice animation effect
   img.style.transform = 'scale(0.95)';
   setTimeout(() => {
     img.style.transform = 'scale(1)';
   }, 100);
 }
 
-// Initialize
-const core = new CoreMock();
-const plugin = new GestureCarouselPlugin();
+// ==========================================
+// INITIALIZE NAVIGATOR
+// ==========================================
 
-core.registerPlugin(plugin);
-core.init().then(() => {
-  console.log('Carousel ready!');
+const core = new NavigatorCore();
+core.registerPlugin(new TouchGesturePlugin());
+
+// LAYER 3: Subscribe to intents (not raw touch events!)
+core.eventBus.on('intent:navigate', (payload) => {
+  if (payload.source === 'touch_swipe') {
+    navigate(payload.direction);
+  }
+});
+
+// Start the engine
+core.start().then(() => {
+  console.log('✅ Carousel ready! Swipe left/right to navigate.');
   updateCarousel();
 });
+
+// Optional: Add keyboard support by just registering another plugin!
+// import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+// core.registerPlugin(new KeyboardPlugin());
+// 
+// core.eventBus.on('intent:navigate', (payload) => {
+//   if (payload.source === 'keyboard') {
+//     navigate(payload.direction);
+//   }
+// });
 ```
 
-### Step 3: HTML Structure
+---
+
+### 👨‍🍳 Step 3: HTML Structure
 
 ```html
 <!-- index.html -->
-<div class="carousel-container">
-  <img id="carousel-image" src="" alt="Carousel">
-  <div class="carousel-controls">
-    <button onclick="navigate(-1)">←</button>
-    <span id="carousel-index">1 / 4</span>
-    <button onclick="navigate(1)">→</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigator Carousel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-container {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    #carousel-image {
+      width: 100%;
+      border-radius: 16px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      user-select: none;
+    }
+
+    .carousel-controls {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .carousel-controls button {
+      font-size: 2rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .carousel-controls button:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+
+    #carousel-index {
+      font-weight: 600;
+      min-width: 80px;
+    }
+
+    .hint {
+      margin-top: 1rem;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="carousel-container">
+    <img id="carousel-image" src="" alt="Carousel">
+    <div class="carousel-controls">
+      <button onclick="navigate('right')">←</button>
+      <span id="carousel-index">1 / 4</span>
+      <button onclick="navigate('left')">→</button>
+    </div>
+    <div class="hint">
+      💡 Try swiping left/right on mobile!
+    </div>
   </div>
-</div>
-
-<style>
-.carousel-container {
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-#carousel-image {
-  width: 100%;
-  border-radius: 12px;
-  transition: transform 0.2s ease;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.carousel-controls {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-}
-
-.carousel-controls button {
-  font-size: 2rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.carousel-controls button:hover {
-  opacity: 1;
-}
-</style>
+  
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
 ```
 
-**Try it**: Run `npm run dev` and swipe left/right on mobile or drag on desktop!
+---
+
+### 🍽️ What You Just Built
+
+Congratulations! You've built a carousel following **The Navigator Way**:
+
+1. ✅ **TouchGesturePlugin** (Input Layer): Detects swipes, emits `intent:navigate`
+2. ✅ **NavigatorCore** (Orchestration Layer): Routes events via Event Bus
+3. ✅ **Carousel Logic** (Application Layer): Listens to intents, updates images
+
+**The Power Move**: Want to add keyboard support?
+
+```javascript
+// Just add this - carousel code stays unchanged!
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+core.registerPlugin(new KeyboardPlugin());
+
+core.eventBus.on('intent:navigate', (payload) => {
+  navigate(payload.direction);  // Works for BOTH touch and keyboard!
+});
+```
+
+**Zero refactoring needed**. That's the magic of decoupled architecture.
+
+---
+
+### 💡 Key Takeaways
+
+- 🔌 **Plugin is generic**: `TouchGesturePlugin` knows nothing about carousels
+- 🧠 **App owns logic**: Carousel navigation lives in application layer
+- 🎯 **Intent-based**: App listens to `intent:navigate`, not `touchend`
+- 🔄 **Multi-modal ready**: Add keyboard/voice without touching carousel code
 
 ---
 
