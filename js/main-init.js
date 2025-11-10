@@ -71,7 +71,7 @@ const adaptiveNav = new AdaptiveNavigationSystem();
  * This bridges config.yaml with legacy CONFIG usage
  */
 function applyConfigValues() {
-    console.log('🔧 Applying configuration values...');
+    // console.log('🔧 Applying configuration values...');
     
     // Apply performance settings
     CONFIG.performance = CONFIG.performance || {};
@@ -134,7 +134,7 @@ function applyConfigValues() {
     CONFIG.lod.nearDistance = getConfig('performance.lod.near_distance', 2);
     CONFIG.lod.mediumDistance = getConfig('performance.lod.medium_distance', 4);
     
-    console.log('✅ Configuration applied:', {
+    // console.log('✅ Configuration applied:', {
         fps: CONFIG.performance.targetFPS,
         gestureConf: CONFIG.camera.minDetectionConfidence,
         audio: CONFIG.audio.masterVolume,
@@ -1114,7 +1114,7 @@ let cameraStarted = false;
 async function startExperience() {
     try {
         // Load configuration first
-        console.log('📦 Loading configuration...');
+        // console.log('📦 Loading configuration...');
         await configLoader.load();
         configLoader.validate();
         
@@ -1174,7 +1174,7 @@ async function startExperience() {
         addDebugEntry('🚀 System initialized', 'layer');
         addDebugEntry('📹 Camera started', 'info');
 
-        console.log('Camera and audio started successfully');
+        // console.log('Camera and audio started successfully');
 
     } catch (error) {
         console.error('Error starting experience:', error);
@@ -1189,4 +1189,4 @@ document.getElementById('start-btn').addEventListener('click', startExperience);
 // Initial debug entry
 addDebugEntry('💫 Aetherium Navigator loaded', 'info');
 
-console.log('Aetherium Navigator initialized with modular architecture');
+// console.log('Aetherium Navigator initialized with modular architecture');

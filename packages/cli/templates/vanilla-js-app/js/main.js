@@ -33,13 +33,13 @@ function init() {
     `;
     
     cardElement.addEventListener('click', () => {
-      console.log('Card clicked:', card.title);
+      // console.log('Card clicked:', card.title);
     });
     
     container.appendChild(cardElement);
   });
   
-  console.log('Navigator app initialized!');
+  // console.log('Navigator app initialized!');
 }
 
 // Initialize when DOM is ready

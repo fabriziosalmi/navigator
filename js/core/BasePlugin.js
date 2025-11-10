@@ -245,7 +245,7 @@ export class BasePlugin {
      */
     log(...args) {
         if (this.core && this.core.config.debugMode) {
-            console.log(`[${this.name}]`, ...args);
+            // console.log(`[${this.name}]`, ...args);
         }
     }
 

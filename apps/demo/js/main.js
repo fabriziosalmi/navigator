@@ -13,7 +13,7 @@ class DemoPlugin extends BasePlugin {
   }
 
   async init() {
-    console.log('✅ DemoPlugin initialized!');
+    // console.log('✅ DemoPlugin initialized!');
     
     // Create NIP-compliant event
     const event = NipValidator.createEvent(
@@ -22,11 +22,11 @@ class DemoPlugin extends BasePlugin {
       { message: 'Demo plugin is ready!' }
     );
     
-    console.log('📤 Event created:', event);
+    // console.log('📤 Event created:', event);
   }
 
   async start() {
-    console.log('🚀 DemoPlugin started!');
+    // console.log('🚀 DemoPlugin started!');
   }
 }
 
@@ -63,7 +63,7 @@ function init() {
     
     // Demo: debounced click handler
     const handleClick = debounce(() => {
-      console.log('Card clicked (debounced):', card.title);
+      // console.log('Card clicked (debounced):', card.title);
       cardElement.style.transform = `scale(${clamp(1.05, 0.95, 1.1)})`;
       setTimeout(() => {
         cardElement.style.transform = '';
@@ -81,12 +81,12 @@ function init() {
   core.registerPlugin(plugin, { priority: 10 });
   
   core.init().then(() => {
-    console.log('✨ Navigator Core initialized with DemoPlugin!');
+    // console.log('✨ Navigator Core initialized with DemoPlugin!');
     core.start();
   });
   
-  console.log('🎯 Navigator Demo App initialized!');
-  console.log('📦 Using @navigator.menu/pdk v2.0.0');
+  // console.log('🎯 Navigator Demo App initialized!');
+  // console.log('📦 Using @navigator.menu/pdk v2.0.0');
 }
 
 // Initialize when DOM is ready

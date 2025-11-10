@@ -77,7 +77,7 @@ export class VoiceCommandModule {
         // Create visual indicator
         this.createIndicator();
         
-        console.log('VoiceCommandModule initialized');
+        // console.log('VoiceCommandModule initialized');
     }
     
     /**
@@ -146,7 +146,7 @@ export class VoiceCommandModule {
      */
     handleStart() {
         this.isListening = true;
-        console.log('Voice recognition started');
+        // console.log('Voice recognition started');
         
         // Show indicator with listening class
         if (this.indicator) {
@@ -164,7 +164,7 @@ export class VoiceCommandModule {
      */
     handleEnd() {
         this.isListening = false;
-        console.log('Voice recognition ended');
+        // console.log('Voice recognition ended');
         
         // Hide indicator by removing listening class
         if (this.indicator) {
@@ -194,12 +194,12 @@ export class VoiceCommandModule {
         }
         
         const transcript = result[0].transcript.toLowerCase().trim();
-        console.log('Voice command received:', transcript);
+        // console.log('Voice command received:', transcript);
         
         // Check cooldown
         const now = Date.now();
         if (now - this.lastCommandTime < this.commandCooldown) {
-            console.log('Command ignored (cooldown)');
+            // console.log('Command ignored (cooldown)');
             return;
         }
         
@@ -213,7 +213,7 @@ export class VoiceCommandModule {
             // Visual feedback
             this.flashIndicator();
         } else {
-            console.log('Command not recognized:', transcript);
+            // console.log('Command not recognized:', transcript);
         }
     }
     
@@ -262,7 +262,7 @@ export class VoiceCommandModule {
      * @param {string} action - Command to execute
      */
     executeCommand(action) {
-        console.log('Executing voice command:', action);
+        // console.log('Executing voice command:', action);
         
         // Activate gesture LED
         if (this.gestureLED) {
@@ -388,6 +388,6 @@ export class VoiceCommandModule {
             this.recognition = null;
         }
         
-        console.log('VoiceCommandModule destroyed');
+        // console.log('VoiceCommandModule destroyed');
     }
 }

@@ -8,9 +8,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -44,7 +44,7 @@
     "@types/node": "^20.17.10",
     "@types/react": "^18.3.18",
     "@vitest/coverage-v8": "^1.6.1",
-    "happy-dom": "^15.11.7",
+    "happy-dom": "^20.0.10",
     "react": "^18.3.1",
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",

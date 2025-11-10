@@ -45,7 +45,7 @@ export class NavigationHistoryHUD {
             </svg>`
         };
         
-        console.log('NavigationHistoryHUD initialized');
+        // console.log('NavigationHistoryHUD initialized');
     }
     
     /**

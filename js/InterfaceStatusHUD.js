@@ -59,7 +59,7 @@ export class InterfaceStatusHUD {
         const targetContainer = document.getElementById('interface-status-container');
         if (targetContainer) {
             targetContainer.appendChild(this.container);
-            console.log('🎛️ Interface Status HUD mounted in left panel');
+            // console.log('🎛️ Interface Status HUD mounted in left panel');
         } else {
             // Fallback: try old container
             const topHudContainer = document.querySelector('.top-hud-container');
@@ -75,7 +75,7 @@ export class InterfaceStatusHUD {
             this.interfaces[key].element = this.container.querySelector(`[data-interface="${key}"]`);
         });
         
-        console.log('🎛️ Interface Status HUD initialized');
+        // console.log('🎛️ Interface Status HUD initialized');
     }
     
     setupListeners() {

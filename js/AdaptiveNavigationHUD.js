@@ -66,7 +66,7 @@ export class AdaptiveNavigationHUD {
             this.onLevelChange(newLevel, oldLevel, changeType);
         };
         
-        console.log('📊 Adaptive Navigation HUD initialized');
+        // console.log('📊 Adaptive Navigation HUD initialized');
     }
     
     /**

@@ -51,7 +51,7 @@ export class ErrorHandler {
             });
         };
 
-        console.log('✅ ErrorHandler: Global error handlers initialized');
+        // console.log('✅ ErrorHandler: Global error handlers initialized');
     }
 
     /**

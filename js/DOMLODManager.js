@@ -50,7 +50,7 @@ export class DOMLODManager {
         this.totalCards = this.cards.length;
         // Reduce console spam - only log once
         if (!this.initialized) {
-            console.log(`DOMLODManager initialized with ${this.totalCards} cards`);
+            // console.log(`DOMLODManager initialized with ${this.totalCards} cards`);
             this.initialized = true;
         }
     }

@@ -63,7 +63,7 @@ export class EventBus {
         }
 
         if (this.debugMode) {
-            console.log(`[EventBus] Subscribed to "${eventName}"`, handler.name || 'anonymous');
+            // console.log(`[EventBus] Subscribed to "${eventName}"`, handler.name || 'anonymous');
         }
 
         // Return unsubscribe function
@@ -94,7 +94,7 @@ export class EventBus {
         }
 
         if (this.debugMode) {
-            console.log(`[EventBus] Unsubscribed from "${eventName}"`);
+            // console.log(`[EventBus] Unsubscribed from "${eventName}"`);
         }
     }
 
@@ -138,7 +138,7 @@ export class EventBus {
         this._addToHistory(processedEvent);
 
         if (this.debugMode) {
-            console.log(`[EventBus] Emit "${eventName}"`, payload);
+            // console.log(`[EventBus] Emit "${eventName}"`, payload);
         }
 
         let handlersCalled = 0;
@@ -254,7 +254,7 @@ export class EventBus {
         this.listeners.clear();
         this.wildcardListeners.clear();
         if (this.debugMode) {
-            console.log('[EventBus] All listeners cleared');
+            // console.log('[EventBus] All listeners cleared');
         }
     }
 

@@ -39,7 +39,7 @@ export class CarouselMomentum {
         this.velocityHistory = [];
         this.maxHistoryLength = 5;
         
-        console.log('🎡 Carousel Momentum Controller initialized');
+        // console.log('🎡 Carousel Momentum Controller initialized');
     }
     
     /**
@@ -113,7 +113,7 @@ export class CarouselMomentum {
         const isFastSwipe = Math.abs(avgVelocity) >= this.config.velocityThreshold;
         const isQuickSwipe = totalTime <= this.config.swipeTimeout;
         
-        console.log('🎡 Swipe detected:', {
+        // console.log('🎡 Swipe detected:', {
             distance: totalDistance.toFixed(0),
             velocity: avgVelocity.toFixed(3),
             time: totalTime,
@@ -151,7 +151,7 @@ export class CarouselMomentum {
             viewport.classList.add('momentum-active');
         }
         
-        console.log('🎡 Momentum activated! Initial velocity:', this.momentumVelocity.toFixed(3));
+        // console.log('🎡 Momentum activated! Initial velocity:', this.momentumVelocity.toFixed(3));
         
         // Start animation loop
         this.animateMomentum();
@@ -189,7 +189,7 @@ export class CarouselMomentum {
         
         // Check if we should stop (velocity too low)
         if (Math.abs(this.momentumVelocity) < this.config.snapThreshold) {
-            console.log('🎡 Momentum stopped - snapping to card');
+            // console.log('🎡 Momentum stopped - snapping to card');
             this.stopMomentum();
             return;
         }

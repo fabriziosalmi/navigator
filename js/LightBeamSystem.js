@@ -10,7 +10,7 @@ export class LightBeamSystem {
         
         // Disable if canvas not found (performance optimization)
         if (!this.canvas) {
-            console.log('⚡ Light Beam System: Canvas not found, system disabled for performance');
+            // console.log('⚡ Light Beam System: Canvas not found, system disabled for performance');
             this.enabled = false;
             this.ctx = null;
             this.beams = [];
@@ -27,7 +27,7 @@ export class LightBeamSystem {
         // Start animation loop
         this.animate();
         
-        console.log('⚡ Light Beam System initialized (Akira style)');
+        // console.log('⚡ Light Beam System initialized (Akira style)');
     }
     
     resize() {

@@ -6,6 +6,7 @@
 
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
+import { logger, LogLevel } from './Logger.js';
 
 export class ConfigLoader {
     constructor() {
@@ -23,7 +24,7 @@ export class ConfigLoader {
             // Load config.yaml
             const configResponse = await fetch('./config.yaml');
             if (!configResponse.ok) {
-                console.warn('⚠️ config.yaml not found, using defaults');
+                logger.warn('config.yaml not found, using defaults');
                 this.config = this.defaultConfig;
                 return this.config;
             }
@@ -36,8 +37,8 @@ export class ConfigLoader {
             const isValid = this.validateConfig();
 
             if (!isValid) {
-                console.error('❌ Configuration validation failed');
-                console.error('Validation errors:', this.ajv.errors);
+                logger.error('Configuration validation failed');
+                logger.error('Validation errors', this.ajv.errors);
                 throw new Error('Invalid configuration');
             }
 
@@ -46,13 +47,13 @@ export class ConfigLoader {
                 this.applyPreset(this.config.active_preset);
             }
 
-            console.log('✅ Configuration loaded and validated from config.yaml');
-            console.log('📊 Active preset:', this.config.active_preset || 'none');
-            console.log('🔌 Plugins loaded:', this.getPluginList().length);
+            logger.info('Configuration loaded and validated from config.yaml');
+            logger.info('Active preset: ' + (this.config.active_preset || 'none'));
+            logger.info('Plugins loaded: ' + this.getPluginList().length);
 
             return this.config;
         } catch (error) {
-            console.error('❌ Error loading config.yaml:', error);
+            logger.error('Error loading config.yaml', error);
             this.config = this.defaultConfig;
             return this.config;
         }
@@ -65,14 +66,14 @@ export class ConfigLoader {
         try {
             const response = await fetch('./config.schema.json');
             if (!response.ok) {
-                console.warn('⚠️ config.schema.json not found, skipping validation');
+                logger.warn('config.schema.json not found, skipping validation');
                 return;
             }
 
             this.schema = await response.json();
-            console.log('✅ Schema loaded from config.schema.json');
+            logger.info('Schema loaded from config.schema.json');
         } catch (error) {
-            console.error('❌ Error loading schema:', error);
+            logger.error('Error loading schema', error);
         }
     }
 
@@ -81,7 +82,7 @@ export class ConfigLoader {
      */
     validateConfig() {
         if (!this.schema) {
-            console.warn('⚠️ No schema loaded, skipping validation');
+            logger.warn('No schema loaded, skipping validation');
             return true;
         }
 
@@ -89,7 +90,7 @@ export class ConfigLoader {
         const valid = validate(this.config);
 
         if (!valid) {
-            console.error('❌ Configuration validation errors:');
+            logger.error('Configuration validation errors:');
             
             // Build detailed error message
             const errorMessages = validate.errors.map(error => {
@@ -99,7 +100,7 @@ export class ConfigLoader {
                 return `${path}: ${message} ${params}`;
             }).join('\n  - ');
 
-            console.error(`  - ${errorMessages}`);
+            logger.error(`  - ${errorMessages}`);
 
             // Emit detailed error for ErrorHandler
             if (window.errorHandler) {
@@ -113,7 +114,7 @@ export class ConfigLoader {
             return false;
         }
 
-        console.log('✅ Configuration schema validation passed');
+        logger.info('Configuration schema validation passed');
         return true;
     }
 
@@ -156,11 +157,11 @@ export class ConfigLoader {
     applyPreset(presetName) {
         const preset = this.config.presets?.[presetName];
         if (!preset) {
-            console.warn(`⚠️ Preset "${presetName}" not found`);
+            logger.warn(`Preset "${presetName}" not found`);
             return;
         }
 
-        console.log(`🎨 Applying preset: ${presetName}`);
+        logger.info(`Applying preset: ${presetName}`);
 
         for (const [path, value] of Object.entries(preset)) {
             // Handle plugin overrides in presets
@@ -214,7 +215,7 @@ export class ConfigLoader {
      */
     get(path, defaultValue = null) {
         if (!this.config) {
-            console.warn('⚠️ Config not loaded, using default');
+            logger.warn('Config not loaded, using default');
             return defaultValue;
         }
 
@@ -333,8 +334,8 @@ export class ConfigLoader {
         }
 
         if (warnings.length > 0) {
-            console.warn('⚠️ Configuration validation warnings:');
-            warnings.forEach(w => console.warn('  -', w));
+            logger.warn('Configuration validation warnings:');
+            warnings.forEach(w => logger.warn('  -' + w));
         }
 
         return warnings.length === 0;
@@ -344,7 +345,7 @@ export class ConfigLoader {
      * Hot reload configuration (for development)
      */
     async reload() {
-        console.log('🔄 Reloading configuration...');
+        logger.info('Reloading configuration...');
         await this.load();
         this.validate();
 

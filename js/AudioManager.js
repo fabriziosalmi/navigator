@@ -28,7 +28,7 @@ export class AudioManager {
         this.cameraPanNodes = null;
         
         // Don't initialize audio context yet - wait for user interaction
-        console.log('AudioManager ready (waiting for user interaction)');
+        // console.log('AudioManager ready (waiting for user interaction)');
     }
     
     /**
@@ -66,7 +66,7 @@ export class AudioManager {
             this.createNoiseBuffers();
             
             this.isInitialized = true;
-            console.log('AudioManager initialized with 3D spatial audio');
+            // console.log('AudioManager initialized with 3D spatial audio');
             
             // Ambient background disabled - keeping only gesture/navigation effects
             // this.startAmbient();
@@ -86,7 +86,7 @@ export class AudioManager {
         
         if (this.audioContext && this.audioContext.state === 'suspended') {
             await this.audioContext.resume();
-            console.log('Audio context resumed');
+            // console.log('Audio context resumed');
         }
     }
     

@@ -46,7 +46,7 @@ export class VisualEffects {
         this.streamsCanvas = document.getElementById('data-streams-canvas');
         
         if (!this.trailsCanvas || !this.streamsCanvas) {
-            console.log('VisualEffects: Canvases not found, particle system disabled for performance');
+            // console.log('VisualEffects: Canvases not found, particle system disabled for performance');
             this.enabled = false;
             return;
         }
@@ -59,7 +59,7 @@ export class VisualEffects {
         
         this.startAnimation();
         
-        console.log('VisualEffects initialized - Blade Runner mode activated');
+        // console.log('VisualEffects initialized - Blade Runner mode activated');
     }
 
     resize() {
@@ -335,7 +335,7 @@ export class VisualEffects {
         // Disabled all particle effects for performance
         // No trails, streams, ripples, kamehameha, singularity or hand aura
         // Keep the instance available but don't animate
-        console.log('VisualEffects: Particle system disabled for performance');
+        // console.log('VisualEffects: Particle system disabled for performance');
     }
 
     /**

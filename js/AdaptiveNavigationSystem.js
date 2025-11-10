@@ -66,7 +66,7 @@ export class AdaptiveNavigationSystem {
         this.stabilityBuffer = [];
         this.stabilityWindowSize = 5;
         
-        console.log('🎯 Adaptive Navigation System initialized at Level 1');
+        // console.log('🎯 Adaptive Navigation System initialized at Level 1');
     }
     
     /**
@@ -122,7 +122,7 @@ export class AdaptiveNavigationSystem {
             this.onMetricsUpdate(this.getMetrics());
         }
         
-        console.log(`✅ Success! ${gestureType} | Consecutive: ${this.metrics.consecutiveSuccesses} | Level: L${this.currentLevel}`);
+        // console.log(`✅ Success! ${gestureType} | Consecutive: ${this.metrics.consecutiveSuccesses} | Level: L${this.currentLevel}`);
     }
     
     /**
@@ -161,7 +161,7 @@ export class AdaptiveNavigationSystem {
             this.onMetricsUpdate(this.getMetrics());
         }
         
-        console.log(`❌ Error! ${errorType} (${gestureType}) | Consecutive errors: ${this.metrics.consecutiveErrors} | Level: L${this.currentLevel}`);
+        // console.log(`❌ Error! ${errorType} (${gestureType}) | Consecutive errors: ${this.metrics.consecutiveErrors} | Level: L${this.currentLevel}`);
     }
     
     /**
@@ -289,7 +289,7 @@ export class AdaptiveNavigationSystem {
         this.metrics.consecutiveSuccesses = 0;
         this.metrics.consecutiveErrors = 0;
         
-        console.log(`🚀 LEVEL UPGRADE: L${oldLevel} → L${newLevel}`);
+        // console.log(`🚀 LEVEL UPGRADE: L${oldLevel} → L${newLevel}`);
         
         // Notify level change
         if (this.onLevelChange) {
@@ -315,7 +315,7 @@ export class AdaptiveNavigationSystem {
         this.metrics.consecutiveSuccesses = 0;
         this.metrics.consecutiveErrors = 0;
         
-        console.log(`⬇️ LEVEL DOWNGRADE: L${oldLevel} → L${this.currentLevel}`);
+        // console.log(`⬇️ LEVEL DOWNGRADE: L${oldLevel} → L${this.currentLevel}`);
         
         // Notify level change
         if (this.onLevelChange) {
@@ -447,7 +447,7 @@ export class AdaptiveNavigationSystem {
         this.performanceWindow = [];
         this.stabilityBuffer = [];
         
-        console.log('🔄 Adaptive Navigation System reset to Level 1');
+        // console.log('🔄 Adaptive Navigation System reset to Level 1');
     }
     
     /**

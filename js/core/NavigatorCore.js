@@ -54,7 +54,7 @@ export class NavigatorCore {
 
         // Log initialization
         if (this.config.debugMode) {
-            console.log('🚀 NavigatorCore initialized', {
+            // console.log('🚀 NavigatorCore initialized', {
                 plugins: this.plugins.size,
                 config: this.config
             });
@@ -88,7 +88,7 @@ export class NavigatorCore {
             this.eventBus.emit('core:init:complete', { source: 'NavigatorCore' });
 
             if (this.config.debugMode) {
-                console.log('✅ NavigatorCore initialized successfully');
+                // console.log('✅ NavigatorCore initialized successfully');
             }
 
             // Auto-start if configured
@@ -138,7 +138,7 @@ export class NavigatorCore {
             this._startPerformanceMonitoring();
 
             if (this.config.debugMode) {
-                console.log('▶️ NavigatorCore started');
+                // console.log('▶️ NavigatorCore started');
             }
 
         } catch (error) {
@@ -175,7 +175,7 @@ export class NavigatorCore {
             this.eventBus.emit('core:stop:complete', { source: 'NavigatorCore' });
 
             if (this.config.debugMode) {
-                console.log('⏸️ NavigatorCore stopped');
+                // console.log('⏸️ NavigatorCore stopped');
             }
 
         } catch (error) {
@@ -218,7 +218,7 @@ export class NavigatorCore {
             this.eventBus.emit('core:destroy:complete', { source: 'NavigatorCore' });
 
             if (this.config.debugMode) {
-                console.log('🗑️ NavigatorCore destroyed');
+                // console.log('🗑️ NavigatorCore destroyed');
             }
 
         } catch (error) {
@@ -288,7 +288,7 @@ export class NavigatorCore {
         });
 
         if (this.config.debugMode) {
-            console.log(`🔌 Plugin registered: ${plugin.name}`, { priority });
+            // console.log(`🔌 Plugin registered: ${plugin.name}`, { priority });
         }
 
         return this; // For chaining
@@ -352,7 +352,7 @@ export class NavigatorCore {
         });
 
         if (this.config.debugMode) {
-            console.log(`🔌 Plugin unregistered: ${name}`);
+            // console.log(`🔌 Plugin unregistered: ${name}`);
         }
     }
 
@@ -390,7 +390,7 @@ export class NavigatorCore {
         this.eventBus.debugMode = enabled;
         
         if (enabled) {
-            console.log('🐛 Debug mode enabled');
+            // console.log('🐛 Debug mode enabled');
         }
     }
 
@@ -401,7 +401,7 @@ export class NavigatorCore {
     async _initPlugin(name, plugin) {
         try {
             if (this.config.debugMode) {
-                console.log(`🔧 Initializing plugin: ${name}`);
+                // console.log(`🔧 Initializing plugin: ${name}`);
             }
 
             // Pass core interface to plugin
@@ -429,7 +429,7 @@ export class NavigatorCore {
         try {
             if (typeof plugin.start === 'function') {
                 if (this.config.debugMode) {
-                    console.log(`▶️ Starting plugin: ${name}`);
+                    // console.log(`▶️ Starting plugin: ${name}`);
                 }
                 await plugin.start();
             }
@@ -456,7 +456,7 @@ export class NavigatorCore {
         try {
             if (typeof plugin.stop === 'function') {
                 if (this.config.debugMode) {
-                    console.log(`⏸️ Stopping plugin: ${name}`);
+                    // console.log(`⏸️ Stopping plugin: ${name}`);
                 }
                 await plugin.stop();
             }
@@ -482,7 +482,7 @@ export class NavigatorCore {
         try {
             if (typeof plugin.destroy === 'function') {
                 if (this.config.debugMode) {
-                    console.log(`🗑️ Destroying plugin: ${name}`);
+                    // console.log(`🗑️ Destroying plugin: ${name}`);
                 }
                 await plugin.destroy();
             }

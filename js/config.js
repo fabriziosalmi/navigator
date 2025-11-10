@@ -136,7 +136,7 @@ export function updateConfig(path, value) {
     }
 
     obj[keys[keys.length - 1]] = value;
-    console.log(`Config updated: ${path} = ${value}`);
+    // console.log(`Config updated: ${path} = ${value}`);
 }
 
 // Export default

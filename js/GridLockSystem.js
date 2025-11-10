@@ -50,7 +50,7 @@ export class GridLockSystem {
         const oldState = this.cognitiveState;
         this.cognitiveState = state;
 
-        console.log(`[GridLock] Adapting for cognitive state: ${oldState} → ${state}`);
+        // console.log(`[GridLock] Adapting for cognitive state: ${oldState} → ${state}`);
 
         switch (state) {
             case 'frustrated':
@@ -59,7 +59,7 @@ export class GridLockSystem {
                 this.thresholdVertical = this.baseThresholdVertical * 0.7;
                 this.lockDuration = this.baseLockDuration * 1.5;
                 this.directionChangeDelay = 500; // Allow faster direction changes
-                console.log('[GridLock] Frustrated mode: -30% threshold, +50% cooldown');
+                // console.log('[GridLock] Frustrated mode: -30% threshold, +50% cooldown');
                 break;
 
             case 'concentrated':
@@ -68,7 +68,7 @@ export class GridLockSystem {
                 this.thresholdVertical = this.baseThresholdVertical * 0.8;
                 this.lockDuration = this.baseLockDuration * 0.7;
                 this.directionChangeDelay = 600;
-                console.log('[GridLock] Concentrated mode: -20% threshold, -30% cooldown');
+                // console.log('[GridLock] Concentrated mode: -20% threshold, -30% cooldown');
                 break;
 
             case 'exploring':
@@ -77,7 +77,7 @@ export class GridLockSystem {
                 this.thresholdVertical = this.baseThresholdVertical * 0.6;
                 this.lockDuration = this.baseLockDuration;
                 this.directionChangeDelay = 400; // Very responsive
-                console.log('[GridLock] Exploring mode: -40% threshold, fast direction changes');
+                // console.log('[GridLock] Exploring mode: -40% threshold, fast direction changes');
                 break;
 
             case 'learning':
@@ -86,7 +86,7 @@ export class GridLockSystem {
                 this.thresholdVertical = this.baseThresholdVertical * 0.9;
                 this.lockDuration = this.baseLockDuration * 1.1;
                 this.directionChangeDelay = 700;
-                console.log('[GridLock] Learning mode: -10% threshold, +10% cooldown');
+                // console.log('[GridLock] Learning mode: -10% threshold, +10% cooldown');
                 break;
 
             default: // neutral
