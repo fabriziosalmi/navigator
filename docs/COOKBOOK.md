@@ -2,15 +2,144 @@
 
 **Learn by doing.** Complete, working examples you can copy and customize.
 
+> **"La primissima e più importante ricetta"** - Start here if you're using React!
+
 ---
 
 ## Table of Contents
 
-1. [Image Carousel with Gestures](#image-carousel-with-gestures)
-2. [Video Player with Voice Commands](#video-player-with-voice-commands)
-3. [Navigator + Three.js (3D Cube)](#navigator--threejs-3d-cube)
-4. [Next.js Integration](#nextjs-integration)
-5. [Custom Plugin: Shake to Undo](#custom-plugin-shake-to-undo)
+1. [**Getting Started with React**](#getting-started-with-react) ⭐ **START HERE**
+2. [Image Carousel with Gestures](#image-carousel-with-gestures)
+3. [Video Player with Voice Commands](#video-player-with-voice-commands)
+4. [Navigator + Three.js (3D Cube)](#navigator--threejs-3d-cube)
+5. [Next.js Integration](#nextjs-integration)
+6. [Custom Plugin: Shake to Undo](#custom-plugin-shake-to-undo)
+
+---
+
+## Getting Started with React
+
+**Goal**: Build your first Navigator-powered React app in under 5 minutes.
+
+This recipe demonstrates the **complete end-to-end architecture** with a working keyboard event display.
+
+### Why This Recipe First?
+
+Because it proves the entire decoupled architecture:
+- ✅ **KeyboardPlugin** emits events without knowing about React
+- ✅ **EventBus** handles messaging without coupling
+- ✅ **React Component** receives events without knowing about the plugin
+
+**"Il plugin emette un evento e il componente React lo riceve, senza che si conoscano a vicenda."**
+
+### Step 1: Installation
+
+```bash
+npm install @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
+# or
+pnpm add @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
+```
+
+### Step 2: Create Your App Component
+
+```tsx
+// src/App.tsx
+import { useState, useEffect } from 'react';
+import { useNavigator } from '@navigator.menu/react';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+
+function App() {
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const [eventCount, setEventCount] = useState(0);
+
+  // 🚀 Initialize Navigator with plugins
+  const { core } = useNavigator({
+    plugins: [new KeyboardPlugin()],
+  });
+
+  // 📡 Subscribe to keyboard events
+  useEffect(() => {
+    if (!core) return;
+
+    // Listen to raw keydown events
+    const unsubscribe = core.eventBus.on('keyboard:keydown', (event) => {
+      setLastKey(event.key);
+      setEventCount((prev) => prev + 1);
+    });
+
+    return unsubscribe; // Cleanup on unmount
+  }, [core]);
+
+  return (
+    <div className="app">
+      <h1>🎯 Navigator + React Demo</h1>
+      <p>Press any key to see events in action!</p>
+
+      <div className="status">
+        <p>Last Key: <strong>{lastKey || 'none'}</strong></p>
+        <p>Events: <strong>{eventCount}</strong></p>
+        <p>Core: <strong>{core ? '✅ Running' : '⏳ Initializing...'}</strong></p>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Step 3: Run It
+
+```bash
+npm run dev
+```
+
+**Press any key** → You'll see the key name update in real-time! 🎉
+
+### What Just Happened?
+
+1. **useNavigator()** hook initializes the core and starts plugins
+2. **KeyboardPlugin** listens to window keyboard events
+3. Plugin emits `keyboard:keydown` event to **EventBus**
+4. React component subscribes to EventBus
+5. State updates trigger re-render
+
+**The Magic**: KeyboardPlugin has ZERO knowledge of React. React has ZERO knowledge of KeyboardPlugin. They communicate through events only.
+
+### Navigation Intents
+
+Want to handle arrow keys for navigation? Just listen to intent events:
+
+```tsx
+useEffect(() => {
+  if (!core) return;
+
+  const unsubscribers = [
+    core.eventBus.on('intent:navigate_left', () => console.log('⬅️ Left')),
+    core.eventBus.on('intent:navigate_right', () => console.log('➡️ Right')),
+    core.eventBus.on('intent:navigate_up', () => console.log('⬆️ Up')),
+    core.eventBus.on('intent:navigate_down', () => console.log('⬇️ Down')),
+    core.eventBus.on('intent:select', () => console.log('✅ Select')),
+    core.eventBus.on('intent:cancel', () => console.log('❌ Cancel')),
+  ];
+
+  return () => unsubscribers.forEach((unsub) => unsub());
+}, [core]);
+```
+
+### Complete Working Example
+
+See **[apps/react-test-app](../apps/react-test-app)** in this repository for the full source code with:
+- Real-time key display
+- Event counter
+- Navigation intent visualization
+- Architecture flow diagram
+- Styled UI with CSS
+
+### Next Steps
+
+- **Add More Plugins**: Try `@navigator.menu/plugin-gesture` for touch events
+- **Build UI**: Create navigation menus that respond to keyboard/gestures
+- **Go Further**: Check out the [Next.js Integration](#nextjs-integration) recipe
 
 ---
 
