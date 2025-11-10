@@ -12,9 +12,16 @@
     --hud-top-height: 70px;
     --hud-bottom-height: 90px;
     
-    /* Z-Index Layers */
+    /* Z-Index Layers - STRICT HIERARCHY
+       1-50:    Cards and viewport content
+       100-300: Overlays (confirmation, effects)
+       1100:    Bottom HUD bar
+       1200:    Top HUD bar
+       1300:    Critical overlays (start screen)
+       10000:   Notifications (voice, adaptive level)
+    */
     --z-viewport: 1;
-    --z-cards: 10;
+    --z-cards: 50;
     --z-hud-bottom: 1100;
     --z-hud-top: 1200;
     --z-overlay: 1300;

@@ -158,7 +158,7 @@
     height: calc(100vh - 140px - 4rem) !important;
     margin: 0 !important;
     transform: none !important;
-    z-index: 100 !important;
+    z-index: 90 !important;
     opacity: 1 !important;
     border-radius: var(--radius-lg) !important;
 }
