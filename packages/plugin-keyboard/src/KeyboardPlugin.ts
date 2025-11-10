@@ -1,0 +1,201 @@
+/**
+ * KeyboardPlugin.ts
+ * 
+ * Keyboard navigation plugin for Navigator.Menu.
+ * Captures keyboard input and emits both raw events and navigation intents.
+ * 
+ * Events emitted:
+ * - keyboard:keydown - Raw keydown events with full details
+ * - keyboard:keyup - Raw keyup events
+ * - keyboard:combo - Key combination events (e.g., Ctrl+d)
+ * - intent:navigate_left - Left arrow intent
+ * - intent:navigate_right - Right arrow intent
+ * - intent:navigate_up - Up arrow intent
+ * - intent:navigate_down - Down arrow intent
+ * - intent:select - Enter key intent
+ * - intent:cancel - Escape key intent
+ */
+
+import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
+
+export interface KeyboardPluginConfig {
+  enabled?: boolean;
+  preventDefaults?: boolean;
+  keyCombos?: Record<string, string>;
+}
+
+export class KeyboardPlugin implements INavigatorPlugin {
+  public readonly name = 'keyboard';
+  
+  private core: NavigatorCore | null = null;
+  private config: KeyboardPluginConfig;
+  private pressedKeys: Set<string> = new Set();
+  private handleKeyDown: ((event: KeyboardEvent) => void) | null = null;
+  private handleKeyUp: ((event: KeyboardEvent) => void) | null = null;
+
+  constructor(config: KeyboardPluginConfig = {}) {
+    this.config = {
+      enabled: true,
+      preventDefaults: true,
+      keyCombos: {
+        'Ctrl+d': 'toggle_debug',
+        'Ctrl+h': 'toggle_hud',
+      },
+      ...config,
+    };
+  }
+
+  // ========================================
+  // INavigatorPlugin Lifecycle
+  // ========================================
+
+  async init(core: NavigatorCore): Promise<void> {
+    this.core = core;
+    
+    // Bind event handlers (capture 'this' context)
+    this.handleKeyDown = this._onKeyDown.bind(this);
+    this.handleKeyUp = this._onKeyUp.bind(this);
+  }
+
+  async start?(): Promise<void> {
+    if (!this.config.enabled) {
+      return;
+    }
+
+    if (!this.handleKeyDown || !this.handleKeyUp) {
+      throw new Error('KeyboardPlugin not initialized');
+    }
+
+    // Attach keyboard listeners
+    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  async stop?(): Promise<void> {
+    if (!this.handleKeyDown || !this.handleKeyUp) {
+      return;
+    }
+
+    // Remove keyboard listeners
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
+
+    // Clear pressed keys
+    this.pressedKeys.clear();
+  }
+
+  async destroy?(): Promise<void> {
+    this.pressedKeys.clear();
+    this.core = null;
+  }
+
+  // ========================================
+  // Event Handlers
+  // ========================================
+
+  private _onKeyDown(event: KeyboardEvent): void {
+    if (!this.core) return;
+
+    const { key, code } = event;
+
+    // Prevent default for navigation keys
+    if (this.config.preventDefaults) {
+      const preventKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '];
+      if (preventKeys.includes(key)) {
+        event.preventDefault();
+      }
+    }
+
+    // Track pressed keys for combos
+    this.pressedKeys.add(key);
+
+    // Check for key combinations
+    const combo = this._getKeyCombo();
+    if (combo && this.config.keyCombos?.[combo]) {
+      event.preventDefault();
+      this.core.eventBus.emit('keyboard:combo', {
+        combo,
+        action: this.config.keyCombos[combo],
+      });
+      return;
+    }
+
+    // Emit raw keydown event
+    this.core.eventBus.emit('keyboard:keydown', {
+      key,
+      code,
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      metaKey: event.metaKey,
+      repeat: event.repeat,
+      timestamp: performance.now(),
+    });
+
+    // Emit navigation intents
+    this._emitNavigationIntent(key);
+  }
+
+  private _onKeyUp(event: KeyboardEvent): void {
+    if (!this.core) return;
+
+    const { key, code } = event;
+
+    // Remove from pressed keys
+    this.pressedKeys.delete(key);
+
+    // Emit raw keyup event
+    this.core.eventBus.emit('keyboard:keyup', {
+      key,
+      code,
+      timestamp: performance.now(),
+    });
+  }
+
+  // ========================================
+  // Helper Methods
+  // ========================================
+
+  private _emitNavigationIntent(key: string): void {
+    if (!this.core) return;
+
+    const intentMap: Record<string, string> = {
+      ArrowLeft: 'intent:navigate_left',
+      ArrowRight: 'intent:navigate_right',
+      ArrowUp: 'intent:navigate_up',
+      ArrowDown: 'intent:navigate_down',
+      Enter: 'intent:select',
+      Escape: 'intent:cancel',
+    };
+
+    const intentEvent = intentMap[key];
+    if (intentEvent) {
+      this.core.eventBus.emit(intentEvent, { key });
+    }
+  }
+
+  private _getKeyCombo(): string | null {
+    const keys = Array.from(this.pressedKeys).sort();
+    if (keys.length < 2) {
+      return null;
+    }
+
+    // Separate modifiers from regular keys
+    const modifiers: string[] = [];
+    const regular: string[] = [];
+
+    for (const key of keys) {
+      if (['Control', 'Alt', 'Shift', 'Meta'].includes(key)) {
+        modifiers.push(key === 'Control' ? 'Ctrl' : key);
+      } else {
+        regular.push(key);
+      }
+    }
+
+    if (regular.length === 0) {
+      return null;
+    }
+
+    return [...modifiers, ...regular].join('+');
+  }
+}

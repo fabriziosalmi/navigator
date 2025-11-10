@@ -1,0 +1,36 @@
+{
+  "name": "@navigator.menu/cli",
+  "version": "2.0.0",
+  "description": "CLI tool for scaffolding Navigator apps",
+  "type": "module",
+  "bin": {
+    "navigator": "./bin/navigator.js",
+    "create-navigator-app": "./bin/navigator.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "echo 'No build step needed for CLI'",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "navigator",
+    "cli",
+    "scaffolding",
+    "boilerplate"
+  ],
+  "author": "Navigator Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "ora": "^8.1.1"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ]
+}

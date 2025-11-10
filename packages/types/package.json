@@ -1,0 +1,48 @@
+{
+  "name": "@navigator.menu/types",
+  "version": "2.0.0",
+  "description": "TypeScript type definitions for Navigator SDK - auto-generated from JSDoc",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts"
+    },
+    "./plugins": {
+      "types": "./dist/plugins.d.ts"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "mkdir -p dist && cp src/index.d.ts dist/index.d.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "navigator",
+    "types",
+    "typescript",
+    "definitions"
+  ],
+  "author": "Navigator Team",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/types"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

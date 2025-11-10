@@ -1,0 +1,25 @@
+# pnpm Workspace Configuration
+# Defines the monorepo structure for Navigator SDK
+
+packages:
+  # Core packages - Framework-agnostic logic
+  - 'packages/core'
+  - 'packages/types'
+  
+  # Plugin packages - Modular, independently versioned
+  - 'packages/plugin-*'
+  
+  # Framework wrappers
+  - 'packages/react'
+  - 'packages/vue'
+  - 'packages/svelte'
+  
+  # Developer tools
+  - 'packages/pdk'
+  - 'packages/cli'
+  
+  # Demo applications
+  - 'apps/*'
+  
+  # Documentation site (Docusaurus)
+  - 'documentation'
