@@ -36,6 +36,7 @@
     <link rel="stylesheet" href="css/effects.css">
     <link rel="stylesheet" href="css/interface-hud.css">
     <link rel="stylesheet" href="css/unified-hud.css">
+    <link rel="stylesheet" href="css/carousel-3d.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -114,6 +115,26 @@
             <span class="history-title">Recent</span>
             <div class="history-icons" id="hud-history">
                 <!-- Populated dynamically with last 5 navigation actions -->
+            </div>
+        </div>
+        
+        <!-- Gesture Status Panel -->
+        <div class="gesture-status-panel">
+            <div class="gesture-status-title">Gesture System</div>
+            <div class="gesture-status-content">
+                <div class="gesture-stat">
+                    <span class="stat-label">Hand</span>
+                    <span class="status-dot inactive" id="hand-status"></span>
+                    <span class="stat-value" id="hand-state">Searching</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Current</span>
+                    <span class="stat-value" id="gesture-type">None</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Grid Lock</span>
+                    <span class="stat-value" id="grid-lock">Active</span>
+                </div>
             </div>
         </div>
     </div>

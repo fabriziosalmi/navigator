@@ -76,6 +76,83 @@
     font-weight: 600;
 }
 
+/* Gesture Status Panel - Top Right */
+.gesture-status-panel {
+    background: rgba(10, 10, 20, 0.9);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 12px 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+    min-width: 220px;
+}
+
+.gesture-status-title {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.gesture-status-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gesture-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    min-width: 60px;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: rgba(0, 255, 255, 0.9);
+    font-weight: 600;
+    flex: 1;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.status-dot.active {
+    background: rgba(0, 255, 100, 1);
+    box-shadow: 0 0 12px rgba(0, 255, 100, 0.8);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-dot.inactive {
+    background: rgba(255, 100, 100, 0.6);
+    box-shadow: 0 0 8px rgba(255, 100, 100, 0.4);
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
 /* ==============================================
    BOTTOM HUD - Main Navigation & Controls
    ============================================== */
@@ -217,19 +294,28 @@
 
 @media (max-width: 768px) {
     .top-hud-container {
-        flex-direction: column;
+        flex-wrap: wrap;
         height: auto;
-        gap: 10px;
+        gap: 8px;
         align-items: stretch;
+        padding: 8px 10px;
     }
     
     .interface-status-hud {
         width: 100%;
+        order: 1;
     }
     
     .top-navigation-history {
-        width: 100%;
-        justify-content: center;
+        flex: 1;
+        min-width: 45%;
+        order: 2;
+    }
+    
+    .gesture-status-panel {
+        flex: 1;
+        min-width: 45%;
+        order: 3;
     }
     
     #quantum-hud {

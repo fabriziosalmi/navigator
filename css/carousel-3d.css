@@ -1,0 +1,325 @@
+/* ==============================================
+   3D CAROUSEL CARD LAYOUT
+   Large focused card with folded side cards
+   Overrides default card.css positioning
+   ============================================== */
+
+/* Override default card sizing */
+.card {
+    width: 85vw !important;
+    max-width: 1200px !important;
+    height: 75vh !important;
+    max-height: 800px !important;
+    /* Reset default fixed sizes from cards.css */
+}
+
+/* Enhanced 3D perspective for cards viewport */
+#cards-viewport {
+    perspective: 1500px;
+    perspective-origin: 50% 50%;
+    padding-top: 80px;
+    padding-bottom: 120px;
+    overflow: visible;
+}
+
+/* Layer containers with enhanced 3D space */
+.layer {
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+/* Card base - much larger focused card */
+.card {
+    position: absolute;
+    width: 85vw !important;
+    max-width: 1200px !important;
+    height: 75vh !important;
+    max-height: 800px !important;
+    left: 50%;
+    top: 50%;
+    transform-style: preserve-3d;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+}
+
+/* FOCUSED CARD - Large and centered */
+.card.active {
+    transform: 
+        translate(-50%, -50%)
+        translateZ(0)
+        rotateY(0deg)
+        scale(1);
+    opacity: 1;
+    z-index: 100;
+    filter: brightness(1) blur(0);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* PREVIOUS CARD - Folded back to the left */
+.card.previous {
+    transform: 
+        translate(-50%, -50%)
+        translateX(-600px)
+        translateZ(-400px)
+        rotateY(45deg)
+        scale(0.75);
+    opacity: 0.5;
+    z-index: 50;
+    filter: brightness(0.7) blur(2px);
+    pointer-events: none;
+}
+
+/* NEXT CARD - Folded back to the right */
+.card.next {
+    transform: 
+        translate(-50%, -50%)
+        translateX(600px)
+        translateZ(-400px)
+        rotateY(-45deg)
+        scale(0.75);
+    opacity: 0.5;
+    z-index: 50;
+    filter: brightness(0.7) blur(2px);
+    pointer-events: none;
+}
+
+/* FAR CARDS - Hidden in the background */
+.card.far-previous {
+    transform: 
+        translate(-50%, -50%)
+        translateX(-800px)
+        translateZ(-600px)
+        rotateY(60deg)
+        scale(0.5);
+    opacity: 0.2;
+    z-index: 25;
+    filter: brightness(0.5) blur(4px);
+    pointer-events: none;
+}
+
+.card.far-next {
+    transform: 
+        translate(-50%, -50%)
+        translateX(800px)
+        translateZ(-600px)
+        rotateY(-60deg)
+        scale(0.5);
+    opacity: 0.2;
+    z-index: 25;
+    filter: brightness(0.5) blur(4px);
+    pointer-events: none;
+}
+
+/* HIDDEN CARDS - Off screen */
+.card:not(.active):not(.previous):not(.next):not(.far-previous):not(.far-next) {
+    transform: 
+        translate(-50%, -50%)
+        translateZ(-1000px)
+        scale(0.3);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Enhanced card inner content */
+.card-inner {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+/* Card lighting effects for 3D depth */
+.card.previous::before,
+.card.next::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.3),
+        transparent 50%,
+        rgba(255, 255, 255, 0.1)
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 1;
+}
+
+.card.next::before {
+    background: linear-gradient(
+        to left,
+        rgba(0, 0, 0, 0.3),
+        transparent 50%,
+        rgba(255, 255, 255, 0.1)
+    );
+}
+
+/* Enhance card title for large cards */
+.card.active .card-title {
+    font-size: 3.5em;
+    text-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.8),
+        0 0 40px currentColor;
+    letter-spacing: 2px;
+}
+
+.card.active .card-description {
+    font-size: 1.4em;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.card.active .card-icon {
+    height: 300px;
+}
+
+.card.active .icon-large {
+    font-size: 12em;
+}
+
+/* Navigation hint overlays on side cards */
+.card.previous::after {
+    content: '←';
+    position: absolute;
+    left: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 4em;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card.next::after {
+    content: '→';
+    position: absolute;
+    right: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 4em;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card.previous:hover::after,
+.card.next:hover::after {
+    opacity: 1;
+}
+
+/* Smooth transitions for swipe animations */
+.layer.animating .card {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ==============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================== */
+
+@media (max-width: 1200px) {
+    .card {
+        width: 90vw;
+        height: 70vh;
+    }
+    
+    .card.previous,
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(-500px)
+            translateZ(-300px)
+            rotateY(40deg)
+            scale(0.7);
+    }
+    
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(500px)
+            translateZ(-300px)
+            rotateY(-40deg)
+            scale(0.7);
+    }
+}
+
+@media (max-width: 768px) {
+    #cards-viewport {
+        perspective: 1000px;
+    }
+    
+    .card {
+        width: 92vw;
+        height: 65vh;
+    }
+    
+    .card.previous,
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(-350px)
+            translateZ(-200px)
+            rotateY(35deg)
+            scale(0.6);
+    }
+    
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(350px)
+            translateZ(-200px)
+            rotateY(-35deg)
+            scale(0.6);
+    }
+    
+    .card.active .card-title {
+        font-size: 2.5em;
+    }
+    
+    .card.active .icon-large {
+        font-size: 8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        width: 95vw;
+        height: 60vh;
+    }
+    
+    .card.previous,
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(-250px)
+            translateZ(-150px)
+            rotateY(30deg)
+            scale(0.5);
+    }
+    
+    .card.next {
+        transform: 
+            translate(-50%, -50%)
+            translateX(250px)
+            translateZ(-150px)
+            rotateY(-30deg)
+            scale(0.5);
+    }
+    
+    .card.active .card-title {
+        font-size: 2em;
+    }
+    
+    .card.active .card-description {
+        font-size: 1.1em;
+    }
+}

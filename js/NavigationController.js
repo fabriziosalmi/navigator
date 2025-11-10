@@ -127,20 +127,28 @@ export class NavigationController {
             }
         });
 
-        // Posiziona le card
+        // Posiziona le card con effetto carousel 3D
         const cards = layerContainer.querySelectorAll('.card');
         cards.forEach((card, index) => {
-            card.classList.remove('center', 'left', 'right', 'hidden', 'fullscreen');
+            // Remove all position classes
+            card.classList.remove('active', 'previous', 'next', 'far-previous', 'far-next', 
+                                 'center', 'left', 'right', 'hidden', 'fullscreen');
             
             const diff = index - currentCardIndex;
             
+            // Apply 3D carousel classes
             if (diff === 0) {
-                card.classList.add('center');
+                card.classList.add('active'); // Focused card (large, center)
             } else if (diff === -1) {
-                card.classList.add('left');
+                card.classList.add('previous'); // Left card (folded)
             } else if (diff === 1) {
-                card.classList.add('right');
+                card.classList.add('next'); // Right card (folded)
+            } else if (diff === -2) {
+                card.classList.add('far-previous'); // Far left
+            } else if (diff === 2) {
+                card.classList.add('far-next'); // Far right
             } else {
+                // Hide cards that are too far away
                 card.classList.add('hidden');
             }
         });
