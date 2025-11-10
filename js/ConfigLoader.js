@@ -1,38 +1,55 @@
 /**
- * Configuration Loader for Navigator
- * Loads and applies settings from config.yaml
- * Provides runtime access to all configuration parameters
+ * Configuration Loader for Navigator v2.0
+ * Loads and validates config.yaml using JSON Schema
+ * Supports plugin-based architecture with schema validation
  */
+
+import yaml from 'js-yaml';
+import Ajv from 'ajv';
 
 export class ConfigLoader {
     constructor() {
         this.config = null;
+        this.schema = null;
+        this.ajv = new Ajv({ allErrors: true, strict: false });
         this.defaultConfig = this.getDefaultConfig();
     }
 
     /**
-     * Load configuration from YAML file
+     * Load and validate configuration from YAML file
      */
     async load() {
         try {
-            const response = await fetch('./config.yaml');
-            if (!response.ok) {
+            // Load config.yaml
+            const configResponse = await fetch('./config.yaml');
+            if (!configResponse.ok) {
                 console.warn('⚠️ config.yaml not found, using defaults');
                 this.config = this.defaultConfig;
                 return this.config;
             }
 
-            const yamlText = await response.text();
-            this.config = this.parseYAML(yamlText);
-            
+            const yamlText = await configResponse.text();
+            this.config = yaml.load(yamlText);
+
+            // Load and validate against schema
+            await this.loadSchema();
+            const isValid = this.validateConfig();
+
+            if (!isValid) {
+                console.error('❌ Configuration validation failed');
+                console.error('Validation errors:', this.ajv.errors);
+                throw new Error('Invalid configuration');
+            }
+
             // Apply preset if specified
             if (this.config.active_preset) {
                 this.applyPreset(this.config.active_preset);
             }
 
-            console.log('✅ Configuration loaded from config.yaml');
+            console.log('✅ Configuration loaded and validated from config.yaml');
             console.log('📊 Active preset:', this.config.active_preset || 'none');
-            
+            console.log('🔌 Plugins loaded:', this.getPluginList().length);
+
             return this.config;
         } catch (error) {
             console.error('❌ Error loading config.yaml:', error);
@@ -42,87 +59,95 @@ export class ConfigLoader {
     }
 
     /**
-     * Simple YAML parser (supports basic key-value, nested objects, arrays)
-     * For production, consider using js-yaml library
+     * Load JSON Schema for validation
      */
-    parseYAML(yamlText) {
-        const config = {};
-        const lines = yamlText.split('\n');
-        const stack = [{ obj: config, indent: -1 }];
-
-        for (const line of lines) {
-            // Skip comments and empty lines
-            if (line.trim().startsWith('#') || line.trim() === '') {
-                continue;
+    async loadSchema() {
+        try {
+            const response = await fetch('./config.schema.json');
+            if (!response.ok) {
+                console.warn('⚠️ config.schema.json not found, skipping validation');
+                return;
             }
 
-            const indent = line.search(/\S/);
-            const trimmed = line.trim();
-
-            // Pop stack until we find the right parent
-            while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
-                stack.pop();
-            }
-
-            const current = stack[stack.length - 1].obj;
-
-            if (trimmed.includes(':')) {
-                const [key, ...valueParts] = trimmed.split(':');
-                const value = valueParts.join(':').trim();
-
-                if (value === '' || value === '{}' || value === '[]') {
-                    // Nested object or array
-                    const newObj = value === '[]' ? [] : {};
-                    current[key.trim()] = newObj;
-                    stack.push({ obj: newObj, indent });
-                } else {
-                    // Simple value
-                    current[key.trim()] = this.parseValue(value);
-                }
-            } else if (trimmed.startsWith('-')) {
-                // Array item
-                const value = trimmed.substring(1).trim();
-                if (Array.isArray(current)) {
-                    current.push(this.parseValue(value));
-                }
-            }
+            this.schema = await response.json();
+            console.log('✅ Schema loaded from config.schema.json');
+        } catch (error) {
+            console.error('❌ Error loading schema:', error);
         }
-
-        return config;
     }
 
     /**
-     * Parse YAML value to appropriate JavaScript type
+     * Validate configuration against schema
      */
-    parseValue(value) {
-        // Remove comments
-        value = value.split('#')[0].trim();
-
-        // Boolean
-        if (value === 'true') {
+    validateConfig() {
+        if (!this.schema) {
+            console.warn('⚠️ No schema loaded, skipping validation');
             return true;
         }
-        if (value === 'false') {
+
+        const validate = this.ajv.compile(this.schema);
+        const valid = validate(this.config);
+
+        if (!valid) {
+            console.error('❌ Configuration validation errors:');
+            
+            // Build detailed error message
+            const errorMessages = validate.errors.map(error => {
+                const path = error.instancePath || 'root';
+                const message = error.message || 'Unknown error';
+                const params = error.params ? JSON.stringify(error.params) : '';
+                return `${path}: ${message} ${params}`;
+            }).join('\n  - ');
+
+            console.error(`  - ${errorMessages}`);
+
+            // Emit detailed error for ErrorHandler
+            if (window.errorHandler) {
+                window.errorHandler.log(
+                    `Configuration validation failed:\n  - ${errorMessages}`,
+                    'critical',
+                    new Error('Config validation failed')
+                );
+            }
+
             return false;
         }
 
-        // Null
-        if (value === 'null' || value === '~') {
-            return null;
+        console.log('✅ Configuration schema validation passed');
+        return true;
+    }
+
+    /**
+     * Get list of enabled plugins with their configuration
+     */
+    getPluginList() {
+        if (!this.config || !this.config.plugins) {
+            return [];
         }
 
-        // Number
-        if (!isNaN(value) && value !== '') {
-            return parseFloat(value);
-        }
+        return this.config.plugins.filter(plugin => plugin.enabled);
+    }
 
-        // String (remove quotes if present)
-        if ((value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))) {
-            return value.slice(1, -1);
-        }
+    /**
+     * Get configuration for a specific plugin
+     * @param {string} pluginName - Name of the plugin (e.g., "GestureInputPlugin")
+     * @returns {object|null} Plugin configuration object
+     */
+    getPluginConfig(pluginName) {
+        const plugins = this.config?.plugins || [];
+        const plugin = plugins.find(p => p.name === pluginName);
+        return plugin?.options || null;
+    }
 
-        return value;
+    /**
+     * Check if a plugin is enabled
+     * @param {string} pluginName - Name of the plugin
+     * @returns {boolean}
+     */
+    isPluginEnabled(pluginName) {
+        const plugins = this.config?.plugins || [];
+        const plugin = plugins.find(p => p.name === pluginName);
+        return plugin?.enabled || false;
     }
 
     /**
@@ -138,13 +163,54 @@ export class ConfigLoader {
         console.log(`🎨 Applying preset: ${presetName}`);
 
         for (const [path, value] of Object.entries(preset)) {
-            this.set(path, value);
+            // Handle plugin overrides in presets
+            if (path === 'plugins' && Array.isArray(value)) {
+                this.mergePluginPresets(value);
+            } else {
+                this.set(path, value);
+            }
         }
     }
 
     /**
+     * Merge plugin-specific preset values with existing plugin config
+     */
+    mergePluginPresets(presetPlugins) {
+        presetPlugins.forEach(presetPlugin => {
+            const existingPlugin = this.config.plugins.find(
+                p => p.name === presetPlugin.name
+            );
+
+            if (existingPlugin && presetPlugin.options) {
+                // Deep merge options
+                existingPlugin.options = this.deepMerge(
+                    existingPlugin.options || {},
+                    presetPlugin.options
+                );
+            }
+        });
+    }
+
+    /**
+     * Deep merge two objects
+     */
+    deepMerge(target, source) {
+        const output = { ...target };
+
+        for (const key in source) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                output[key] = this.deepMerge(target[key] || {}, source[key]);
+            } else {
+                output[key] = source[key];
+            }
+        }
+
+        return output;
+    }
+
+    /**
      * Get configuration value by path (dot notation)
-     * Example: get('gestures.detection.min_detection_confidence')
+     * Example: get('performance.target_fps')
      */
     get(path, defaultValue = null) {
         if (!this.config) {
@@ -192,55 +258,30 @@ export class ConfigLoader {
     }
 
     /**
-     * Default configuration (fallback if YAML fails to load)
+     * Default configuration (minimal fallback if YAML fails)
      */
     getDefaultConfig() {
         return {
+            plugins: [
+                { name: 'KeyboardInputPlugin', enabled: true, priority: 100, options: {} },
+                { name: 'NavigationLogicPlugin', enabled: true, priority: 50, options: {} },
+                { name: 'DomRendererPlugin', enabled: true, priority: 10, options: {} }
+            ],
             performance: {
                 target_fps: 60,
                 idle_timeout_ms: 15000,
                 idle_enabled: true
             },
-            gestures: {
-                detection: {
-                    min_detection_confidence: 0.7,
-                    min_tracking_confidence: 0.5,
-                    model_complexity: 1,
-                    max_num_hands: 1
-                },
-                recognition: {
-                    swipe: {
-                        min_distance: 0.08,
-                        max_time_ms: 800,
-                        cooldown_ms: 300
-                    }
-                },
-                grid_lock: {
-                    enabled: true,
-                    cell_size: 0.15,
-                    accumulator_decay: 0.85,
-                    intent_threshold: 0.3,
-                    dead_zone: 0.05
-                }
-            },
             navigation: {
-                cards: {
-                    transition_duration_ms: 600
-                },
-                momentum: {
-                    enabled: true,
-                    friction: 0.92
-                }
-            },
-            audio: {
-                enabled: true,
-                master_volume: 0.3
-            },
-            visual_effects: {
-                enabled: true,
-                performance_mode: 'medium'
+                initial_layer: 'video',
+                initial_card_index: 0
             },
             ui: {
+                hud: {
+                    top_bar: true,
+                    bottom_bar: true,
+                    compact_mode: true
+                },
                 debug: {
                     enabled: false,
                     console_logging: true
@@ -253,63 +294,42 @@ export class ConfigLoader {
      * Export current config as YAML string (for saving)
      */
     exportYAML() {
-        return this.objectToYAML(this.config);
-    }
-
-    /**
-     * Convert JavaScript object to YAML string
-     */
-    objectToYAML(obj, indent = 0) {
-        let yaml = '';
-        const spaces = '  '.repeat(indent);
-
-        for (const [key, value] of Object.entries(obj)) {
-            if (value === null) {
-                yaml += `${spaces}${key}: null\n`;
-            } else if (typeof value === 'object' && !Array.isArray(value)) {
-                yaml += `${spaces}${key}:\n`;
-                yaml += this.objectToYAML(value, indent + 1);
-            } else if (Array.isArray(value)) {
-                yaml += `${spaces}${key}:\n`;
-                value.forEach(item => {
-                    if (typeof item === 'object') {
-                        yaml += this.objectToYAML(item, indent + 1);
-                    } else {
-                        yaml += `${spaces}  - ${item}\n`;
-                    }
-                });
-            } else if (typeof value === 'string') {
-                yaml += `${spaces}${key}: "${value}"\n`;
-            } else {
-                yaml += `${spaces}${key}: ${value}\n`;
-            }
-        }
-
-        return yaml;
+        return yaml.dump(this.config, {
+            indent: 2,
+            lineWidth: 120,
+            noRefs: true
+        });
     }
 
     /**
      * Validate configuration values are within acceptable ranges
+     * (Lightweight validation for runtime checks)
      */
     validate() {
         const warnings = [];
 
         // FPS validation
         const fps = this.get('performance.target_fps');
-        if (fps < 30 || fps > 120) {
+        if (fps && (fps < 30 || fps > 120)) {
             warnings.push(`target_fps ${fps} outside recommended range [30-120]`);
         }
 
-        // Confidence validation
-        const detectionConf = this.get('gestures.detection.min_detection_confidence');
-        if (detectionConf < 0.5 || detectionConf > 0.95) {
-            warnings.push(`min_detection_confidence ${detectionConf} outside range [0.5-0.95]`);
+        // Plugin validation
+        const plugins = this.getPluginList();
+        if (plugins.length === 0) {
+            warnings.push('No plugins enabled - application may not function');
         }
 
-        // Volume validation
-        const volume = this.get('audio.master_volume');
-        if (volume < 0 || volume > 1) {
-            warnings.push(`master_volume ${volume} outside range [0-1]`);
+        // Check for required plugins
+        const hasNavigationLogic = plugins.some(p => p.name === 'NavigationLogicPlugin');
+        const hasRenderer = plugins.some(p => p.name === 'DomRendererPlugin');
+
+        if (!hasNavigationLogic) {
+            warnings.push('NavigationLogicPlugin not enabled - navigation may not work');
+        }
+
+        if (!hasRenderer) {
+            warnings.push('DomRendererPlugin not enabled - UI may not render');
         }
 
         if (warnings.length > 0) {
@@ -327,13 +347,31 @@ export class ConfigLoader {
         console.log('🔄 Reloading configuration...');
         await this.load();
         this.validate();
-        
+
         // Emit event for components to react
         window.dispatchEvent(new CustomEvent('config:reloaded', {
             detail: { config: this.config }
         }));
-        
+
         return this.config;
+    }
+
+    /**
+     * Get detailed validation report
+     */
+    getValidationReport() {
+        if (!this.schema) {
+            return { valid: true, errors: [], message: 'No schema loaded' };
+        }
+
+        const validate = this.ajv.compile(this.schema);
+        const valid = validate(this.config);
+
+        return {
+            valid,
+            errors: validate.errors || [],
+            message: valid ? 'Configuration is valid' : 'Configuration has errors'
+        };
     }
 }
 
@@ -345,7 +383,15 @@ if (typeof window !== 'undefined') {
     window.configLoader = configLoader;
 }
 
-// Helper function for easy access
+// Helper functions for easy access
 export function getConfig(path, defaultValue) {
     return configLoader.get(path, defaultValue);
+}
+
+export function getPluginConfig(pluginName) {
+    return configLoader.getPluginConfig(pluginName);
+}
+
+export function isPluginEnabled(pluginName) {
+    return configLoader.isPluginEnabled(pluginName);
 }

@@ -1,0 +1,368 @@
+/**
+ * Accessibility Styles
+ * WCAG 2.1 AA compliant focus indicators and keyboard navigation
+ */
+
+/* ========================================
+   Focus Indicators
+   ======================================== */
+
+/* Remove default outline, replace with custom */
+*:focus {
+    outline: none;
+}
+
+/* Visible focus indicator for keyboard navigation */
+*:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Enhanced focus for buttons */
+button:focus-visible,
+a:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 6px rgba(0, 255, 255, 0.2);
+}
+
+/* HUD navigation buttons get special treatment */
+.hud-nav:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 2px;
+    background: rgba(0, 255, 255, 0.15);
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+/* Primary action buttons */
+.btn-primary:focus-visible {
+    outline: 3px solid #00ff88;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 8px rgba(0, 255, 136, 0.3);
+}
+
+/* Start button gets extra emphasis */
+#start-btn:focus-visible {
+    outline: 4px solid #00ffff;
+    outline-offset: 6px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    transform: scale(1.05);
+}
+
+/* ========================================
+   Keyboard Navigation Enhancements
+   ======================================== */
+
+/* Visual indicator for keyboard users */
+body.keyboard-nav *:focus-visible {
+    animation: focusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focusPulse {
+    0%, 100% {
+        outline-offset: 3px;
+    }
+    50% {
+        outline-offset: 5px;
+    }
+}
+
+/* Skip to main content link (hidden unless focused) */
+.skip-to-main {
+    position: absolute;
+    top: -100px;
+    left: 10px;
+    z-index: 999999;
+    padding: 10px 20px;
+    background: #000;
+    color: #00ffff;
+    text-decoration: none;
+    border: 2px solid #00ffff;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.skip-to-main:focus {
+    top: 10px;
+}
+
+/* ========================================
+   Interactive Element States
+   ======================================== */
+
+/* Ensure all interactive elements have visible hover/focus states */
+button,
+a,
+input,
+select,
+textarea {
+    transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled),
+a:hover {
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+button:active:not(:disabled),
+a:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   Screen Reader Only Content
+   ======================================== */
+
+.sr-only,
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Allow screen reader only elements to be focusable */
+.sr-only:focus,
+.visually-hidden:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* ========================================
+   High Contrast Mode Support
+   ======================================== */
+
+@media (prefers-contrast: high) {
+    :root {
+        --focus-color: #ffffff;
+        --bg-contrast: #000000;
+        --text-contrast: #ffffff;
+    }
+
+    *:focus-visible {
+        outline-color: var(--focus-color);
+        outline-width: 4px;
+    }
+
+    button,
+    .btn-primary,
+    .btn-secondary {
+        border: 2px solid var(--text-contrast);
+    }
+}
+
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    /* Keep critical focus transitions */
+    *:focus-visible {
+        transition: outline 0.2s ease;
+    }
+}
+
+/* ========================================
+   Color Blind Friendly Patterns
+   ======================================== */
+
+/* Use patterns in addition to color for status indicators */
+.status-dot.active::before {
+    content: '●';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+}
+
+.status-dot.inactive::before {
+    content: '○';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+}
+
+/* ========================================
+   Touch Target Sizes (Mobile Accessibility)
+   ======================================== */
+
+@media (pointer: coarse) {
+    /* Ensure minimum 44x44px touch targets (WCAG 2.5.5) */
+    button,
+    a {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px;
+    }
+
+    .hud-nav {
+        min-width: 48px;
+        min-height: 48px;
+    }
+}
+
+/* ========================================
+   ARIA Live Regions Styling
+   ======================================== */
+
+[aria-live] {
+    position: relative;
+}
+
+/* Visual indicator for live regions during development */
+[aria-live][data-debug]::after {
+    content: 'LIVE';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff00ff;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+/* ========================================
+   Form Accessibility
+   ======================================== */
+
+/* Ensure labels are associated with inputs */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 2px;
+    border-color: #00ffff;
+}
+
+/* Error states */
+input:invalid,
+select:invalid,
+textarea:invalid {
+    border-color: #ff6666;
+}
+
+input:invalid:focus-visible,
+select:invalid:focus-visible,
+textarea:invalid:focus-visible {
+    outline-color: #ff6666;
+}
+
+/* ========================================
+   Card Accessibility
+   ======================================== */
+
+/* Make cards keyboard focusable when interactive */
+.card[tabindex="0"]:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 4px;
+    transform: scale(1.02);
+    z-index: 100;
+}
+
+/* Active card gets special indicator */
+.card.active {
+    position: relative;
+}
+
+.card.active::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 3px solid #00ffff;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* ========================================
+   Confirmation Dialog Accessibility
+   ======================================== */
+
+#confirm-dialog-overlay[aria-hidden="true"] {
+    display: none !important;
+}
+
+.confirm-btn:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 3px;
+    transform: scale(1.05);
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+/* Focus trap container (for modals) */
+.focus-trap {
+    position: relative;
+}
+
+.focus-trap::before,
+.focus-trap::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    outline: none;
+}
+
+/* Prevent focus while loading */
+[aria-busy="true"] * {
+    pointer-events: none;
+}
+
+/* ========================================
+   Print Accessibility
+   ======================================== */
+
+@media print {
+    /* Ensure focus indicators don't print */
+    *:focus-visible {
+        outline: none;
+    }
+
+    /* Hide decorative elements */
+    [aria-hidden="true"] {
+        display: none;
+    }
+}

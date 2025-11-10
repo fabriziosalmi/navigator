@@ -45,16 +45,18 @@
     <link rel="stylesheet" href="css/interface-status-compact.css">
     <link rel="stylesheet" href="css/monochrome-minimal.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/onboarding-wizard.css">
+    <link rel="stylesheet" href="css/accessibility.css">
 </head>
 <body>
     <!-- Start Screen -->
-    <div id="start-screen">
+    <div id="start-screen" role="dialog" aria-labelledby="start-title">
         <div class="start-box">
-            <h1>🌌 Navigator</h1>
+            <h1 id="start-title">🌌 Navigator</h1>
             <p>Multi-layer gesture-controlled interface</p>
             <p>Navigate through cards with hand gestures</p>
-            <button id="start-btn">🚀 Start Experience</button>
-            <div class="permissions-info">
+            <button id="start-btn" aria-label="Start the Navigator experience">🚀 Start Experience</button>
+            <div class="permissions-info" role="note">
                 📹 Camera permission will be requested<br>
                 🔊 Audio will be enabled<br>
                 🖐️ Use hand gestures to navigate
@@ -141,7 +143,7 @@
          CENTRAL CONTENT AREA - Fullwidth Viewport
          Cards matrix with 3D carousel
          =================================================== -->
-    <div id="cards-viewport">
+    <div id="cards-viewport" role="main" aria-label="Content cards">
         <div id="cards-container">
             <!-- Cards will be rendered here -->
         </div>
@@ -151,9 +153,9 @@
          BOTTOM HUD BAR - Fullwidth
          Organized in 5 columns: Input Methods | Position | Navigation | Gesture Status | Adaptive Progress
          =================================================== -->
-    <div class="bottom-hud-bar">
+    <div class="bottom-hud-bar" role="complementary" aria-label="Navigation HUD">
         <!-- Gesture LED Indicator (floating) -->
-        <div class="gesture-led" id="gesture-led"></div>
+        <div class="gesture-led" id="gesture-led" aria-hidden="true"></div>
         
         <!-- Column 1: Input Methods & Interface Status -->
         <div class="hud-panel compact-panel input-methods-panel">
@@ -164,13 +166,13 @@
         </div>
         
         <!-- Column 2: Layer & Position Info -->
-        <div class="hud-panel compact-panel position-info">
+        <div class="hud-panel compact-panel position-info" role="status" aria-live="polite">
             <div class="panel-title">POSITION</div>
             <div class="layer-display">
                 <span class="layer-name" id="hud-layer-name">Videos</span>
                 <span class="layer-meta" id="hud-layer-meta">Layer 1/6</span>
             </div>
-            <div class="card-position">
+            <div class="card-position" aria-label="Current position">
                 <span class="current-card" id="hud-current-card">1</span>
                 <span class="separator">/</span>
                 <span class="total-cards" id="hud-total-cards">4</span>
@@ -178,36 +180,40 @@
         </div>
 
         <!-- Column 3: Central Navigation Controls -->
-        <div class="hud-panel nav-controls">
-            <button class="hud-nav" id="prev-btn" data-action="prev" title="Previous card">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <div class="hud-panel nav-controls" role="toolbar" aria-label="Navigation controls">
+            <button class="hud-nav" id="prev-btn" data-action="prev" 
+                    aria-label="Navigate to previous card" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M15 18l-6-6 6-6"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="layer-up" data-action="layer-up" title="Layer up">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="hud-nav" id="layer-up" data-action="layer-up" 
+                    aria-label="Navigate to upper layer" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M12 19V5m0 0l-7 7m7-7l7 7"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="layer-down" data-action="layer-down" title="Layer down">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="hud-nav" id="layer-down" data-action="layer-down" 
+                    aria-label="Navigate to lower layer" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M12 5v14m0 0l-7-7m7 7l7-7"/>
                 </svg>
             </button>
-            <button class="hud-nav" id="next-btn" data-action="next" title="Next card">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="hud-nav" id="next-btn" data-action="next" 
+                    aria-label="Navigate to next card" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M9 18l6-6-6-6"/>
                 </svg>
             </button>
         </div>
 
         <!-- Column 4: Gesture System Status -->
-        <div class="hud-panel compact-panel gesture-status-panel">
+        <div class="hud-panel compact-panel gesture-status-panel" role="status" aria-live="polite">
             <div class="panel-title">GESTURE SYSTEM</div>
             <div class="gesture-status-content">
                 <div class="gesture-stat">
                     <span class="stat-label">Hand</span>
-                    <span class="status-dot inactive" id="hand-status"></span>
+                    <span class="status-dot inactive" id="hand-status" aria-hidden="true"></span>
                     <span class="stat-value" id="hand-state">Searching</span>
                 </div>
                 <div class="gesture-stat">

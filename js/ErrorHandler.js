@@ -1,6 +1,7 @@
 /**
  * Centralized Error Handler for Navigator
  * Provides global error catching, logging, and user-friendly error messages
+ * Supports multiple severity levels: critical, warning, info
  */
 
 export class ErrorHandler {
@@ -10,10 +11,14 @@ export class ErrorHandler {
         this.criticalErrors = new Set([
             'MediaPipe initialization failed',
             'Camera access denied',
-            'WebGL not supported'
+            'WebGL not supported',
+            'Config validation failed',
+            'Configuration validation failed'
         ]);
         
+        this.toastContainer = null;
         this.setupGlobalHandlers();
+        this.createToastContainer();
     }
 
     /**
@@ -23,6 +28,7 @@ export class ErrorHandler {
         // Catch synchronous errors
         window.onerror = (message, source, lineno, colno, error) => {
             this.logError({
+                severity: 'critical',
                 type: 'runtime',
                 message: message,
                 source: source,
@@ -37,6 +43,7 @@ export class ErrorHandler {
         // Catch unhandled promise rejections
         window.onunhandledrejection = (event) => {
             this.logError({
+                severity: 'critical',
                 type: 'promise',
                 message: event.reason?.message || event.reason,
                 error: event.reason,
@@ -48,9 +55,33 @@ export class ErrorHandler {
     }
 
     /**
-     * Log an error
+     * Create toast notification container
+     */
+    createToastContainer() {
+        this.toastContainer = document.createElement('div');
+        this.toastContainer.id = 'toast-container';
+        this.toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(this.toastContainer);
+    }
+
+    /**
+     * Log an error with severity level
      */
     logError(errorData) {
+        // Ensure severity is set
+        if (!errorData.severity) {
+            errorData.severity = this.isCriticalError(errorData.message) ? 'critical' : 'warning';
+        }
+
         // Add to error log
         this.errors.unshift(errorData);
         if (this.errors.length > this.maxErrors) {
@@ -58,19 +89,40 @@ export class ErrorHandler {
         }
 
         // Console logging with categorization
-        const prefix = errorData.type === 'critical' ? '🚨' : '⚠️';
-        console.error(`${prefix} [${errorData.type}]`, errorData.message, errorData.error);
+        const prefix = {
+            'critical': '🚨',
+            'warning': '⚠️',
+            'info': 'ℹ️'
+        }[errorData.severity] || '⚠️';
 
-        // Check if critical
-        const isCritical = this.isCriticalError(errorData.message);
-        if (isCritical) {
+        console.error(`${prefix} [${errorData.severity}] [${errorData.type}]`, errorData.message, errorData.error);
+
+        // Handle based on severity
+        if (errorData.severity === 'critical') {
             this.handleCriticalError(errorData);
+        } else if (errorData.severity === 'warning') {
+            this.showToast(errorData);
+        } else if (errorData.severity === 'info') {
+            this.showToast(errorData);
         }
 
         // Emit event for listeners
         window.dispatchEvent(new CustomEvent('navigator:error', {
-            detail: { ...errorData, isCritical }
+            detail: errorData
         }));
+    }
+
+    /**
+     * Public method for manual logging with severity
+     */
+    log(message, severity = 'info', error = null) {
+        this.logError({
+            severity: severity,
+            type: 'manual',
+            message: message,
+            error: error,
+            timestamp: new Date().toISOString()
+        });
     }
 
     /**
@@ -192,19 +244,117 @@ export class ErrorHandler {
         if (technicalMessage.includes('WebGL')) {
             return 'Your browser does not support required 3D graphics. Please use a modern browser like Chrome or Firefox.';
         }
+        if (technicalMessage.includes('Config') || technicalMessage.includes('configuration')) {
+            return 'Configuration file is invalid or corrupted. Using default settings.';
+        }
         return 'An unexpected error occurred. Please reload the page to continue.';
     }
 
     /**
-     * Manual error logging
+     * Show toast notification for non-critical errors
      */
-    log(message, type = 'info', error = null) {
-        this.logError({
-            type: type,
-            message: message,
-            error: error,
-            timestamp: new Date().toISOString()
+    showToast(errorData) {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${errorData.severity}`;
+        
+        const icon = {
+            'warning': '⚠️',
+            'info': 'ℹ️'
+        }[errorData.severity] || 'ℹ️';
+
+        toast.style.cssText = `
+            background: ${errorData.severity === 'warning' 
+                ? 'linear-gradient(135deg, rgba(255, 150, 0, 0.95), rgba(255, 100, 0, 0.95))' 
+                : 'linear-gradient(135deg, rgba(0, 150, 255, 0.95), rgba(0, 100, 255, 0.95))'};
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            max-width: 400px;
+            pointer-events: all;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: toastSlideIn 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        `;
+
+        toast.innerHTML = `
+            <div style="font-size: 24px; flex-shrink: 0;">${icon}</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px; text-transform: capitalize;">
+                    ${errorData.severity}
+                </div>
+                <div style="font-size: 14px; opacity: 0.95; line-height: 1.4;">
+                    ${this.getUserFriendlyMessage(errorData.message)}
+                </div>
+            </div>
+            <button style="
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: white;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 16px;
+                line-height: 1;
+                flex-shrink: 0;
+                transition: background 0.2s ease;
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+        `;
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes toastSlideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes toastSlideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        if (!document.querySelector('#toast-animations')) {
+            style.id = 'toast-animations';
+            document.head.appendChild(style);
+        }
+
+        // Close button handler
+        const closeBtn = toast.querySelector('button');
+        const removeToast = () => {
+            toast.style.animation = 'toastSlideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        };
+
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeToast();
         });
+
+        // Click anywhere to dismiss
+        toast.addEventListener('click', removeToast);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(removeToast, 5000);
+
+        this.toastContainer.appendChild(toast);
     }
 
     /**

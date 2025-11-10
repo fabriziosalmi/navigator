@@ -1,143 +1,247 @@
 # ============================================
-# NAVIGATOR - CENTRALIZED CONFIGURATION
+# NAVIGATOR - CENTRALIZED CONFIGURATION V2
 # ============================================
-# All tunable parameters in one place
-# Modify values here to adjust app behavior
+# Optimized plugin-based configuration with schema validation
+# Schema: config.schema.json
+# Version: 2.0.0 (Post Phase 3 Optimization)
 
 # ============================================
-# PERFORMANCE & OPTIMIZATION
+# PLUGINS - Core & Plugin Architecture
 # ============================================
+# Plugins are loaded in priority order (higher = earlier)
+# Each plugin can have specific options passed during initialization
+
+plugins:
+  # ===== INPUT PLUGINS (Priority: 100) =====
+
+  - name: "GestureInputPlugin"
+    enabled: true
+    priority: 100
+    options:
+      # Camera configuration (consolidated from camera.* section)
+      camera:
+        width: 640
+        height: 480
+        facing_mode: "user"               # "user" (front) | "environment" (back)
+        frame_rate: 30
+        # MediaPipe Hands settings (consolidated from gestures.detection.*)
+        max_num_hands: 1                  # 1-2 hands
+        model_complexity: 1               # 0=lite, 1=full
+        min_detection_confidence: 0.7     # 0.3-0.95 (higher = stricter)
+        min_tracking_confidence: 0.5      # 0.3-0.95
+
+      # Gesture recognition thresholds
+      gestures:
+        swipe:
+          min_distance: 0.08              # Minimum hand movement (0-1 normalized)
+          max_time_ms: 800                # Max time for valid swipe
+          cooldown_ms: 300                # Cooldown between swipes
+
+        point:
+          hold_duration_ms: 2000          # Hold point for 2s to activate
+          stability_threshold: 0.02       # Max movement while pointing
+
+        fist:
+          enabled: true
+          min_confidence: 0.75
+
+        open_hand:
+          enabled: true
+          finger_spread_threshold: 0.15
+
+        pinch:
+          enabled: true
+          max_distance: 0.05              # Max thumb-index distance
+
+        # Grid Lock System (gesture stabilization)
+        grid_lock:
+          enabled: true
+          cell_size: 0.15                 # Grid cell size (0-1)
+          accumulator_decay: 0.85         # Decay rate
+          intent_threshold: 0.3           # Threshold to register intent
+          dead_zone: 0.05                 # Central dead zone
+
+        # Predictive tracking (compensate latency)
+        predictive:
+          enabled: true
+          smooth_factor: 0.7              # 0-1 (higher = smoother)
+          prediction_frames: 3            # Frames to predict ahead
+
+  - name: "KeyboardInputPlugin"
+    enabled: true
+    priority: 100
+    options:
+      arrows_navigate_cards: true
+      wasd_navigate_cards: true
+      page_up_down_layers: true
+      space_toggle_pause: true
+
+  - name: "VoiceInputPlugin"
+    enabled: false                        # Disabled by default
+    priority: 100
+    options:
+      wake_word: "navigator"
+      language: "en-US"
+
+  # ===== UI PLUGINS (Priority: 90) =====
+
+  - name: "OnboardingPlugin"
+    enabled: true
+    priority: 90
+    options:
+      storage_key: "navigator_onboarding_completed"
+      auto_start: true
+
+  # ===== SYSTEM PLUGINS (Priority: 95) =====
+
+  - name: "IdleSystemPlugin"
+    enabled: true
+    priority: 95
+    options:
+      idle_timeout_ms: 15000              # 15 seconds
+      check_interval_ms: 1000             # Check every second
+
+  # ===== LOGIC PLUGINS (Priority: 50) =====
+
+  - name: "NavigationLogicPlugin"
+    enabled: true
+    priority: 50
+    options:
+      # Card navigation behavior
+      cards:
+        transition_duration_ms: 600
+        ease_function: "cubic-bezier(0.4, 0, 0.2, 1)"
+        # 3D Carousel settings
+        active_scale: 1.0
+        side_cards_scale: 0.75
+        side_cards_opacity: 0.5
+        side_cards_rotation_deg: 45
+        side_cards_offset_x: 600
+        side_cards_offset_z: -400
+
+      # Layer navigation behavior
+      layers:
+        transition_duration_ms: 800
+        ease_function: "cubic-bezier(0.23, 1, 0.32, 1)"
+
+      # Momentum/inertia physics
+      momentum:
+        enabled: true
+        friction: 0.92                    # 0.8-0.98 (higher = longer)
+        min_velocity: 0.01
+        velocity_multiplier: 0.5
+
+      # Initial state
+      initial_layer: "video"
+      initial_card_index: 0
+
+  # ===== OUTPUT PLUGINS (Priority: 10) =====
+
+  - name: "DomRendererPlugin"
+    enabled: true
+    priority: 10
+    options:
+      # Level of Detail system
+      lod:
+        enabled: true
+        max_visible_cards: 5              # Max cards in DOM
+        blur_distance_cards: true
+
+      # Performance optimizations
+      lazy_load_images: true
+      lazy_load_threshold: "200px"
+
+  - name: "AudioFeedbackPlugin"
+    enabled: true
+    priority: 10
+    options:
+      master_volume: 0.3                  # 0.0-1.0
+
+      # Individual sound volumes
+      volumes:
+        navigation: 0.4
+        success: 0.5
+        error: 0.3
+        ambient: 0.2
+
+      # Spatial audio (stereo panning)
+      spatial:
+        enabled: true
+        pan_range: 0.7                    # 0-1 (max stereo separation)
+
+      # Audio event triggers
+      feedback:
+        card_select: true
+        layer_change: true
+        gesture_detect: true
+        error_sound: true
+
+  - name: "VisualEffectsPlugin"
+    enabled: true
+    priority: 10
+    options:
+      performance_mode: "medium"          # low | medium | high
+
+      # Particle systems
+      particles:
+        enabled: false                    # Performance: disabled
+        max_particles: 100
+
+      # Light beams (Akira-style)
+      light_beams:
+        enabled: false                    # Performance: disabled
+        duration_ms: 600
+
+      # Card blur overlay (active)
+      blur:
+        enabled: true
+        inactive_cards_blur: 12           # pixels
+        inactive_cards_brightness: 0.6    # 0-1
+        inactive_cards_saturation: 0.3    # 0-1
+
+      # Gesture LED indicator
+      gesture_led:
+        enabled: true
+        pulse_duration_ms: 300
+        colors:
+          idle: "#333333"
+          detecting: "#00ffff"
+          success: "#00ff00"
+          error: "#ff0000"
+
+# ============================================
+# GLOBAL SETTINGS
+# ============================================
+
+# Performance & optimization
 performance:
-  # Target FPS for smooth experience
-  target_fps: 60                    # range: 30-120
-  
-  # Performance mode auto-switch thresholds
-  fps_high_threshold: 50            # Switch to medium below this
-  fps_medium_threshold: 30          # Switch to low below this
-  
+  target_fps: 60                          # 30-120
+  fps_high_threshold: 50                  # Switch to medium mode below this
+  fps_medium_threshold: 30                # Switch to low mode below this
+
   # Idle detection
-  idle_timeout_ms: 15000            # Time before entering idle mode (15s)
-  idle_enabled: true                # Enable/disable idle system
-  
-  # Level of Detail (LOD) system
-  lod:
-    enabled: true
-    max_visible_cards: 5            # Max cards to keep in DOM
-    blur_distance_cards: true       # Apply blur to non-active cards
-    
-  # Resource loading
-  lazy_load_images: true            # Lazy load card images
-  lazy_load_threshold: "200px"      # Load images X pixels before visible
+  idle_timeout_ms: 15000                  # 15 seconds
+  idle_enabled: true
 
-# ============================================
-# GESTURE DETECTION
-# ============================================
-gestures:
-  # Hand detection sensitivity
-  detection:
-    min_detection_confidence: 0.7   # range: 0.5-0.95 (higher = more strict)
-    min_tracking_confidence: 0.5    # range: 0.3-0.95
-    model_complexity: 1             # 0=lite, 1=full (recommended)
-    max_num_hands: 1                # Detect only 1 hand for performance
-  
-  # Gesture recognition thresholds
-  recognition:
-    # Swipe detection
-    swipe:
-      min_distance: 0.08            # Minimum hand movement (0-1 normalized)
-      max_time_ms: 800              # Max time for valid swipe
-      cooldown_ms: 300              # Cooldown between swipes
-      
-    # Point gesture (focus mode)
-    point:
-      hold_duration_ms: 2000        # Hold point for 2s to activate focus
-      stability_threshold: 0.02     # Max movement allowed while pointing
-      
-    # Fist gesture
-    fist:
-      enabled: true
-      min_confidence: 0.75          # Fist detection confidence
-      
-    # Open hand gesture
-    open_hand:
-      enabled: true
-      finger_spread_threshold: 0.15 # Min distance between fingers
-      
-    # Pinch gesture
-    pinch:
-      enabled: true
-      max_distance: 0.05            # Max distance thumb-index for pinch
-  
-  # Grid Lock System (stabilization)
-  grid_lock:
-    enabled: true
-    cell_size: 0.15                 # Grid cell size (0-1 normalized)
-    accumulator_decay: 0.85         # Decay rate for accumulated movement
-    intent_threshold: 0.3           # Threshold to register intent
-    dead_zone: 0.05                 # Central dead zone (no movement)
-    
-  # Predictive tracking
-  predictive:
-    enabled: true
-    smooth_factor: 0.7              # range: 0-1 (higher = smoother but slower)
-    prediction_frames: 3            # Frames to predict ahead
-
-# ============================================
-# NAVIGATION BEHAVIOR
-# ============================================
-navigation:
-  # Card navigation
-  cards:
-    transition_duration_ms: 600     # Animation duration
-    ease_function: "cubic-bezier(0.4, 0, 0.2, 1)"
-    
-    # Carousel 3D settings
-    active_scale: 1.0               # Scale of active card
-    side_cards_scale: 0.75          # Scale of adjacent cards
-    side_cards_opacity: 0.5         # Opacity of adjacent cards
-    side_cards_rotation_deg: 45     # Rotation angle (Y-axis)
-    side_cards_offset_x: 600        # Horizontal offset (pixels)
-    side_cards_offset_z: -400       # Depth offset (pixels)
-    
-  # Layer navigation
-  layers:
-    transition_duration_ms: 800
-    ease_function: "cubic-bezier(0.23, 1, 0.32, 1)"
-    
-  # Momentum/inertia
-  momentum:
-    enabled: true
-    friction: 0.92                  # range: 0.8-0.98 (higher = longer momentum)
-    min_velocity: 0.01              # Stop below this velocity
-    velocity_multiplier: 0.5        # Amplify swipe velocity
-    
-  # Initial state
-  initial_layer: "video"            # Starting layer
-  initial_card_index: 0             # Starting card (0-based)
-
-# ============================================
-# ADAPTIVE SYSTEM
-# ============================================
+# Adaptive difficulty system
 adaptive:
   enabled: true
-  
-  # Leveling system
   levels:
     starting_level: 1
     max_level: 5
-    xp_per_level: 100               # XP needed per level
-    
+    xp_per_level: 100
+
     # XP rewards
     xp_swipe_success: 10
     xp_layer_change: 15
     xp_gesture_combo: 25
-    xp_precision_bonus: 5           # For very accurate gestures
-    
-  # Difficulty scaling
+    xp_precision_bonus: 5
+
+  # Difficulty scaling per level
   difficulty:
     level_1:
-      gestures: ["swipe"]           # Only basic swipes
-      speed_multiplier: 0.8         # Slower required gestures
+      gestures: ["swipe"]
+      speed_multiplier: 0.8
     level_2:
       gestures: ["swipe", "pinch"]
       speed_multiplier: 0.9
@@ -151,169 +255,48 @@ adaptive:
       gestures: ["all"]
       speed_multiplier: 1.2
 
-# ============================================
-# AUDIO FEEDBACK
-# ============================================
-audio:
-  enabled: true
-  master_volume: 0.3                # range: 0.0-1.0
-  
-  # Individual volumes
-  volumes:
-    navigation: 0.4                 # Card swipe sounds
-    success: 0.5                    # Success feedback
-    error: 0.3                      # Error feedback
-    ambient: 0.2                    # Background ambient (if enabled)
-    
-  # Spatial audio
-  spatial:
-    enabled: true
-    pan_range: 0.7                  # range: 0-1 (max stereo separation)
-    
-  # Audio types
-  feedback:
-    card_select: true               # Sound on card change
-    layer_change: true              # Sound on layer change
-    gesture_detect: true            # Sound on gesture detected
-    error_sound: true               # Sound on invalid action
-
-# ============================================
-# VISUAL EFFECTS
-# ============================================
-visual_effects:
-  # Enable/disable effect systems
-  enabled: true
-  performance_mode: "medium"        # low | medium | high
-  
-  # Particle systems
-  particles:
-    enabled: false                  # Disabled for performance (can enable)
-    max_particles: 100
-    
-  # Light beams (Akira style)
-  light_beams:
-    enabled: false                  # Disabled for performance
-    duration_ms: 600
-    
-  # Card blur overlay
-  blur:
-    enabled: true
-    inactive_cards_blur: 12         # pixels
-    inactive_cards_brightness: 0.6  # range: 0-1
-    inactive_cards_saturation: 0.3  # range: 0-1
-    
-  # Gesture LED indicator
-  gesture_led:
-    enabled: true
-    pulse_duration_ms: 300
-    colors:
-      idle: "#333333"
-      detecting: "#00ffff"
-      success: "#00ff00"
-      error: "#ff0000"
-
-# ============================================
-# USER INTERFACE
-# ============================================
+# User interface
 ui:
-  # HUD visibility
   hud:
     top_bar: true
     bottom_bar: true
-    compact_mode: true              # Use compact panels
-    
-  # HUD update frequency
-  update_frequency_ms: 100          # Update HUD every 100ms
-  
-  # Debug mode
+    compact_mode: true
+
+  update_frequency_ms: 100
+
   debug:
-    enabled: false                  # Show debug info
-    show_fps: false                 # Show FPS counter
-    show_gesture_data: false        # Show raw gesture data
-    console_logging: true           # Log to console
-    
-  # Start screen
+    enabled: false
+    show_fps: false
+    show_gesture_data: false
+    console_logging: true
+
   start_screen:
-    show_tutorial: true             # Show tutorial on first run
-    auto_start: false               # Skip start screen (for dev)
+    show_tutorial: true
+    auto_start: false
 
-# ============================================
-# CAMERA & MEDIAPIPE
-# ============================================
-camera:
-  # Video constraints
-  width: 640                        # Camera resolution width
-  height: 480                       # Camera resolution height
-  facing_mode: "user"               # "user" (front) | "environment" (back)
-  frame_rate: 30                    # Target frame rate
-  
-  # MediaPipe optimization
-  mediapipe:
-    static_image_mode: false
-    max_num_hands: 1
-    model_complexity: 1             # 0=lite, 1=full
-    min_detection_confidence: 0.7
-    min_tracking_confidence: 0.5
-
-# ============================================
-# ACCESSIBILITY
-# ============================================
+# Accessibility
 accessibility:
-  # Reduced motion
   respect_prefers_reduced_motion: true
-  
-  # Keyboard navigation
   keyboard:
     enabled: true
     arrows_navigate_cards: true
     page_up_down_layers: true
-    
-  # Voice commands
   voice:
-    enabled: false                  # Requires browser support
+    enabled: false
     wake_word: "navigator"
 
-# ============================================
-# DEVELOPER OPTIONS
-# ============================================
+# Developer options
 developer:
-  # Hot reload config (future feature)
   hot_reload: false
-  
-  # Mock gestures (for testing without camera)
   mock_gestures: false
-  
-  # Performance monitoring
   monitor_performance: true
-  log_slow_frames: true             # Log frames below target FPS
-  
-  # Error handling
+  log_slow_frames: true
   show_error_overlay: true
   detailed_errors: true
 
 # ============================================
-# FEATURE FLAGS
-# ============================================
-features:
-  # Enable/disable major features
-  gesture_navigation: true
-  keyboard_navigation: true
-  mouse_navigation: true            # Click/drag support
-  voice_commands: false
-  onboarding_wizard: false          # Not yet implemented
-  
-  # Experimental features
-  experimental:
-    app_state_integration: false    # Use new AppState.js
-    error_handler_integration: false # Use new ErrorHandler.js
-    idle_system: false              # Auto-pause when idle
-    multi_hand_support: false       # Support 2 hands (future)
-
-# ============================================
 # CONTENT LAYERS
 # ============================================
-# Note: This section mirrors js/config.js
-# Eventually we'll load from here instead
 layers:
   video:
     label: "Videos"
@@ -341,7 +324,7 @@ layers:
     cards: 4
 
 # ============================================
-# TUNING PRESETS
+# CONFIGURATION PRESETS
 # ============================================
 # Quick preset configurations for different use cases
 
@@ -349,46 +332,70 @@ presets:
   # Maximum performance (minimal effects)
   performance:
     performance.target_fps: 60
-    visual_effects.enabled: false
-    visual_effects.particles.enabled: false
-    visual_effects.light_beams.enabled: false
-    gestures.predictive.enabled: true
-    navigation.momentum.enabled: false
-    
-  # Maximum quality (all effects)
+    plugins:
+      - name: "VisualEffectsPlugin"
+        options:
+          performance_mode: "low"
+          particles.enabled: false
+          light_beams.enabled: false
+      - name: "NavigationLogicPlugin"
+        options:
+          momentum.enabled: false
+
+  # Maximum quality (all effects enabled)
   quality:
     performance.target_fps: 60
-    visual_effects.enabled: true
-    visual_effects.particles.enabled: true
-    visual_effects.light_beams.enabled: true
-    visual_effects.performance_mode: "high"
-    
-  # Accessibility focused
+    plugins:
+      - name: "VisualEffectsPlugin"
+        options:
+          performance_mode: "high"
+          particles.enabled: true
+          light_beams.enabled: true
+
+  # Accessibility focused (easier gestures, slower animations)
   accessible:
-    gestures.recognition.swipe.min_distance: 0.06  # Easier swipes
-    gestures.recognition.swipe.cooldown_ms: 500    # More time
-    navigation.cards.transition_duration_ms: 800   # Slower animations
-    accessibility.respect_prefers_reduced_motion: true
-    
-  # Precision focused (for demos/testing)
+    plugins:
+      - name: "GestureInputPlugin"
+        options:
+          gestures:
+            swipe:
+              min_distance: 0.06          # Easier swipes
+              cooldown_ms: 500            # More time
+      - name: "NavigationLogicPlugin"
+        options:
+          cards:
+            transition_duration_ms: 800   # Slower animations
+
+  # Precision focused (demos/testing)
   precision:
-    gestures.grid_lock.cell_size: 0.1              # Smaller grid
-    gestures.grid_lock.intent_threshold: 0.4       # Higher threshold
-    gestures.detection.min_detection_confidence: 0.8
-    gestures.recognition.swipe.min_distance: 0.12  # Longer swipes
-    
-  # Development mode
+    plugins:
+      - name: "GestureInputPlugin"
+        options:
+          camera:
+            min_detection_confidence: 0.8
+          gestures:
+            swipe:
+              min_distance: 0.12          # Longer swipes required
+            grid_lock:
+              cell_size: 0.1              # Smaller grid
+              intent_threshold: 0.4       # Higher threshold
+
+  # Development mode (all debug features)
   development:
-    ui.debug.enabled: true
-    ui.debug.show_fps: true
-    ui.debug.show_gesture_data: true
-    developer.monitor_performance: true
-    ui.start_screen.auto_start: true
+    ui:
+      debug:
+        enabled: true
+        show_fps: true
+        show_gesture_data: true
+      start_screen:
+        auto_start: true
+    developer:
+      monitor_performance: true
 
 # ============================================
 # ACTIVE PRESET
 # ============================================
-# Uncomment to activate a preset
+# Uncomment to activate a preset (overrides above settings)
 # active_preset: "performance"
 # active_preset: "quality"
 # active_preset: "accessible"

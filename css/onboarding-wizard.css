@@ -1,0 +1,486 @@
+/**
+ * Onboarding Wizard Styles
+ * Clean, centered modal with smooth animations
+ */
+
+.onboarding-wizard {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.onboarding-wizard.visible {
+    opacity: 1;
+}
+
+.onboarding-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+}
+
+.onboarding-modal {
+    position: relative;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.95));
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 255, 255, 0.2);
+    overflow: hidden;
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Header & Progress */
+.onboarding-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.onboarding-progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ffff, #00ff88);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+}
+
+.progress-text .current-step {
+    color: #00ffff;
+    font-weight: bold;
+}
+
+/* Content Area */
+.onboarding-content {
+    padding: 40px 30px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-step {
+    width: 100%;
+    text-align: center;
+    animation: stepFadeIn 0.3s ease;
+}
+
+@keyframes stepFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.step-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.onboarding-step h2 {
+    font-size: 28px;
+    color: #00ffff;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+}
+
+.step-description {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin: 0 0 15px 0;
+}
+
+.step-description strong {
+    color: #00ffff;
+}
+
+.step-note {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* Action Buttons */
+.step-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00ffff, #00ff88);
+    color: #000;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary.btn-large {
+    padding: 16px 40px;
+    font-size: 18px;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Permission Status */
+.permission-status {
+    margin: 30px 0;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.status-indicator.waiting {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.status-indicator.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+}
+
+.status-indicator.error {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6666;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.status-icon {
+    font-size: 24px;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #00ffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-help {
+    margin-top: 15px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+/* Hand Tracking Status */
+.hand-tracking-status {
+    margin: 30px 0;
+}
+
+.hand-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.hand-icon {
+    font-size: 80px;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.hand-indicator.detected .hand-icon {
+    opacity: 1;
+    animation: handDetected 0.6s ease;
+}
+
+@keyframes handDetected {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.tracking-bar {
+    width: 200px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.tracking-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #00ffff, #00ff88);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.tracking-fill.active {
+    width: 100%;
+}
+
+.status-text {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.hand-indicator.detected .status-text {
+    color: #00ff88;
+    font-weight: 600;
+}
+
+/* Gesture Test */
+.gesture-demo {
+    margin: 30px 0;
+}
+
+.gesture-animation {
+    position: relative;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.hand-sprite {
+    font-size: 60px;
+    animation: handSwipe 2s ease-in-out infinite;
+}
+
+@keyframes handSwipe {
+    0%, 100% {
+        transform: translateX(-30px);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translateX(30px);
+        opacity: 1;
+    }
+}
+
+.arrow-indicator {
+    font-size: 40px;
+    color: #00ffff;
+    animation: arrowPulse 1s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.gesture-result {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.gesture-result.success {
+    color: #00ff88;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Gesture Cheatsheet */
+.gesture-cheatsheet {
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+}
+
+.gesture-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.gesture-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 255, 255, 0.3);
+}
+
+.gesture-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.gesture-item span:last-child {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .onboarding-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .onboarding-header {
+        padding: 15px 20px;
+    }
+
+    .onboarding-content {
+        padding: 30px 20px;
+    }
+
+    .onboarding-step h2 {
+        font-size: 24px;
+    }
+
+    .step-description {
+        font-size: 14px;
+    }
+
+    .step-icon {
+        font-size: 48px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .step-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .step-actions button {
+        width: 100%;
+    }
+}

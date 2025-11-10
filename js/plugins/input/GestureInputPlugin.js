@@ -70,6 +70,10 @@ export class GestureInputPlugin extends BasePlugin {
 
         // Setup video elements if not provided
         this._setupVideoElements();
+
+        // Listen for idle system events
+        this.on('idle:start', () => this._pauseTracking());
+        this.on('idle:end', () => this._resumeTracking());
     }
 
     async onStart() {
@@ -215,6 +219,45 @@ export class GestureInputPlugin extends BasePlugin {
 
         this.setState('system.cameraActive', false);
         this.log('Camera stopped');
+    }
+
+    // ========================================
+    // Idle Integration
+    // ========================================
+
+    _pauseTracking() {
+        this.log('Pausing tracking (idle mode)');
+        
+        // Stop MediaPipe processing by setting empty callback
+        if (this.hands) {
+            this.hands.onResults(() => {
+                // No-op during idle - saves CPU
+            });
+        }
+
+        // Stop animation frame loop
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+
+        this.setPluginState('paused', true);
+    }
+
+    _resumeTracking() {
+        this.log('Resuming tracking (active mode)');
+        
+        // Restore MediaPipe results callback
+        if (this.hands) {
+            this.hands.onResults((results) => this._onMediaPipeResults(results));
+        }
+
+        // Restart detection loop
+        if (!this.animationFrameId) {
+            this._startDetectionLoop();
+        }
+
+        this.setPluginState('paused', false);
     }
 
     // ========================================
