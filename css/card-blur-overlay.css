@@ -1,0 +1,126 @@
+/* ==============================================
+   CARD BLUR OVERLAY SYSTEM - MONOCHROME VERSION
+   Non-active cards show blurred content with subtle gray gradient
+   ============================================== */
+
+/* Blur overlay per card NON attive */
+.card:not(.active)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 100;
+    border-radius: inherit;
+    
+    /* Blur forte sul contenuto */
+    backdrop-filter: blur(12px) saturate(30%) brightness(0.6);
+    -webkit-backdrop-filter: blur(12px) saturate(30%) brightness(0.6);
+    
+    /* Gradiente monocromatico sottile */
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0.3) 30%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.2) 70%,
+        rgba(0, 0, 0, 0.4) 100%
+    );
+    
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Card attiva: rimuovi blur overlay */
+.card.active::after {
+    opacity: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* ==============================================
+   BLUR INTENSITY VARIATIONS - Monochrome
+   Più lontana la card, più forte il blur e più scura
+   ============================================== */
+
+/* Card adjacent (previous/next) - blur medio */
+.card.previous:not(.active)::after,
+.card.next:not(.active)::after {
+    backdrop-filter: blur(10px) saturate(40%) brightness(0.7);
+    -webkit-backdrop-filter: blur(10px) saturate(40%) brightness(0.7);
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.3) 100%
+    );
+}
+
+/* Card distanti - blur forte */
+.card.far-previous:not(.active)::after,
+.card.far-next:not(.active)::after {
+    backdrop-filter: blur(16px) saturate(20%) brightness(0.5);
+    -webkit-backdrop-filter: blur(16px) saturate(20%) brightness(0.5);
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.5) 100%
+    );
+}
+
+/* Card molto lontane - blur massimo */
+.card:not(.active):not(.previous):not(.next):not(.far-previous):not(.far-next)::after {
+    backdrop-filter: blur(20px) saturate(10%) brightness(0.4);
+    -webkit-backdrop-filter: blur(20px) saturate(10%) brightness(0.4);
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
+}
+
+/* ==============================================
+   HOVER STATE - Riduzione blur temporanea
+   ============================================== */
+
+.card:not(.active):hover::after {
+    backdrop-filter: blur(6px) saturate(60%) brightness(0.8);
+    -webkit-backdrop-filter: blur(6px) saturate(60%) brightness(0.8);
+    opacity: 0.6;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.1) 50%,
+        rgba(0, 0, 0, 0.2) 100%
+    );
+}
+
+/* ==============================================
+   PERFORMANCE - GPU Acceleration
+   ============================================== */
+
+.card::after {
+    will-change: opacity, backdrop-filter;
+    transform: translateZ(0);
+}
+
+/* Disable blur on low-performance devices */
+@media (prefers-reduced-motion: reduce) {
+    .card:not(.active)::after {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+    }
+}
+
+/* Mobile optimization - ridotto blur */
+@media (max-width: 768px) {
+    .card:not(.active)::after {
+        backdrop-filter: blur(8px) saturate(60%);
+        -webkit-backdrop-filter: blur(8px) saturate(60%);
+    }
+}
