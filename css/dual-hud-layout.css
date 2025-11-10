@@ -26,7 +26,7 @@
 
 /* ==============================================
    TOP HUD BAR - FULLWIDTH
-   Interface Status (left) + History (center) + Gesture Status (right)
+   History (left) + Gesture Status (right)
    ============================================== */
 
 .top-hud-bar {
@@ -38,7 +38,7 @@
     height: var(--hud-top-height);
     
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
     padding: 0 20px;
     gap: 20px;
@@ -69,11 +69,6 @@
 /* Grid Areas */
 .top-hud-bar .left-panel {
     justify-self: start;
-    pointer-events: auto;
-}
-
-.top-hud-bar .center-panel {
-    justify-self: center;
     pointer-events: auto;
 }
 

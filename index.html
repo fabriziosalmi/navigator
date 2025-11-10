@@ -42,6 +42,7 @@
     <link rel="stylesheet" href="css/ux-refinements.css">
     <link rel="stylesheet" href="css/viewport-cleanup.css">
     <link rel="stylesheet" href="css/card-blur-overlay.css">
+    <link rel="stylesheet" href="css/interface-status-compact.css">
     <link rel="stylesheet" href="css/monochrome-minimal.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
@@ -100,18 +101,11 @@
 
     <!-- ===================================================
          TOP HUD BAR - Fullwidth
-         Left: Interface Status | Center: History | Right: Gesture Status
+         Left: History | Right: Gesture Status
          =================================================== -->
     <div class="top-hud-bar">
-        <!-- Left Panel: Interface Status Indicators -->
+        <!-- Left Panel: Navigation History -->
         <div class="left-panel">
-            <div id="interface-status-container" class="hud-panel compact-panel">
-                <!-- InterfaceStatusHUD will mount here -->
-            </div>
-        </div>
-        
-        <!-- Center Panel: Navigation History -->
-        <div class="center-panel">
             <div class="hud-panel compact-panel">
                 <span class="history-title">Recent</span>
                 <div class="history-icons" id="hud-history">
@@ -155,11 +149,18 @@
 
     <!-- ===================================================
          BOTTOM HUD BAR - Fullwidth
-         Quantum HUD with Navigation + Adaptive Progress + Status
+         Quantum HUD with Interface Status + Position + Navigation + Adaptive Progress
          =================================================== -->
     <div class="bottom-hud-bar">
         <!-- Gesture LED Indicator -->
         <div class="gesture-led" id="gesture-led"></div>
+        
+        <!-- Interface Status (moved from top, compact version) -->
+        <div class="hud-panel compact-panel interface-status-compact">
+            <div id="interface-status-container">
+                <!-- InterfaceStatusHUD will mount here -->
+            </div>
+        </div>
         
         <!-- Layer & Position Info -->
         <div class="hud-panel compact-panel position-info">

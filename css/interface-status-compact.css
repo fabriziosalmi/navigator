@@ -1,0 +1,137 @@
+/* ==============================================
+   INTERFACE STATUS COMPACT - Bottom HUD Version
+   Smaller, denser version matching bottom HUD style
+   ============================================== */
+
+.interface-status-compact {
+    min-width: auto !important;
+    max-width: 200px !important;
+    padding: 8px 12px !important;
+}
+
+.interface-status-compact .interface-status-hud {
+    padding: 0 !important;
+    gap: 6px !important;
+}
+
+.interface-status-compact .interface-status-title {
+    font-size: 0.65rem !important;
+    margin-bottom: 4px !important;
+    letter-spacing: 0.5px !important;
+}
+
+.interface-status-compact .status-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 4px 8px !important;
+}
+
+.interface-status-compact .status-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 0.7rem !important;
+}
+
+.interface-status-compact .status-label {
+    font-size: 0.65rem !important;
+    color: var(--mono-gray-400) !important;
+    white-space: nowrap !important;
+}
+
+.interface-status-compact .status-value {
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    color: var(--mono-white) !important;
+}
+
+.interface-status-compact .status-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+}
+
+.interface-status-compact .status-dot.active {
+    background: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5) !important;
+}
+
+.interface-status-compact .status-dot.inactive {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Compact grid layout for bottom HUD */
+.interface-status-compact #interface-status-container {
+    display: block !important;
+}
+
+/* Hide verbose labels, show only essential info */
+.interface-status-compact .status-item .status-label {
+    max-width: 50px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Make icons smaller */
+.interface-status-compact svg,
+.interface-status-compact .icon {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+/* Tighter spacing for metrics */
+.interface-status-compact .metric-value {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+}
+
+.interface-status-compact .metric-label {
+    font-size: 0.6rem !important;
+    opacity: 0.7 !important;
+}
+
+/* ==============================================
+   RESPONSIVE - Even more compact on mobile
+   ============================================== */
+
+@media (max-width: 768px) {
+    .interface-status-compact {
+        max-width: 160px !important;
+        padding: 6px 10px !important;
+    }
+    
+    .interface-status-compact .status-grid {
+        gap: 3px 6px !important;
+    }
+    
+    .interface-status-compact .status-item {
+        font-size: 0.65rem !important;
+    }
+    
+    .interface-status-compact .status-label {
+        font-size: 0.6rem !important;
+    }
+}
+
+/* ==============================================
+   MONOCHROME OVERRIDE
+   Ensure consistency with bottom HUD style
+   ============================================== */
+
+.bottom-hud-bar .interface-status-compact {
+    background: var(--glass-light) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+
+.bottom-hud-bar .interface-status-compact .interface-status-title {
+    color: var(--mono-gray-300) !important;
+}
+
+.bottom-hud-bar .interface-status-compact .status-value {
+    color: var(--mono-white) !important;
+}
+
+.bottom-hud-bar .interface-status-compact .status-label {
+    color: var(--mono-gray-400) !important;
+}
