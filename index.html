@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="css/start-screen.css">
     <link rel="stylesheet" href="css/effects.css">
     <link rel="stylesheet" href="css/interface-hud.css">
+    <link rel="stylesheet" href="css/unified-hud.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -103,6 +104,19 @@
     <!-- Snap Indicators - Hidden for modern UI -->
     <div class="snap-indicator left hidden-element">👈</div>
     <div class="snap-indicator right hidden-element">👉</div>
+
+    <!-- Top HUD Bar - Interface Status & History -->
+    <div class="top-hud-container">
+        <!-- Interface Status HUD will be moved here by JS -->
+        
+        <!-- Navigation History -->
+        <div class="top-navigation-history">
+            <span class="history-title">Recent</span>
+            <div class="history-icons" id="hud-history">
+                <!-- Populated dynamically with last 5 navigation actions -->
+            </div>
+        </div>
+    </div>
 
     <!-- Unified Bottom HUD - Quantum Leap Design -->
     <div id="quantum-hud">
@@ -182,13 +196,6 @@
             
             <div class="debug-compact" id="hud-debug-ticker">
                 <span class="ticker-text" id="hud-ticker-text"></span>
-            </div>
-        </div>
-
-        <!-- Navigation History Widget -->
-        <div class="hud-section history-display">
-            <div class="history-icons" id="hud-history">
-                <!-- Populated dynamically with last 5 navigation actions -->
             </div>
         </div>
     </div>

@@ -23,7 +23,7 @@ export class InterfaceStatusHUD {
         this.container = document.createElement('div');
         this.container.className = 'interface-status-hud';
         this.container.innerHTML = `
-            <div class="interface-status-title">Active Interfaces</div>
+            <div class="interface-status-title">Input Methods</div>
             <div class="interface-indicators">
                 <div class="interface-indicator" data-interface="keyboard">
                     <div class="indicator-icon">⌨️</div>
@@ -55,7 +55,14 @@ export class InterfaceStatusHUD {
             </div>
         `;
         
-        document.body.appendChild(this.container);
+        // Insert into top HUD container
+        const topHudContainer = document.querySelector('.top-hud-container');
+        if (topHudContainer) {
+            topHudContainer.insertBefore(this.container, topHudContainer.firstChild);
+        } else {
+            // Fallback: append to body if container doesn't exist
+            document.body.appendChild(this.container);
+        }
         
         // Cache interface elements
         Object.keys(this.interfaces).forEach(key => {

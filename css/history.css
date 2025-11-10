@@ -1,6 +1,6 @@
 /* ==============================================
    NAVIGATION HISTORY WIDGET
-   Visual breadcrumb trail
+   Visual breadcrumb trail - Optimized for top bar
    ============================================== */
 
 .history-display {
@@ -11,13 +11,13 @@
 .history-icons {
     display: flex;
     align-items: center;
-    gap: 8px;
-    height: 40px;
-    padding: 0 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
+    gap: 6px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    overflow: visible;
     position: relative;
 }
 
@@ -27,18 +27,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     flex-shrink: 0;
     position: relative;
     transition: all var(--transition-fast);
-    animation: historyFadeIn 0.4s ease-out;
+    animation: historyFadeIn 0.3s ease-out;
+}
+
+.history-icon:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(1.1);
 }
 
 .history-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     transition: all var(--transition-fast);
 }
 
