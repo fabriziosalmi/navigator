@@ -22,4 +22,4 @@ echo "⚠️  Linting temporarily disabled due to ESLint 8.x + AJV compatibility
 echo "ℹ️  Will be re-enabled after upgrading to ESLint 9"
 echo ""
 echo "✅ Linting skipped (known issue)"
-# pnpm lint --filter="..."
+# pnpm -r lint

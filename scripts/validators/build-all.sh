@@ -18,13 +18,13 @@ fi
 
 # Build SDK packages first
 echo "📦 Building SDK packages..."
-pnpm build --filter="@navigator.menu/*"
+pnpm -r --filter './packages/**' build
 
 echo ""
 
 # Build applications
 echo "🚀 Building applications..."
-pnpm build --filter="./apps/*"
+pnpm -r --filter './apps/*' build
 
 echo ""
 echo "✅ Build completed"
