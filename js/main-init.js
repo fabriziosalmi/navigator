@@ -17,6 +17,7 @@ import { VoiceCommandModule } from './VoiceCommandModule.js';
 import { NavigationHistoryHUD } from './NavigationHistoryHUD.js';
 import { GestureLED } from './GestureLED.js';
 import { InterfaceStatusHUD } from './InterfaceStatusHUD.js';
+import { CarouselMomentum } from './CarouselMomentum.js';
 import CONFIG from './config.js';
 
 // Debug logging system
@@ -257,6 +258,9 @@ const navController = new NavigationController(layerManager, {
 
 navController.init('cards-viewport');
 
+// Initialize Carousel Momentum Controller
+const carouselMomentum = new CarouselMomentum(navController);
+
 // Initialize DOM LOD Manager for foveated rendering
 const domLODManager = new DOMLODManager({
     enabled: CONFIG.domLOD.enabled,
@@ -401,6 +405,63 @@ document.getElementById('confirm-yes').addEventListener('click', () => {
 
 document.getElementById('confirm-no').addEventListener('click', () => {
     navController.confirmNo();
+});
+
+// ========================================
+// MOMENTUM SCROLL - Touch/Mouse Handlers
+// ========================================
+
+const cardsViewport = document.getElementById('cards-viewport');
+let isTouchActive = false;
+
+// Touch events
+cardsViewport.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    carouselMomentum.startGesture(touch.clientX, touch.clientY);
+    isTouchActive = true;
+}, { passive: true });
+
+cardsViewport.addEventListener('touchmove', (e) => {
+    if (!isTouchActive) return;
+    const touch = e.touches[0];
+    carouselMomentum.updateGesture(touch.clientX, touch.clientY);
+}, { passive: true });
+
+cardsViewport.addEventListener('touchend', () => {
+    if (!isTouchActive) return;
+    carouselMomentum.endGesture();
+    isTouchActive = false;
+}, { passive: true });
+
+cardsViewport.addEventListener('touchcancel', () => {
+    carouselMomentum.cancel();
+    isTouchActive = false;
+}, { passive: true });
+
+// Mouse events (for desktop testing)
+let isMouseDown = false;
+
+cardsViewport.addEventListener('mousedown', (e) => {
+    carouselMomentum.startGesture(e.clientX, e.clientY);
+    isMouseDown = true;
+});
+
+cardsViewport.addEventListener('mousemove', (e) => {
+    if (!isMouseDown) return;
+    carouselMomentum.updateGesture(e.clientX, e.clientY);
+});
+
+cardsViewport.addEventListener('mouseup', () => {
+    if (!isMouseDown) return;
+    carouselMomentum.endGesture();
+    isMouseDown = false;
+});
+
+cardsViewport.addEventListener('mouseleave', () => {
+    if (isMouseDown) {
+        carouselMomentum.cancel();
+        isMouseDown = false;
+    }
 });
 
 // Keyboard controls (Arrow keys + WASD)
