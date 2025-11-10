@@ -1,0 +1,264 @@
+/* ==============================================
+   CARD PERFORMANCE OPTIMIZATIONS
+   GPU acceleration + rendering optimizations
+   ============================================== */
+
+/* Card Base - Force GPU Layer */
+.card {
+    /* Performance Containment */
+    contain: layout style paint;
+    isolation: isolate;
+    
+    /* GPU Acceleration */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    
+    /* Always on GPU layer */
+    transform: translateZ(0);
+    
+    /* Optimize text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Active Card - Highest Priority */
+.card.active {
+    will-change: transform, opacity;
+    content-visibility: auto;
+}
+
+/* Adjacent Cards - Medium Priority */
+.card.previous,
+.card.next {
+    will-change: transform;
+    content-visibility: auto;
+}
+
+/* Far Cards - Low Priority */
+.card.far-previous,
+.card.far-next {
+    content-visibility: auto;
+    /* Remove will-change to reduce memory */
+}
+
+/* Hidden Cards - Minimal Resources */
+.card:not(.active):not(.previous):not(.next):not(.far-previous):not(.far-next) {
+    content-visibility: hidden;
+    contain: strict;
+}
+
+/* Card Content - Optimize rendering */
+.card-content {
+    contain: layout style;
+    transform: translateZ(0);
+}
+
+/* Card Images - Lazy Loading */
+.card img {
+    content-visibility: auto;
+    will-change: auto;
+}
+
+/* Card Title - Text Optimization */
+.card-title {
+    contain: layout style;
+    text-rendering: optimizeLegibility;
+}
+
+/* ==============================================
+   LAYER PERFORMANCE OPTIMIZATIONS
+   ============================================== */
+
+.layer-container {
+    /* Performance Containment */
+    contain: layout style paint;
+    isolation: isolate;
+    
+    /* GPU Acceleration */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Active Layer - Maximum Performance */
+.layer-container.active {
+    will-change: transform, opacity;
+    content-visibility: auto;
+}
+
+/* Background Layers - Reduce Resources */
+.layer-container:not(.active) {
+    content-visibility: hidden;
+    contain: strict;
+}
+
+/* ==============================================
+   MATRIX SCROLL PERFORMANCE
+   Smooth high-FPS scrolling
+   ============================================== */
+
+#cards-container {
+    /* Enable hardware compositing */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    
+    /* Optimize scroll performance */
+    overflow: hidden;
+    overscroll-behavior: contain;
+    
+    /* Reduce paint on scroll */
+    contain: layout style paint;
+}
+
+/* Smooth scroll physics */
+#cards-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+#cards-viewport {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    
+    /* Enable smooth scrolling */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==============================================
+   ANIMATION PERFORMANCE
+   Optimize transitions and animations
+   ============================================== */
+
+/* Use transform instead of position for animations */
+@keyframes cardSlideIn {
+    from {
+        transform: translateX(100vw) translateZ(0);
+    }
+    to {
+        transform: translateX(0) translateZ(0);
+    }
+}
+
+@keyframes cardSlideOut {
+    from {
+        transform: translateX(0) translateZ(0);
+    }
+    to {
+        transform: translateX(-100vw) translateZ(0);
+    }
+}
+
+/* ==============================================
+   REDUCED MOTION SUPPORT
+   Accessibility - disable animations
+   ============================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .layer-container,
+    #cards-container {
+        animation: none !important;
+        transition: none !important;
+        will-change: auto !important;
+    }
+}
+
+/* ==============================================
+   LOW-END DEVICE OPTIMIZATIONS
+   Disable expensive effects on weak hardware
+   ============================================== */
+
+@media (max-width: 768px) {
+    .card {
+        /* Reduce containment on mobile */
+        contain: layout style;
+    }
+    
+    /* Disable blur on mobile for performance */
+    .card:not(.active) {
+        filter: none !important;
+    }
+    
+    /* Simplify shadows */
+    .card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+}
+
+/* ==============================================
+   MEMORY OPTIMIZATION
+   Limit simultaneous GPU layers
+   ============================================== */
+
+/* Only keep active + adjacent cards in GPU layers */
+.card:not(.active):not(.previous):not(.next) {
+    will-change: auto;
+}
+
+/* Cleanup after transitions */
+.card {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:not(.transitioning) {
+    will-change: auto;
+}
+
+/* ==============================================
+   PAINT OPTIMIZATION
+   Reduce repaints during interaction
+   ============================================== */
+
+/* Isolate painted layers */
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    contain: strict;
+}
+
+/* Optimize glassmorphism backdrop */
+.card {
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+    .card {
+        background: rgba(20, 20, 35, 0.95);
+    }
+}
+
+/* ==============================================
+   DEBUG MODE - Performance Monitoring
+   ============================================== */
+
+.debug-performance {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    color: lime;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 10px;
+    z-index: 10000;
+    border: 1px solid lime;
+    border-radius: 4px;
+}
+
+.debug-performance .fps {
+    color: #0f0;
+}
+
+.debug-performance .mem {
+    color: #ff0;
+}
+
+.debug-performance .gpu {
+    color: #0ff;
+}

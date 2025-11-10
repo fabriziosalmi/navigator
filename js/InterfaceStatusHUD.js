@@ -55,13 +55,19 @@ export class InterfaceStatusHUD {
             </div>
         `;
         
-        // Insert into top HUD container
-        const topHudContainer = document.querySelector('.top-hud-container');
-        if (topHudContainer) {
-            topHudContainer.insertBefore(this.container, topHudContainer.firstChild);
+        // Mount into new dual HUD layout - left panel
+        const targetContainer = document.getElementById('interface-status-container');
+        if (targetContainer) {
+            targetContainer.appendChild(this.container);
+            console.log('🎛️ Interface Status HUD mounted in left panel');
         } else {
-            // Fallback: append to body if container doesn't exist
-            document.body.appendChild(this.container);
+            // Fallback: try old container
+            const topHudContainer = document.querySelector('.top-hud-container');
+            if (topHudContainer) {
+                topHudContainer.insertBefore(this.container, topHudContainer.firstChild);
+            } else {
+                document.body.appendChild(this.container);
+            }
         }
         
         // Cache interface elements

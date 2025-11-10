@@ -43,19 +43,10 @@
 
 /* ==============================================
    CARDS VIEWPORT
-   Full-screen perspective container
+   Managed by dual-hud-layout.css - no positioning here
    ============================================== */
 
-#cards-viewport {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    perspective: var(--perspective-distance);
-    perspective-origin: 50% 50%;
-    overflow: hidden;
-}
+/* Removed: #cards-viewport positioning managed by dual-hud-layout.css */
 
 /* ==============================================
    DEPTH HIERARCHY SYSTEM

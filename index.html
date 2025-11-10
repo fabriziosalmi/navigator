@@ -37,6 +37,8 @@
     <link rel="stylesheet" href="css/interface-hud.css">
     <link rel="stylesheet" href="css/unified-hud.css">
     <link rel="stylesheet" href="css/carousel-3d.css">
+    <link rel="stylesheet" href="css/dual-hud-layout.css">
+    <link rel="stylesheet" href="css/performance-optimizations.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -105,47 +107,71 @@
     <!-- Snap Indicators - Hidden for modern UI -->
     <div class="snap-indicator left hidden-element">👈</div>
     <div class="snap-indicator right hidden-element">👉</div>
-
-    <!-- Top HUD Bar - Interface Status & History -->
-    <div class="top-hud-container">
-        <!-- Interface Status HUD will be moved here by JS -->
-        
-        <!-- Navigation History -->
-        <div class="top-navigation-history">
-            <span class="history-title">Recent</span>
-            <div class="history-icons" id="hud-history">
-                <!-- Populated dynamically with last 5 navigation actions -->
+    <!-- ===================================================
+         TOP HUD BAR - Fullwidth
+         Left: Interface Status | Center: History | Right: Gesture Status
+         =================================================== -->
+    <div class="top-hud-bar">
+        <!-- Left Panel: Interface Status Indicators -->
+        <div class="left-panel">
+            <div id="interface-status-container" class="hud-panel compact-panel">
+                <!-- InterfaceStatusHUD will mount here -->
             </div>
         </div>
         
-        <!-- Gesture Status Panel -->
-        <div class="gesture-status-panel">
-            <div class="gesture-status-title">Gesture System</div>
-            <div class="gesture-status-content">
-                <div class="gesture-stat">
-                    <span class="stat-label">Hand</span>
-                    <span class="status-dot inactive" id="hand-status"></span>
-                    <span class="stat-value" id="hand-state">Searching</span>
+        <!-- Center Panel: Navigation History -->
+        <div class="center-panel">
+            <div class="hud-panel compact-panel">
+                <span class="history-title">Recent</span>
+                <div class="history-icons" id="hud-history">
+                    <!-- Populated dynamically with last 5 navigation actions -->
                 </div>
-                <div class="gesture-stat">
-                    <span class="stat-label">Current</span>
-                    <span class="stat-value" id="gesture-type">None</span>
-                </div>
-                <div class="gesture-stat">
-                    <span class="stat-label">Grid Lock</span>
-                    <span class="stat-value" id="grid-lock">Active</span>
+            </div>
+        </div>
+        
+        <!-- Right Panel: Gesture System Status -->
+        <div class="right-panel">
+            <div class="hud-panel compact-panel">
+                <div class="gesture-status-title">Gesture System</div>
+                <div class="gesture-status-content">
+                    <div class="gesture-stat">
+                        <span class="stat-label">Hand</span>
+                        <span class="status-dot inactive" id="hand-status"></span>
+                        <span class="stat-value" id="hand-state">Searching</span>
+                    </div>
+                    <div class="gesture-stat">
+                        <span class="stat-label">Current</span>
+                        <span class="stat-value" id="gesture-type">None</span>
+                    </div>
+                    <div class="gesture-stat">
+                        <span class="stat-label">Grid Lock</span>
+                        <span class="stat-value" id="grid-lock">Active</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Unified Bottom HUD - Quantum Leap Design -->
-    <div id="quantum-hud">
+    <!-- ===================================================
+         CENTRAL CONTENT AREA - Fullwidth Viewport
+         Cards matrix with 3D carousel
+         =================================================== -->
+    <div id="cards-viewport">
+        <div id="cards-container">
+            <!-- Cards will be rendered here -->
+        </div>
+    </div>
+
+    <!-- ===================================================
+         BOTTOM HUD BAR - Fullwidth
+         Quantum HUD with Navigation + Adaptive Progress + Status
+         =================================================== -->
+    <div class="bottom-hud-bar">
         <!-- Gesture LED Indicator -->
         <div class="gesture-led" id="gesture-led"></div>
         
         <!-- Layer & Position Info -->
-        <div class="hud-section position-info">
+        <div class="hud-panel compact-panel position-info">
             <div class="layer-display">
                 <span class="layer-name" id="hud-layer-name">Videos</span>
                 <span class="layer-meta" id="hud-layer-meta">Layer 1/6</span>
@@ -157,8 +183,8 @@
             </div>
         </div>
 
-        <!-- Central Navigation -->
-        <div class="hud-section nav-controls">
+        <!-- Central Navigation Controls -->
+        <div class="hud-panel nav-controls">
             <button class="hud-nav" id="prev-btn" data-action="prev" title="Previous card">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M15 18l-6-6 6-6"/>
@@ -182,12 +208,12 @@
         </div>
 
         <!-- Adaptive Level Progress -->
-        <div class="hud-section adaptive-display" id="adaptive-hud-quantum">
+        <div class="hud-panel compact-panel adaptive-display" id="adaptive-hud-quantum">
             <!-- Populated by AdaptiveNavigationHUD -->
         </div>
 
         <!-- Status & Metrics -->
-        <div class="hud-section status-display">
+        <div class="hud-panel compact-panel status-display">
             <div class="hand-status" id="hud-hand-status">
                 <svg class="hand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 11V6a1 1 0 0 1 2 0v5m0 0V5a1 1 0 0 1 2 0v6m0 0V4a1 1 0 0 1 2 0v7m0 0V5a1 1 0 0 1 2 0v8a5 5 0 0 1-10 0v-1"/>
