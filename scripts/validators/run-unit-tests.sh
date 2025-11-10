@@ -16,8 +16,9 @@ if ! grep -q '"test"' package.json; then
   exit 0
 fi
 
-# Run tests across all workspaces with coverage
-pnpm test --filter="..." --coverage
+# Run tests across all workspaces
+# Note: --coverage flag not supported at root level, run without it
+pnpm test --filter="..."
 
 echo ""
 echo "✅ Unit tests completed"

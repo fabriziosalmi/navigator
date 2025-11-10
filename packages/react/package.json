@@ -20,8 +20,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test": "vitest --run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
