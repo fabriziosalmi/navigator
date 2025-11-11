@@ -19,6 +19,12 @@ export type {
   CognitiveMiddlewareConfig
 } from './middleware/cognitiveMiddleware';
 
+export { 
+  loggerMiddleware, 
+  createLoggerMiddleware 
+} from './middleware/loggerMiddleware';
+export type { LoggerMiddlewareOptions } from './middleware/loggerMiddleware';
+
 // Types
 export type {
   Action,
