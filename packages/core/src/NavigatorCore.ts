@@ -642,6 +642,14 @@ export class NavigatorCore {
    *
    * This allows the new Store to operate in parallel with the old EventBus
    * without breaking any existing functionality.
+   * 
+   * STATUS (Nov 2025): Core TypeScript plugins fully migrated to Store-first.
+   * Remaining EventBus emissions:
+   *   - keyboard:combo (KeyboardPlugin) - keyboard combinations feature
+   *   - gesture:* events (MockGesturePlugin) - test/mock plugin  
+   *   - All legacy JS plugins (js/plugins/*)
+   * 
+   * TODO: Remove bridge in v3.1 once all plugins migrate to Store-first
    */
   private _setupLegacyBridge(): void {
     // Subscribe to ALL events using wildcard

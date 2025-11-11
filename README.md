@@ -4,7 +4,7 @@
 
 [![CI/CD Pipeline](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml/badge.svg)](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml)
 [![Test Coverage](https://img.shields.io/badge/Coverage-95%25%2B-brightgreen)](./packages/core)
-[![Tests](https://img.shields.io/badge/Tests-184%2B%20Passing-success)](./packages)
+[![Tests](https://img.shields.io/badge/Tests-386%2B%20Passing-success)](./packages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)](https://www.typescriptlang.org/)
 
@@ -19,9 +19,9 @@ Navigator is a **decoupled, plugin-based SDK** for building next-generation web 
 *   🧠 **Cognitive AI Engine:** Automatically detects user's mental state (frustrated, concentrated, etc.) and adapts the UI to help them.
 *   🔮 **Predictive Intent System:** Predicts user actions *before* they are completed, enabling zero-latency interactions.
 *   🔌 **Fully Plugin-Based:** The entire architecture is modular. Add or remove capabilities like gesture, voice, or keyboard input by simply adding a plugin.
-*   ⚡ **High-Performance Core:** Parallel plugin initialization (55-93% faster startup) and debounced state watchers prevent main thread blocking.
+*   ⚡ **High-Performance Core:** Redux-like unidirectional data flow ensures **predictable state management** with time-travel debugging. Parallel plugin initialization (55-93% faster startup).
 *   ⚛️ **Framework Agnostic:** Works with any framework. Comes with official wrappers for **React** (`@navigator.menu/react`) and **Vue** (`@navigator.menu/vue`).
-*   🛡️ **Robust & Tested:** Built with TypeScript, with **184+ tests** and **95%+ code coverage** on the core engine.
+*   🛡️ **Robust & Tested:** Built with TypeScript, with **386+ tests** and **95%+ code coverage** across all packages.
 *   🧑‍💻 **World-Class DX:** A powerful CLI (`create-app`), a Plugin Development Kit (PDK), and a "Cookbook" full of practical recipes get you started in minutes.
 
 ---
@@ -44,22 +44,23 @@ import { useNavigator } from '@navigator.menu/react';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 
 function App() {
-  const [lastKey, setLastKey] = useState('none');
-  const [eventCount, setEventCount] = useState(0);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [cognitiveState, setCognitiveState] = useState('neutral');
 
   // 🚀 Initialize Navigator with KeyboardPlugin
-  const { core } = useNavigator({
+  const { core, isReady } = useNavigator({
     plugins: [new KeyboardPlugin()],
     autoStart: true
   });
 
-  // 📡 Subscribe to keyboard events
+  // 📡 Subscribe to Store state changes (Redux-like pattern)
   useEffect(() => {
     if (!core) return;
 
-    const unsubscribe = core.eventBus.on('keyboard:keydown', (event) => {
-      setLastKey(event.key);
-      setEventCount(prev => prev + 1);
+    const unsubscribe = core.store.subscribe(() => {
+      const state = core.store.getState();
+      setCurrentCard(state.navigation.currentCard);
+      setCognitiveState(state.cognitive.currentState);
     });
 
     return unsubscribe;
@@ -68,9 +69,10 @@ function App() {
   return (
     <div>
       <h1>🎯 Navigator Demo</h1>
-      <p>Press any key!</p>
-      <div>Last Key: <strong>{lastKey}</strong></div>
-      <div>Events: <strong>{eventCount}</strong></div>
+      <p>Use Arrow Keys to navigate!</p>
+      <div>Current Card: <strong>{currentCard}</strong></div>
+      <div>Cognitive State: <strong>{cognitiveState}</strong></div>
+      <p>✨ Your UI is now a <em>pure function of state</em></p>
     </div>
   );
 }
@@ -78,9 +80,13 @@ function App() {
 
 ### 3. Run it!
 
+```bash
+npm run dev
 ```
 
-**🎉 That's it!** You now have a fully decoupled keyboard input system. The magic? Change `KeyboardPlugin` to `GesturePlugin` later, and your app code **doesn't change at all**.
+**🎉 That's it!** You now have a **predictable, unidirectional data flow** powering your app. The UI is a pure function of state, and Navigator's Store manages everything with Redux-like patterns.
+
+> **Why this matters:** With a single source of truth (the Store), you get time-travel debugging, predictable updates, and effortless testing. Change `KeyboardPlugin` to `GesturePlugin` later, and your app code **doesn't change at all**.
 
 > For more examples, including **Gesture Control, Voice Commands, and Three.js integration**, check out our **[Cookbook Recipes](./docs/docs/COOKBOOK.md)**.
 
