@@ -16,9 +16,16 @@
  * - navigation/NAVIGATE - Unidirectional navigation actions
  */
 
-import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
 import { navigate, keyPress, keyRelease, select, cancel } from '@navigator.menu/core';
+
+/**
+ * Lightweight ID generator (replaces nanoid to reduce bundle size)
+ * Format: timestamp-random (e.g., "1699876543210-x7k9p")
+ */
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -224,7 +231,7 @@ export class KeyboardPlugin implements INavigatorPlugin {
       : undefined;
     
     const action: Action = {
-      id: nanoid(),
+      id: generateId(),
       timestamp,
       type,
       success,
