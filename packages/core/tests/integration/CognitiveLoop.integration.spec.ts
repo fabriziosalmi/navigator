@@ -295,10 +295,10 @@ describe('Cognitive Loop Integration', () => {
   it('should emit custom DOM events for external listeners', async () => {
     console.log('[TEST] Testing custom DOM events...');
 
-    let stateChangeEvent: CustomEvent<any> | null = null;
+    let stateChangeEvent: CustomEvent<{ state: string; confidence: number }> | null = null;
     
     const listener = (event: Event) => {
-      stateChangeEvent = event as CustomEvent<any>;
+      stateChangeEvent = event as CustomEvent<{ state: string; confidence: number }>;
       console.log('[TEST] Received navigatorStateChange:', (event as CustomEvent).detail);
     };
     

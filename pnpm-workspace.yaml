@@ -12,7 +12,6 @@ packages:
   # Framework wrappers
   - 'packages/react'
   - 'packages/vue'
-  - 'packages/svelte'
   
   # Developer tools
   - 'packages/pdk'
