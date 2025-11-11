@@ -1,0 +1,18 @@
+{
+  "name": "@navigator.menu/landing-page",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Navigator.Menu landing page - The Sentient Interface SDK",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "astro": "^5.15.5",
+    "tailwindcss": "^4.1.17"
+  }
+}
