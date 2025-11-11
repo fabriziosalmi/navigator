@@ -20,6 +20,11 @@ import {
   type UIState,
   type SessionState,
 } from './placeholderReducer';
+import {
+  inputReducer,
+  INPUT_ACTIONS,
+  type InputState,
+} from './inputReducer';
 
 /**
  * Root state shape
@@ -44,6 +49,11 @@ export interface RootState {
   cognitive: CognitiveStateSlice;
 
   /**
+   * Input state (keyboard, gesture, voice)
+   */
+  input: InputState;
+
+  /**
    * UI state (theme, debug mode, overlays)
    */
   ui: UIState;
@@ -61,6 +71,7 @@ export const rootReducer = combineReducers<RootState>({
   history: historyReducer,
   navigation: navigationReducer,
   cognitive: cognitiveReducer,
+  input: inputReducer,
   ui: uiReducer,
   session: sessionReducer,
 });
@@ -72,6 +83,7 @@ export type {
   HistoryState,
   NavigationState,
   CognitiveStateSlice,
+  InputState,
   UIState,
   SessionState,
 };
@@ -84,6 +96,8 @@ export {
   navigationReducer,
   navigationActions,
   cognitiveReducer,
+  inputReducer,
+  INPUT_ACTIONS,
   uiReducer,
   sessionReducer,
 };
