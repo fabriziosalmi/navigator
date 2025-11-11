@@ -47,6 +47,8 @@ export interface INavigatorPlugin {
   _priority?: number;
   /** Internal plugin-specific config */
   _config?: any;
+  /** Max time (ms) for init() to complete (default: 5000) */
+  _initTimeout?: number;
 }
 
 /**
@@ -178,11 +180,8 @@ export class NavigatorCore {
       }
 
     } catch (error) {
-      this.eventBus.emit('core:error', {
-        message: 'Core initialization failed',
-        error,
-        source: 'NavigatorCore'
-      });
+      // L'evento di errore viene già emesso da _initPlugin
+      // Non lo riemmettiamo qui per evitare duplicati
       throw error;
     }
   }
@@ -423,20 +422,45 @@ export class NavigatorCore {
   // ========================================
 
   private async _initPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
+    const timeout = plugin._initTimeout || 5000; // Default: 5 secondi
+
+    // Crea promise per l'inizializzazione
+    const initPromise = (async () => {
+      try {
+        await plugin.init(this);
+        this.pluginStates.set(name, 'initialized');
+        
+        this.eventBus.emit('core:plugin:initialized', {
+          pluginName: name,
+          source: 'NavigatorCore'
+        });
+
+        if (this.config.debugMode) {
+          console.log(`✓ Plugin initialized: ${name}`);
+        }
+      } catch (error) {
+        console.error(`NavigatorCore: Plugin "${name}" init failed`, error);
+        throw error;
+      }
+    })();
+
+    // Crea promise per il timeout
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`Plugin "${name}" init timeout (${timeout}ms)`));
+      }, timeout);
+    });
+
+    // Race tra init e timeout
     try {
-      await plugin.init(this);
-      this.pluginStates.set(name, 'initialized');
-      
-      this.eventBus.emit('core:plugin:initialized', {
-        pluginName: name,
+      await Promise.race([initPromise, timeoutPromise]);
+    } catch (error) {
+      // Emetti evento di errore
+      this.eventBus.emit('core:error', {
+        message: `Plugin "${name}" initialization failed`,
+        error,
         source: 'NavigatorCore'
       });
-
-      if (this.config.debugMode) {
-        console.log(`✓ Plugin initialized: ${name}`);
-      }
-    } catch (error) {
-      console.error(`NavigatorCore: Plugin "${name}" init failed`, error);
       throw error;
     }
   }

@@ -193,3 +193,171 @@ describe('NavigatorCore - Area 1: Initialization & State', () => {
     });
   });
 });
+
+// ============================================
+// SPRINT 1: Plugin Init Timeout (TDD)
+// ============================================
+
+describe('SPRINT 1: Plugin Init Timeout', () => {
+  let core: NavigatorCore;
+
+  beforeEach(() => {
+    core = new NavigatorCore({ debugMode: false });
+  });
+
+  describe('Plugin initialization timeout', () => {
+    it('should timeout if a plugin takes too long to initialize', async () => {
+      const slowPlugin = {
+        name: 'slow-plugin',
+        _initTimeout: 100, // Timeout molto breve per il test
+        async init() {
+          await new Promise(r => setTimeout(r, 200)); // Impiega più del timeout
+        }
+      };
+
+      core.registerPlugin(slowPlugin);
+
+      // L'init deve fallire con un errore di timeout
+      await expect(core.init()).rejects.toThrow(/timeout/i);
+    });
+
+    it('should successfully init a plugin that completes within timeout', async () => {
+      const fastPlugin = {
+        name: 'fast-plugin',
+        _initTimeout: 1000,
+        async init() {
+          await new Promise(r => setTimeout(r, 50)); // Completa in tempo
+        }
+      };
+
+      core.registerPlugin(fastPlugin);
+
+      await expect(core.init()).resolves.not.toThrow();
+      expect(core.isInitialized).toBe(true);
+    });
+
+    it('should use default timeout (5000ms) if _initTimeout is not specified', async () => {
+      const pluginWithoutTimeout = {
+        name: 'no-timeout-plugin',
+        async init() {
+          await new Promise(r => setTimeout(r, 10)); // Veloce
+        }
+      };
+
+      core.registerPlugin(pluginWithoutTimeout);
+
+      const startTime = performance.now();
+      await core.init();
+      const duration = performance.now() - startTime;
+
+      expect(core.isInitialized).toBe(true);
+      expect(duration).toBeLessThan(1000); // Completa velocemente
+    });
+
+    it('should provide clear error message with plugin name on timeout', async () => {
+      const slowPlugin = {
+        name: 'my-slow-plugin',
+        _initTimeout: 50,
+        async init() {
+          await new Promise(r => setTimeout(r, 200));
+        }
+      };
+
+      core.registerPlugin(slowPlugin);
+
+      try {
+        await core.init();
+        expect.fail('Should have thrown timeout error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toContain('my-slow-plugin');
+        expect((error as Error).message).toMatch(/timeout|50ms/i);
+      }
+    });
+
+    it('should timeout multiple slow plugins independently', async () => {
+      const slowPlugin1 = {
+        name: 'slow-plugin-1',
+        _initTimeout: 100,
+        async init() {
+          await new Promise(r => setTimeout(r, 200));
+        }
+      };
+
+      const slowPlugin2 = {
+        name: 'slow-plugin-2',
+        _initTimeout: 100,
+        async init() {
+          await new Promise(r => setTimeout(r, 50)); // Questo dovrebbe passare
+        }
+      };
+
+      core.registerPlugin(slowPlugin1);
+      core.registerPlugin(slowPlugin2);
+
+      // Il primo plugin lento dovrebbe causare il fallimento
+      await expect(core.init()).rejects.toThrow(/slow-plugin-1/);
+      expect(core.isInitialized).toBe(false);
+    });
+
+    it('should allow very long timeouts for heavy plugins (e.g., ML models)', async () => {
+      const heavyPlugin = {
+        name: 'ml-plugin',
+        _initTimeout: 30000, // 30 secondi
+        async init() {
+          await new Promise(r => setTimeout(r, 100)); // Simula caricamento pesante
+        }
+      };
+
+      core.registerPlugin(heavyPlugin);
+
+      await expect(core.init()).resolves.not.toThrow();
+      expect(core.isInitialized).toBe(true);
+    });
+
+    it('should handle synchronous init without timeout issues', async () => {
+      const syncPlugin = {
+        name: 'sync-plugin',
+        _initTimeout: 100,
+        init() {
+          // Init sincrono - dovrebbe completare istantaneamente
+        }
+      };
+
+      core.registerPlugin(syncPlugin);
+
+      await expect(core.init()).resolves.not.toThrow();
+      expect(core.isInitialized).toBe(true);
+    });
+
+    it('should emit error event when plugin init times out', async () => {
+      let errorEmitted = false;
+      let errorDetails: any = null;
+
+      core.eventBus.on('core:error', (event) => {
+        errorEmitted = true;
+        errorDetails = event.payload;
+      });
+
+      const slowPlugin = {
+        name: 'timeout-plugin',
+        _initTimeout: 50,
+        async init() {
+          await new Promise(r => setTimeout(r, 200));
+        }
+      };
+
+      core.registerPlugin(slowPlugin);
+
+      try {
+        await core.init();
+      } catch (error) {
+        // Errore atteso
+      }
+
+      expect(errorEmitted).toBe(true);
+      expect(errorDetails).toHaveProperty('message');
+      expect(errorDetails.message).toContain('timeout');
+    });
+  });
+});

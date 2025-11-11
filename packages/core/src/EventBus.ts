@@ -37,6 +37,13 @@ export class EventBus {
     totalEvents: number;
     eventCounts: Map<string, number>;
   };
+  
+  // Circuit Breaker state
+  private circuitBreakerEnabled: boolean;
+  private maxCallDepth: number;
+  private maxChainLength: number;
+  private callDepthMap: Map<string, number>;
+  private eventChain: string[];
 
   constructor(options: EventBusOptions = {}) {
     this.listeners = new Map();
@@ -49,6 +56,14 @@ export class EventBus {
       totalEvents: 0,
       eventCounts: new Map()
     };
+    
+    // Initialize circuit breaker
+    const circuitBreaker = options.circuitBreaker || {};
+    this.circuitBreakerEnabled = circuitBreaker.enabled !== false; // Default: true
+    this.maxCallDepth = circuitBreaker.maxCallDepth || 100;
+    this.maxChainLength = circuitBreaker.maxChainLength || 50;
+    this.callDepthMap = new Map();
+    this.eventChain = [];
   }
 
   /**
@@ -144,6 +159,58 @@ export class EventBus {
    * @returns Whether any handlers were called
    */
   emit<T = any>(eventName: string, payload: T = {} as T): boolean {
+    // ==========================================
+    // CIRCUIT BREAKER: Loop Detection
+    // ==========================================
+    if (this.circuitBreakerEnabled && eventName !== 'system:circuit-breaker') {
+      // Check call depth for this specific event
+      const currentDepth = this.callDepthMap.get(eventName) || 0;
+      
+      if (currentDepth >= this.maxCallDepth) {
+        if (this.debugMode) {
+          console.error(
+            `[EventBus] Circuit breaker: "${eventName}" exceeded max call depth (${this.maxCallDepth})`
+          );
+        }
+        
+        // Emit circuit breaker event (non-recursive)
+        this.emit('system:circuit-breaker', {
+          eventName,
+          depth: currentDepth,
+          type: 'max_depth_exceeded',
+          source: 'EventBus'
+        });
+        
+        return false; // Stop propagation
+      }
+      
+      // Check for cycles in the event chain
+      const cycleIndex = this.eventChain.lastIndexOf(eventName);
+      const hasCycle = cycleIndex !== -1;
+      
+      if (hasCycle && this.eventChain.length >= this.maxChainLength) {
+        const cycle = this.eventChain.slice(cycleIndex);
+        
+        if (this.debugMode) {
+          console.error(
+            `[EventBus] Circuit breaker: Cycle detected`,
+            { eventName, cycle, chainLength: this.eventChain.length }
+          );
+        }
+        
+        // Emit circuit breaker event
+        this.emit('system:circuit-breaker', {
+          eventName,
+          cycle,
+          chain: [...this.eventChain],
+          type: 'cycle_detected',
+          source: 'EventBus'
+        });
+        
+        return false; // Stop propagation
+      }
+    }
+    
     const event: NavigatorEvent<T> = {
       name: eventName,
       payload,
@@ -170,39 +237,59 @@ export class EventBus {
       console.log(`[EventBus] Emit "${eventName}"`, payload);
     }
 
+    // ==========================================
+    // Track call depth and event chain
+    // ==========================================
+    if (this.circuitBreakerEnabled) {
+      const depth = this.callDepthMap.get(eventName) || 0;
+      this.callDepthMap.set(eventName, depth + 1);
+      this.eventChain.push(eventName);
+    }
+
     let handlersCalled = 0;
 
-    // Call specific event handlers
-    const handlers = this.listeners.get(eventName);
-    if (handlers && handlers.size > 0) {
-      // Convert to array to safely iterate (handlers might remove themselves)
-      const handlersArray = Array.from(handlers);
-      for (const handler of handlersArray) {
+    try {
+      // Call specific event handlers
+      const handlers = this.listeners.get(eventName);
+      if (handlers && handlers.size > 0) {
+        // Convert to array to safely iterate (handlers might remove themselves)
+        const handlersArray = Array.from(handlers);
+        for (const handler of handlersArray) {
+          try {
+            handler(processedEvent);
+            handlersCalled++;
+          } catch (error) {
+            console.error(`[EventBus] Error in handler for "${eventName}":`, error);
+            this.emit('system:error', {
+              message: `Event handler error for "${eventName}"`,
+              error,
+              source: 'EventBus'
+            });
+          }
+        }
+      }
+
+      // Call wildcard handlers
+      for (const handler of this.wildcardListeners) {
         try {
           handler(processedEvent);
           handlersCalled++;
         } catch (error) {
-          console.error(`[EventBus] Error in handler for "${eventName}":`, error);
-          this.emit('system:error', {
-            message: `Event handler error for "${eventName}"`,
-            error,
-            source: 'EventBus'
-          });
+          console.error(`[EventBus] Error in wildcard handler for "${eventName}":`, error);
         }
       }
-    }
 
-    // Call wildcard handlers
-    for (const handler of this.wildcardListeners) {
-      try {
-        handler(processedEvent);
-        handlersCalled++;
-      } catch (error) {
-        console.error(`[EventBus] Error in wildcard handler for "${eventName}":`, error);
+      return handlersCalled > 0;
+    } finally {
+      // ==========================================
+      // Cleanup call depth and event chain
+      // ==========================================
+      if (this.circuitBreakerEnabled) {
+        const depth = this.callDepthMap.get(eventName) || 0;
+        this.callDepthMap.set(eventName, depth - 1);
+        this.eventChain.pop();
       }
     }
-
-    return handlersCalled > 0;
   }
 
   /**

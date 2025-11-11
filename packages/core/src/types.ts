@@ -50,6 +50,15 @@ export interface EventBusOptions {
   maxHistorySize?: number;
   /** Enable debug logging */
   debugMode?: boolean;
+  /** Circuit breaker configuration for loop detection */
+  circuitBreaker?: {
+    /** Enable circuit breaker (default: true) */
+    enabled?: boolean;
+    /** Max call depth for a single event (default: 100) */
+    maxCallDepth?: number;
+    /** Max length of event chain before detecting cycles (default: 50) */
+    maxChainLength?: number;
+  };
 }
 
 /**
