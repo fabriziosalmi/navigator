@@ -1,68 +1,87 @@
-# Navigator
+# Navigator.Menu ✨
 
-> A next-generation **multi-modal gesture-controlled navigation system** with adaptive intelligence, voice commands, and immersive visual feedback.
+**The Sentient Interface SDK.** Navigate the web with gesture, voice, and predictive AI.
 
-![CI Status](https://github.com/fabriziosalmi/navigator/workflows/CI%20Pipeline/badge.svg) ![Status](https://img.shields.io/badge/Status-BETA-orange) ![Version](https://img.shields.io/badge/Version-0.1.0-blue) ![Tests](https://img.shields.io/badge/Tests-36%2F43_Passing-brightgreen) ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange) ![Voice](https://img.shields.io/badge/Voice_Commands-EN%2FIT-blue)
+[![CI/CD Pipeline](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml/badge.svg)](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml)
+[![Test Coverage](https://img.shields.io/badge/Coverage-95%25%2B-brightgreen)](./packages/core)
+[![Tests](https://img.shields.io/badge/Tests-139%2B%20Passing-success)](./packages)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)](https://www.typescriptlang.org/)
 
----
+**[🚀 Live Demo](https://fabriziosalmi.github.io/navigator/)** | **[📚 Full Documentation](https://fabriziosalmi.github.io/navigator/docs/)** | **[🧑‍🍳 Cookbook Recipes](./docs/docs/COOKBOOK.md)**
 
-## ✨ Features
-
-- 🖐️ **Hand Gesture Control** - MediaPipe Hands tracking with 21 landmarks
-- ⌨️ **Keyboard Navigation** - Full WASD + Arrow keys support
-- 🎤 **Voice Commands** - Bilingual (English/Italian) speech recognition
-- 🧠 **Adaptive System** - 3-level progressive unlock based on skill
-- 🎨 **Quantum HUD** - Glassmorphism interface with live metrics
-- 🌈 **Light Beams** - Akira-style visual feedback on navigation
-- 🔊 **Spatial Audio** - 3D sound synthesis with Web Audio API
-- 📊 **Navigation History** - Color-coded action tracking widget
-- ⚡ **Zero Dependencies** - Pure ES6+ modules, no frameworks
+Navigator is a **decoupled, plugin-based SDK** for building next-generation web interfaces. It's a context-aware perception platform that understands user intent, predicts actions, and adapts the UI in real-time.
 
 ---
 
-## 🚀 Quick Start
+## 🌟 Key Features
 
-### Modern Development (Recommended)
+*   🧠 **Cognitive AI Engine:** Automatically detects user's mental state (frustrated, concentrated, etc.) and adapts the UI to help them.
+*   🔮 **Predictive Intent System:** Predicts user actions *before* they are completed, enabling zero-latency interactions.
+*   🔌 **Fully Plugin-Based:** The entire architecture is modular. Add or remove capabilities like gesture, voice, or keyboard input by simply adding a plugin.
+*   ⚛️ **Framework Agnostic:** Works with any framework. Comes with official wrappers for **React** (`@navigator.menu/react`) and **Vue** (`@navigator.menu/vue`).
+*   🛡️ **Robust & Tested:** Built with TypeScript, with **139+ tests** and **95%+ code coverage** on the core engine.
+*   🧑‍💻 **World-Class DX:** A powerful CLI (`create-app`), a Plugin Development Kit (PDK), and a "Cookbook" full of practical recipes get you started in minutes.
 
-```bash
-# Install dependencies
-npm install
+---
 
-# Start dev server with HMR (Hot Module Replacement)
-npm run dev
-# → Opens at http://localhost:3000
+## 🚀 Quick Start (React)
 
-# Run tests
-npm test
+Get a keyboard-controlled app running in under 5 minutes.
 
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-### Traditional Static Server
+### 1. Install Dependencies
 
 ```bash
-# Python
-python3 -m http.server 8080
-
-# Node.js
-npx http-server -p 8080
-
-# PHP
-php -S localhost:8080
+npm install @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
 ```
 
-### Start Navigating
+### 2. Add to Your React App
 
-1. Click **"🚀 Start Experience"**
-2. Grant camera/microphone permissions
-3. Hold hand in front of webcam
-4. Swipe left/right to navigate!
+```tsx
+import { useState, useEffect } from 'react';
+import { useNavigator } from '@navigator.menu/react';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 
-**Full guide**: [docs/docs/GETTING_STARTED.md](docs/docs/GETTING_STARTED.md)
+function App() {
+  const [lastKey, setLastKey] = useState('none');
+  const [eventCount, setEventCount] = useState(0);
+
+  // 🚀 Initialize Navigator with KeyboardPlugin
+  const { core } = useNavigator({
+    plugins: [new KeyboardPlugin()],
+    autoStart: true
+  });
+
+  // 📡 Subscribe to keyboard events
+  useEffect(() => {
+    if (!core) return;
+
+    const unsubscribe = core.eventBus.on('keyboard:keydown', (event) => {
+      setLastKey(event.key);
+      setEventCount(prev => prev + 1);
+    });
+
+    return unsubscribe;
+  }, [core]);
+
+  return (
+    <div>
+      <h1>🎯 Navigator Demo</h1>
+      <p>Press any key!</p>
+      <div>Last Key: <strong>{lastKey}</strong></div>
+      <div>Events: <strong>{eventCount}</strong></div>
+    </div>
+  );
+}
+```
+
+### 3. Run it!
+
+```
+
+**🎉 That's it!** You now have a fully decoupled keyboard input system. The magic? Change `KeyboardPlugin` to `GesturePlugin` later, and your app code **doesn't change at all**.
+
+> For more examples, including **Gesture Control, Voice Commands, and Three.js integration**, check out our **[Cookbook Recipes](./docs/docs/COOKBOOK.md)**.
 
 ---
 
@@ -79,298 +98,167 @@ php -S localhost:8080
 
 ---
 
-## 🎮 Navigation Methods
+---
 
-### Gestures 🖐️
-- **Swipe Left/Right** → Navigate cards
-- **Swipe Up/Down** → Change layers
-- **Point (2s)** → Focus mode (Kamehameha effect)
+## �️ Architecture
 
-### Keyboard ⌨️
-- `A`/`D` or `←`/`→` → Navigate cards
-- `W`/`S` or `↑`/`↓` → Navigate layers
-- `M` → Toggle voice commands
-- `F` → Fullscreen, `V` → Webcam view
+Navigator is a **monorepo** containing the core SDK, official plugins, framework wrappers, and demo applications.
 
-### Voice 🎤
-- English: "left", "right", "up", "down"
-- Italian: "sinistra", "destra", "su", "giù"
+```
+/navigator
+├── packages/                # 📦 The SDK (published to NPM)
+│   ├── core/                # Core engine (EventBus, AppState, Lifecycle)
+│   ├── types/               # TypeScript definitions & NIP Protocol
+│   ├── pdk/                 # Plugin Development Kit
+│   ├── cli/                 # Scaffolding tool: `create-app`
+│   ├── plugin-keyboard/     # ⌨️  Keyboard input sensor
+│   ├── plugin-logger/       # 📝 Configurable logging system
+│   ├── plugin-dom-renderer/ # 🎨 DOM manipulation helpers
+│   ├── plugin-mock-gesture/ # 🧪 Testing utilities
+│   ├── react/               # ⚛️  React wrapper (`useNavigator` hook)
+│   └── vue/                 # 💚 Vue wrapper (composables)
+│
+├── apps/                    # 🚀 Example Applications
+│   ├── demo/                # Main demo (navigator.menu)
+│   └── react-test-app/      # E2E validation app
+│
+└── docs/                    # 📚 Documentation & Guides
+    ├── COOKBOOK.md          # Complete recipes & examples
+    ├── ARCHITECTURE.md      # Deep-dive into design
+    └── plugin-development/  # Build your own plugins
+```
+
+### The Navigator Way: Three Core Principles
+
+Navigator is built on a **philosophy**, not just a pattern:
+
+1. **🎤 Input Plugins Capture, They Don't Act**  
+   Plugins translate physical inputs into standardized events. They never manipulate your app.
+
+2. **👂 Your App Listens to Intents, Not Inputs**  
+   Subscribe to `intent:navigate`, not `keydown`. Change input method with zero app code changes.
+
+3. **💫 The Core is the Decoupled Heart**  
+   All communication flows through the Event Bus. Plugins and your app never directly talk.
+
+**[Learn more in our documentation →](./docs/docs/ARCHITECTURE.md)**
 
 ---
 
-## 🧠 Adaptive System
+## 🧪 Quality & Validation
 
-**3-Level Progressive Unlock**:
-- **Level 1** (Default): Basic gestures
-- **Level 2** (85% accuracy): Pinch, fan cards
-- **Level 3** (90% accuracy): Fist collapse, explosions
+We take quality seriously. Every commit pushed to `main` must pass our **Ecosystem Validation System**, which includes:
 
-System tracks accuracy, speed, and stability - auto-upgrades when ready!
+-   ✅ **Dependency & Security Audit** (0 vulnerabilities)
+-   ✅ **Code Linting & Quality Checks** (ESLint, Complexity Analysis)
+-   ✅ **Unit & Integration Tests** (139+ tests, 95%+ coverage)
+-   ✅ **Production Build** for all packages
+-   ✅ **End-to-End Tests** (Playwright, 19+ scenarios)
+-   ✅ **Bundle Size Checks** (Core: 3.25 KB gzipped)
+
+You can run the full validation suite locally:
+
+```bash
+pnpm validate
+```
+
+### Test Results
+
+```
+packages/core:              116 tests passing  ✓
+packages/plugin-keyboard:    23 tests passing  ✓
+packages/react:             E2E validated      ✓
+```
 
 ---
 
-## 🛠️ Technology
+## 📦 Available Packages
 
-- **HTML5 + CSS3** - Glassmorphism, GPU-accelerated animations
-- **JavaScript ES6+** - 12 modular components, zero dependencies
-- **MediaPipe Hands** - 30 FPS hand tracking
-- **Web Speech API** - Continuous voice recognition
-- **Web Audio API** - Spatial sound synthesis
-- **Canvas API** - Light beams and visual effects
+| Package | Version | Size | Description |
+|---------|---------|------|-------------|
+| [`@navigator.menu/core`](./packages/core) | 2.0.0 | 3.25 KB | Core engine with Event Bus |
+| [`@navigator.menu/react`](./packages/react) | 0.1.0 | 5.92 KB | React integration hooks |
+| [`@navigator.menu/plugin-keyboard`](./packages/plugin-keyboard) | 1.0.0 | 802 B | Keyboard input plugin |
+| [`@navigator.menu/plugin-logger`](./packages/plugin-logger) | 1.0.0 | - | Configurable logging |
+| [`@navigator.menu/pdk`](./packages/pdk) | 2.0.0 | - | Plugin Development Kit |
+| [`@navigator.menu/types`](./packages/types) | 2.0.0 | - | TypeScript definitions |
 
 ---
 
-## 🎯 Browser Support
+## 🎯 Use Cases
 
-| Browser | Version | Support |
-|---------|---------|---------|
-| Chrome  | 90+     | ✅ Full |
-| Edge    | 90+     | ✅ Full |
-| Opera   | 76+     | ✅ Full |
-| Firefox | 88+     | ⚠️ Partial (voice limited) |
-| Safari  | 14+     | ⚠️ Partial (voice may fail) |
+Navigator is perfect for building:
+
+- 🎮 **Interactive Experiences:** Games, 3D viewers, immersive storytelling
+- 🎬 **Media Players:** Video/audio players with gesture/voice control
+- 🖼️ **Image Galleries:** Carousels, lightboxes with multi-input support
+- 🏢 **Enterprise Dashboards:** Keyboard-first navigation for power users
+- ♿ **Accessible Interfaces:** Multi-modal input for better accessibility
+- 🧪 **Prototypes:** Quickly test different input methods without refactoring
 
 **Requirements**: ES6 modules, MediaPipe WASM, Web Audio API, webcam access
 
 ---
 
-## ⚙️ Configuration
-
-All settings in `js/config.js`:
-
-```javascript
-// Grid Lock Sensitivity
-CONFIG.gridLock = {
-    threshold: 0.12,              // Horizontal (higher = less sensitive)
-    thresholdVertical: 0.10       // Vertical (lower = easier)
-}
-
-// Audio
-CONFIG.audio = {
-    masterVolume: 0.3,            // 0-1 scale
-    spatialEnabled: true          // 3D positioning
-}
-
-// Adaptive System
-CONFIG.adaptiveNavigation = {
-    enabled: true,
-    levels: { /* difficulty settings */ }
-}
-```
-
----
-
-## 🧪 Testing
-
-```bash
-npm install
-npm test              # Run all tests (Playwright)
-npm run test:ui       # Interactive test UI
-npm run test:headed   # See browser execution
-```
-
-**Results**: 36/43 tests passing (83.7%)
-- ✅ Keyboard navigation (100%)
-- ✅ Adaptive system (90.9%)
-- ✅ Navigation history (80%)
-- ⚠️ Visual refinements (63.6% - CSS limitations in headless)
-
-See [docs/TEST_RESULTS.md](docs/TEST_RESULTS.md) for details.
-
----
-
-## 📦 Project Structure
-
-```
-/navigator
-├── index.html                      # Main app (1170 lines)
-├── style.css                       # Complete styling (2097 lines)
-├── package.json                    # npm config for testing
-├── playwright.config.js            # Test configuration
-├── docs/                           # Documentation
-│   ├── GETTING_STARTED.md          # Quick start guide
-│   ├── FEATURES.md                 # Feature breakdown
-│   ├── ARCHITECTURE.md             # Technical reference
-│   ├── TEST_RESULTS.md             # Test suite results
-│   └── OPTIMIZATION_GUIDE.md       # Performance tuning
-├── tests/                          # Playwright test suites
-│   ├── keyboard-navigation.spec.js
-│   ├── adaptive-system.spec.js
-│   ├── navigation-history.spec.js
-│   └── visual-refinements.spec.js
-└── js/                             # Modular ES6+ components
-    ├── config.js                   # Centralized configuration
-    ├── AdaptiveNavigationSystem.js # 3-level progression (455 lines)
-    ├── VoiceCommandModule.js       # Speech recognition (390 lines)
-    ├── AudioManager.js             # Spatial audio (709 lines)
-    ├── NavigationController.js     # Navigation logic (~400 lines)
-    ├── GestureDetector.js          # Hand tracking (~350 lines)
-    ├── LightBeamSystem.js          # Akira beams (195 lines)
-    ├── NavigationHistoryHUD.js     # Action tracking (180 lines)
-    └── ... (5 more modules)
-```
-
----
-
-## 🔐 Security & Privacy
-
-- **100% Client-Side** - All processing in browser
-- **No Data Transmission** - Webcam/mic never leaves device
-- **No Tracking** - Zero analytics or external services
-- **No Storage** - No cookies, localStorage, or persistence
-- **Open Source** - Full code transparency
-
----
-
-## 🐛 Troubleshooting
-
-### Gestures Not Working
-- Check webcam permissions
-- Ensure good lighting
-- Hold hand clearly in frame
-- Press `V` to see webcam view
-- Look for green hand icon in HUD
-
-### Voice Not Responding
-- Press `M` to activate
-- Check microphone permissions
-- Look for green 🎤 icon (top-right)
-- Use Chrome/Edge (best support)
-
-### Performance Issues
-- Close other browser tabs
-- Disable dynamic background in `config.js`
-- Reduce MediaPipe complexity to `modelComplexity: 0`
-
-**Full guide**: [docs/GETTING_STARTED.md#troubleshooting](docs/GETTING_STARTED.md#troubleshooting)
-
----
-
 ## 🤝 Contributing
 
-Contributions welcome! Please:
+Contributions are welcome! Whether it's a bug report, a new feature, or a new recipe for the cookbook, we'd love to have your help.
+
+**Getting Started:**
+
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a feature branch: `git checkout -b feat/amazing-feature`
+3. Make your changes and add tests
+4. Run validation: `pnpm validate`
+5. Submit a Pull Request
+
+Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Conduct](./CODE_OF_CONDUCT.md)** for details.
+
+---
+
+## � Documentation
+
+- **[Getting Started Guide](./docs/docs/GETTING_STARTED.md)** - Installation and first steps
+- **[Cookbook](./docs/docs/COOKBOOK.md)** - Complete working examples
+- **[Architecture Deep-Dive](./docs/docs/ARCHITECTURE.md)** - Understand the design philosophy
+- **[Plugin Development](./docs/docs/PLUGIN_ARCHITECTURE.md)** - Build your own plugins
+- **[API Reference](./documentation/docs/core-concepts.md)** - Complete API documentation
+
+---
+
+## 🌐 Community & Support
+
+- **[GitHub Discussions](https://github.com/fabriziosalmi/navigator/discussions)** - Ask questions, share ideas
+- **[Issues](https://github.com/fabriziosalmi/navigator/issues)** - Report bugs, request features
+- **[Changelog](./CHANGELOG.md)** - See what's new in each release
 
 ---
 
 ## 📄 License
 
-MIT License - Free to use, modify, and distribute.
-
-See [LICENSE](LICENSE) for full text.
+Navigator is open-source software licensed under the **[MIT License](./LICENSE)**.
 
 ---
 
-## 🙏 Acknowledgments
+## � Acknowledgments
 
-**Technologies**:
-- [MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands) - Google's hand tracking ML
-- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) - Browser voice recognition
-- [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) - Spatial audio synthesis
+Navigator is built with modern tools and inspired by great projects:
 
-**Design Inspiration**:
-- Akira - Light beam aesthetics
-- Blade Runner - Cyber UI elements
-- Apple Vision Pro - Glassmorphism design
+- **TypeScript** - Type safety and developer experience
+- **Vite** - Lightning-fast builds
+- **Vitest** - Delightful testing framework
+- **Playwright** - Reliable E2E testing
+- **pnpm** - Efficient package management
 
 ---
 
-## 📧 Contact
+<div align="center">
 
-Questions or feedback? Open an issue or discussion on GitHub!
+**Made with ❤️ by the Navigator Team**
 
----
+[⭐ Star us on GitHub](https://github.com/fabriziosalmi/navigator) • [📖 Read the docs](https://fabriziosalmi.github.io/navigator/docs/)
 
-**Built with ❤️ using modern web standards - no frameworks, just pure JavaScript magic.** ✨
-
-
-1. **Position Info**: Current layer name + card counter (1/4)
-2. **Navigation Controls**: 4 SVG buttons (prev/next cards, up/down layers)
-3. **Adaptive Display**: Level progress bar + metrics
-4. **Status Panel**: Hand detection, gesture legend, debug ticker
-5. **Navigation History**: Last 5 actions with color-coded icons
-
-**Design**:
-- Convex glassmorphism with `backdrop-filter: blur(40px)`
-- Inter font family, 72px height, 36px border-radius
-- Translucent background `rgba(20,20,35,0.85)`
-- Floating 20px from bottom edge
-- Category-specific accent colors (cyan, magenta, green, orange)
-
-### � Navigation History Widget
-
-**Live action tracking** - see your last 5 navigation moves:
-
-- **Color-coded icons**:
-  - � Cyan: Card navigation (left/right swipes)
-  - 🟣 Magenta: Layer navigation (up/down)
-  - 🟢 Green: Voice commands
-  - 🟠 Orange: Keyboard inputs
-  
-- **Smooth animations**: Icons fade in from right, scroll left, fade out
-- **Auto-cleanup**: Oldest actions removed when new ones arrive
-- **Source tracking**: Distinguishes gesture/keyboard/voice input
-
-### 🎨 Visual Feedback
-
-**Akira-Style Light Beams**:
-- Horizontal cyan/magenta beams for card navigation
-- Vertical pink/cyan beams for layer switching
-- Gradient trails with velocity-based intensity
-- Rendered on dedicated canvas layer
-
-**3D Vanishing Point Perspective**:
-- Active layer at z-depth 0 (full focus)
-- Back layers at -500px, -1000px (visible, blurred)
-- Front layers hidden (opacity 0) until gesture reveals
-- Smooth blur transitions with CSS `filter`
-
-**Dynamic Background**:
-- Three animated glow orbs
-- React to navigation velocity
-- High-speed mode: Intense pulsing
-- Auto-fade when idle (2s timeout)
-
-### 🎵 Spatial Audio System
-
-**Web Audio API** procedural sound synthesis:
-
-- **Gesture Sounds**: Whoosh (swipe), beep (focus), grab (confirm)
-- **Spatial Positioning**: 3D audio based on hand/card position
-- **Navigation Feedback**: Success tones, error alerts
-- **No Music**: Ambient loops disabled (gesture effects only)
-- **Configurable**: Volume/type in `AudioManager.js`
-
-### 🔒 Smart Grid Lock
-
-Prevents accidental navigation and jitter:
-
-- **Separate thresholds**: Vertical (0.10) easier than horizontal (0.12)
-- **Velocity tracking**: Only responds to intentional movements
-- **Direction cooldown**: 800ms delay before reversing
-- **Infinite wrapping**: Seamless loops on all axes
-- **Predictive intent**: Anticipates gesture completion
-
-### ⚙️ Modular Architecture
-
-```
-/navigator
-├── index.html                      # Main app (1170 lines, fully integrated)
-├── style.css                       # Complete styling (2097 lines)
-└── js/
-    ├── config.js                   # Centralized configuration
-    ├── AdaptiveNavigationSystem.js # ⭐ 3-level progression system
-    ├── AdaptiveNavigationHUD.js    # Adaptive progress display
-    ├── AudioManager.js             # Spatial audio synthesis
-    ├── GestureDetector.js          # Hand gesture recognition
-    ├── GridLockSystem.js           # Smart gesture processing
-    ├── LayerManager.js             # Multi-layer state management
-    ├── NavigationController.js     # Navigation logic & routing
-    ├── DOMLODManager.js            # Performance optimization (LOD)
+</div>
     ├── VisualEffects.js            # Canvas-based visual effects
     ├── LightBeamSystem.js          # ⭐ Akira-style light beams
     ├── VoiceCommandModule.js       # ⭐ Speech recognition (EN/IT)
