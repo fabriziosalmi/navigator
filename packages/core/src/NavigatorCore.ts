@@ -78,13 +78,21 @@ export class NavigatorCore {
   /** Configuration */
   public readonly config: Required<NavigatorCoreConfig>;
   
-  /** Event bus instance (read-only access) */
+  /**
+   * Event bus instance (read-only access)
+   * @deprecated Since v3.0. Use `core.store.subscribe()` to react to state changes instead.
+   * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   */
   public readonly eventBus: EventBus;
   
-  /** App state instance (read-only access) */
+  /**
+   * App state instance (read-only access)
+   * @deprecated Since v3.0. Use `core.store.getState()` to read state instead.
+   * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   */
   public readonly state: AppState;
 
-  /** Redux-like Store (v3.1+ - Shadow Mode) */
+  /** Redux-like Store (v3.0+ - Primary state management) */
   public readonly store: Store<RootState, StoreAction>;
 
   /** User session history tracker */
@@ -643,13 +651,20 @@ export class NavigatorCore {
    * This allows the new Store to operate in parallel with the old EventBus
    * without breaking any existing functionality.
    * 
-   * STATUS (Nov 2025): Core TypeScript plugins fully migrated to Store-first.
-   * Remaining EventBus emissions:
-   *   - keyboard:combo (KeyboardPlugin) - keyboard combinations feature
-   *   - gesture:* events (MockGesturePlugin) - test/mock plugin  
-   *   - All legacy JS plugins (js/plugins/*)
+   * ---
    * 
-   * TODO: Remove bridge in v3.1 once all plugins migrate to Store-first
+   * TODO: [DEPRECATION] This bridge is a temporary compatibility layer.
+   * It will be removed in v4.0 once all plugins are migrated to dispatch Actions.
+   * 
+   * Remaining EventBus emissions to migrate:
+   *   - core:* (lifecycle events) - HIGH PRIORITY
+   *   - keyboard:combo (KeyboardPlugin) - MEDIUM PRIORITY
+   *   - intent:prediction (predictive system) - MEDIUM PRIORITY
+   *   - gesture:* events (MockGesturePlugin) - LOW PRIORITY
+   *   - All legacy JS plugins (js/plugins/*) - LOW PRIORITY
+   * 
+   * Migration Tracking: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   * Target Removal: v4.0.0 (Q4 2026)
    */
   private _setupLegacyBridge(): void {
     // Subscribe to ALL events using wildcard
