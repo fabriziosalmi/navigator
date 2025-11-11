@@ -8,6 +8,16 @@ on:
   workflow_dispatch:
 
 # ==========================================
+# PERMISSIONS: Explicit GitHub Token Permissions
+# ==========================================
+# Modern security practice: explicitly declare required permissions
+# instead of relying on default permissions
+permissions:
+  contents: read        # Read repository contents
+  pull-requests: write  # Write comments on PRs
+  issues: write         # Write comments on issues
+
+# ==========================================
 # SMART CI: Parallel Jobs for Speed
 # ==========================================
 # Instead of running all steps sequentially (15+ min),
@@ -246,3 +256,57 @@ jobs:
               repo: context.repo.repo,
               body: summary
             });
+
+      # ==========================================
+      # PHASE 3: Job Summary for Direct Pushes
+      # ==========================================
+      # When pushing directly to main/develop (not a PR),
+      # post a visible summary in the GitHub Actions UI
+      - name: Post Job Summary for Main/Develop Push
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          echo "## 🚀 Ecosystem Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Lint & Unit Tests
+          if [ "${{ needs.lint_and_unit_test.result }}" = "success" ]; then
+            echo "| **Lint & Unit Tests** | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Lint & Unit Tests** | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build & Bundle Size
+          if [ "${{ needs.build_and_size_check.result }}" = "success" ]; then
+            echo "| **Build & Bundle Size** | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Build & Bundle Size** | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # E2E Tests
+          if [ "${{ needs.e2e_test.result }}" = "success" ]; then
+            echo "| **E2E Tests** | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **E2E Tests** | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [ "${{ needs.lint_and_unit_test.result }}" = "success" ] && \
+             [ "${{ needs.build_and_size_check.result }}" = "success" ] && \
+             [ "${{ needs.e2e_test.result }}" = "success" ]; then
+            echo "### 🎉 All Checks Passed!" >> $GITHUB_STEP_SUMMARY
+            echo "The ecosystem is validated and ready for deployment." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Some Checks Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the failed checks above." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Powered by [Navigator Validation System](https://github.com/${{ github.repository }}/blob/main/docs/VALIDATION.md)*" >> $GITHUB_STEP_SUMMARY
