@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DomRendererPlugin } from '../src/DomRendererPlugin';
 import { NavigatorCore } from '@navigator.menu/core';
-import type { CognitiveStateChangePayload, IntentPredictionPayload } from '@navigator.menu/types';
+import type { IntentPredictionPayload } from '@navigator.menu/types';
 
 describe('DomRendererPlugin', () => {
   let core: NavigatorCore;
@@ -61,17 +61,16 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      // Emit cognitive state change
-      const payload: CognitiveStateChangePayload = {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
-      };
+      // Dispatch cognitive state change via Store
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
+      });
 
-      core.eventBus.emit('system_state:change', payload);
-
-      // Wait for event processing
+      // Wait for store subscription processing
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(documentBody.classList.contains('state-frustrated')).toBe(true);
@@ -83,14 +82,15 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      const payload: CognitiveStateChangePayload = {
-        from: 'neutral',
-        to: 'concentrated',
-        confidence: 0.9,
-        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
-      };
+      // Dispatch cognitive state change via Store
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'concentrated',
+          confidence: 0.9,
+        },
+      });
 
-      core.eventBus.emit('system_state:change', payload);
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(documentBody.classList.contains('state-concentrated')).toBe(true);
@@ -101,14 +101,15 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      const payload: CognitiveStateChangePayload = {
-        from: 'neutral',
-        to: 'exploring',
-        confidence: 0.7,
-        signals: { frustrated: 0, concentrated: 0, exploring: 4, learning: 0 },
-      };
+      // Dispatch cognitive state change via Store
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'exploring',
+          confidence: 0.7,
+        },
+      });
 
-      core.eventBus.emit('system_state:change', payload);
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(documentBody.classList.contains('state-exploring')).toBe(true);
@@ -120,22 +121,24 @@ describe('DomRendererPlugin', () => {
       await plugin.start();
 
       // First state: frustrated
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(documentBody.classList.contains('state-frustrated')).toBe(true);
 
       // Transition to concentrated
-      core.eventBus.emit('system_state:change', {
-        from: 'frustrated',
-        to: 'concentrated',
-        confidence: 0.9,
-        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'concentrated',
+          confidence: 0.9,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -244,11 +247,12 @@ describe('DomRendererPlugin', () => {
       await debugPlugin.init(core);
       await debugPlugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -262,11 +266,12 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'concentrated',
-        confidence: 0.9,
-        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'concentrated',
+          confidence: 0.9,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -283,14 +288,13 @@ describe('DomRendererPlugin', () => {
       const eventSpy = vi.fn();
       document.addEventListener('navigatorStateChange', eventSpy);
 
-      const payload: CognitiveStateChangePayload = {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
-      };
-
-      core.eventBus.emit('system_state:change', payload);
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
+      });
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(eventSpy).toHaveBeenCalled();
@@ -336,11 +340,12 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -353,11 +358,12 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'concentrated',
-        confidence: 0.9,
-        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'concentrated',
+          confidence: 0.9,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -377,11 +383,12 @@ describe('DomRendererPlugin', () => {
       await customPlugin.init(core);
       await customPlugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -396,11 +403,12 @@ describe('DomRendererPlugin', () => {
       await plugin.init(core);
       await plugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'frustrated',
-        confidence: 0.8,
-        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'frustrated',
+          confidence: 0.8,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -425,11 +433,12 @@ describe('DomRendererPlugin', () => {
       await customPlugin.init(core);
       await customPlugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'concentrated',
-        confidence: 0.9,
-        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'concentrated',
+          confidence: 0.9,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -453,11 +462,12 @@ describe('DomRendererPlugin', () => {
       await customPlugin.init(core);
       await customPlugin.start();
 
-      core.eventBus.emit('system_state:change', {
-        from: 'neutral',
-        to: 'exploring',
-        confidence: 0.7,
-        signals: { frustrated: 0, concentrated: 0, exploring: 4, learning: 0 },
+      core.store.dispatch({
+        type: 'cognitive/STATE_CHANGE',
+        payload: {
+          currentState: 'exploring',
+          confidence: 0.7,
+        },
       });
       await new Promise(resolve => setTimeout(resolve, 100));
 

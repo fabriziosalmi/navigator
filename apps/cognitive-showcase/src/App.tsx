@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigator } from '@navigator.menu/react';
-import { CognitiveModelPlugin } from '@navigator.menu/plugin-cognitive';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 import ImageCarousel from './components/ImageCarousel';
 import CognitiveHUD from './components/CognitiveHUD';
@@ -35,7 +34,7 @@ function App() {
     autoStart: true,
     debugMode: false,
     plugins: [
-      new CognitiveModelPlugin(),
+      // CognitiveModelPlugin removed - cognitive analysis is now automatic via middleware
       new KeyboardPlugin(),
     ],
   });
@@ -43,13 +42,13 @@ function App() {
   useEffect(() => {
     if (!core) return;
 
-    // Subscribe to cognitive state changes
-    const unsubState = core.eventBus.on('system_state:change', (payload: any) => {
-      console.log('[App] Cognitive state changed:', payload);
+    // Subscribe to cognitive state changes via store
+    const unsubscribe = core.store.subscribe(() => {
+      const state = core.store.getState();
+      const cognitiveSlice = state.cognitive;
       
-      // FIX: EventBus wraps the payload in a payload property
-      const newState = payload.to || payload.payload?.to;
-      setCognitiveState(newState);
+      console.log('[App] Cognitive state changed:', cognitiveSlice);
+      setCognitiveState(cognitiveSlice.currentState);
     });
 
     // Subscribe to action history
@@ -123,7 +122,7 @@ function App() {
     });
 
     return () => {
-      unsubState();
+      unsubscribe();
       unsubHistory();
       unsubKeyDown();
     };

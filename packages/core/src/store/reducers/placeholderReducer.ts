@@ -58,11 +58,16 @@ export const cognitiveReducer: Reducer<CognitiveStateSlice, Action> = (
 ) => {
   switch (action.type) {
     case 'cognitive/STATE_CHANGE': {
-      const cognitiveAction = action as CognitiveStateChangeAction;
+      const payload = action.payload as any;
+      // Support both middleware format (newState) and test format (currentState)
+      const newState = payload.newState || payload.currentState;
+      const confidence = payload.confidence ?? 0;
+      const timestamp = payload.timestamp ?? (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      
       return {
-        currentState: cognitiveAction.payload.newState,
-        confidence: cognitiveAction.payload.confidence,
-        lastUpdate: cognitiveAction.payload.timestamp,
+        currentState: newState,
+        confidence: confidence,
+        lastUpdate: timestamp,
       };
     }
 
@@ -72,9 +77,7 @@ export const cognitiveReducer: Reducer<CognitiveStateSlice, Action> = (
     default:
       return state;
   }
-};
-
-/**
+};/**
  * UI reducer (placeholder)
  */
 const uiInitialState: UIState = {
