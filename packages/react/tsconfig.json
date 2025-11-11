@@ -5,7 +5,11 @@
     "outDir": "./dist",
     "lib": ["ES2022", "DOM"],
     "jsx": "react-jsx",
-    "types": ["vitest/globals", "node", "@testing-library/react"]
+    "types": ["vitest/globals", "node", "@testing-library/react"],
+    "paths": {
+      "@navigator.menu/core": ["../core/src/index.ts"],
+      "@navigator.menu/types": ["../types/src/index.d.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
