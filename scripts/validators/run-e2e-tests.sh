@@ -29,6 +29,9 @@ TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm wo
 SERVER_URL="http://localhost:5173"
 SERVER_PID=""
 PLAYWRIGHT_CONFIG="tests/e2e/playwright.config.ts"
+SERVER_LOG="/tmp/navigator-e2e-server.log"
+TIMEOUT=120  # Increased from 60s to 120s for CI compatibility
+POLL_INTERVAL=2  # Check every 2 seconds instead of 5
 
 # ==========================================
 # CLEANUP FUNCTION (ALWAYS RUNS)
@@ -49,6 +52,12 @@ cleanup() {
   if [ -d "$TEMP_APP_DIR" ]; then
     echo "   Removing temporary app directory: $TEMP_APP_DIR"
     rm -rf "$TEMP_APP_DIR"
+  fi
+  
+  # Remove server log
+  if [ -f "$SERVER_LOG" ]; then
+    echo "   Removing server log: $SERVER_LOG"
+    rm -f "$SERVER_LOG"
   fi
   
   echo -e "${GREEN}   ✓ Cleanup complete${NC}"
@@ -78,6 +87,23 @@ if [ -d "$TEMP_APP_DIR" ]; then
 fi
 
 echo -e "${GREEN}✓ Setup complete${NC}"
+
+# ==========================================
+# BUILD NAVIGATOR PACKAGES
+# ==========================================
+
+echo ""
+echo -e "${BLUE}🔨 STEP 1.5: BUILDING NAVIGATOR PACKAGES${NC}"
+echo ""
+echo "   Building Navigator SDK packages for E2E test..."
+
+# Build only the packages needed for E2E tests
+if ! pnpm build --filter '@navigator.menu/core' --filter '@navigator.menu/react' --filter '@navigator.menu/plugin-keyboard' 2>&1 | grep -v "Scope:"; then
+  echo -e "${RED}❌ Failed to build Navigator packages${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}✓ Packages built successfully${NC}"
 
 # ==========================================
 # CREATE FRESH TEST APPLICATION
@@ -177,33 +203,73 @@ echo ""
 echo -e "${BLUE}🌐 STEP 5: STARTING TEST SERVER${NC}"
 echo ""
 echo "   Starting Vite dev server on $SERVER_URL..."
+echo "   [$(date +%H:%M:%S)] Initializing server..."
 
-# Start server in background (use npx vite directly)
+# Check if port is already in use
+if lsof -i :5173 > /dev/null 2>&1; then
+  echo -e "${YELLOW}⚠️  Port 5173 already in use!${NC}"
+  echo "   Attempting to kill existing process..."
+  kill $(lsof -t -i :5173) 2>/dev/null || true
+  sleep 2
+fi
+
+# Start server in background and capture logs
 WORKSPACE_ROOT_ABS="$(pwd)"
-(cd "$TEMP_APP_DIR" && npx vite) > /dev/null 2>&1 &
+echo "   [$(date +%H:%M:%S)] Starting Vite process..."
+(cd "$TEMP_APP_DIR" && npx vite) > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 
 echo -e "${GREEN}   ✓ Server started (PID: $SERVER_PID)${NC}"
+echo "   Server logs: $SERVER_LOG"
 
-# Wait for server to be ready (simple curl polling)
-echo "   Waiting for server to be ready..."
+# Tail server logs in background for debugging
+tail -f "$SERVER_LOG" &
+TAIL_PID=$!
 
-TIMEOUT=60
+# Wait for server to be ready with improved polling
+echo "   [$(date +%H:%M:%S)] Waiting for server to be ready (timeout: ${TIMEOUT}s)..."
+
 ELAPSED=0
 while [ $ELAPSED -lt $TIMEOUT ]; do
-  if curl -s "$SERVER_URL" > /dev/null 2>&1; then
+  # Check if server process is still alive
+  if ! kill -0 $SERVER_PID 2>/dev/null; then
+    echo -e "${RED}❌ Server process died unexpectedly!${NC}"
+    echo "   Check server logs at: $SERVER_LOG"
+    echo ""
+    echo "Last 20 lines of server log:"
+    tail -20 "$SERVER_LOG"
+    kill $TAIL_PID 2>/dev/null || true
+    exit 1
+  fi
+  
+  # Check if server responds with valid HTML
+  if curl -s "$SERVER_URL" 2>/dev/null | grep -q "<title>" ; then
+    echo "   [$(date +%H:%M:%S)] Server is responding!"
     break
   fi
-  sleep 2
-  ELAPSED=$((ELAPSED + 2))
-done || true  # Don't exit on curl failure during polling
+  
+  sleep $POLL_INTERVAL
+  ELAPSED=$((ELAPSED + POLL_INTERVAL))
+  
+  # Progress indicator every 10 seconds
+  if [ $((ELAPSED % 10)) -eq 0 ]; then
+    echo "   [$(date +%H:%M:%S)] Still waiting... (${ELAPSED}s / ${TIMEOUT}s)"
+  fi
+done
+
+# Stop tailing logs
+kill $TAIL_PID 2>/dev/null || true
 
 if [ $ELAPSED -ge $TIMEOUT ]; then
   echo -e "${RED}❌ Server failed to start within $TIMEOUT seconds${NC}"
+  echo "   Check server logs at: $SERVER_LOG"
+  echo ""
+  echo "Last 30 lines of server log:"
+  tail -30 "$SERVER_LOG"
   exit 1
 fi
 
-echo -e "${GREEN}   ✓ Server is ready at $SERVER_URL${NC}"
+echo -e "${GREEN}   ✓ Server is ready at $SERVER_URL (startup time: ${ELAPSED}s)${NC}"
 
 # ==========================================
 # RUN PLAYWRIGHT TESTS
@@ -239,10 +305,15 @@ echo "=================================================="
 echo "📊 E2E TEST SUMMARY"
 echo "=================================================="
 echo ""
-echo "   Test App: $TEMP_APP_DIR (will be removed)"
+echo "   Test App: $TEMP_APP_DIR (cleaned up)"
 echo "   Server: $SERVER_URL"
+echo "   Server startup time: ${ELAPSED}s"
 echo "   Config: $PLAYWRIGHT_CONFIG"
 echo "   Result: $([ $EXIT_CODE -eq 0 ] && echo -e "${GREEN}PASSED${NC}" || echo -e "${RED}FAILED${NC}")"
+echo ""
+echo "📊 E2E Metrics:"
+echo "   Server startup: ${ELAPSED}s"
+echo "   Timeout limit: ${TIMEOUT}s"
 echo ""
 
 # Cleanup will run automatically via trap
