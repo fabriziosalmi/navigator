@@ -18,7 +18,7 @@
 
 import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
-import { navigate } from '@navigator.menu/core';
+import { navigate, keyPress, keyRelease } from '@navigator.menu/core';
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -143,17 +143,8 @@ export class KeyboardPlugin implements INavigatorPlugin {
       return;
     }
 
-    // Emit raw keydown event
-    this.core.eventBus.emit('keyboard:keydown', {
-      key,
-      code,
-      altKey: event.altKey,
-      ctrlKey: event.ctrlKey,
-      shiftKey: event.shiftKey,
-      metaKey: event.metaKey,
-      repeat: event.repeat,
-      timestamp,
-    });
+    // Dispatch raw key press to store (unidirectional flow)
+    this.core.store.dispatch(keyPress(key, timestamp));
 
     // Emit navigation intents and record action
     const intentEmitted = this._emitNavigationIntent(key, timestamp);
@@ -167,17 +158,14 @@ export class KeyboardPlugin implements INavigatorPlugin {
   private _onKeyUp(event: KeyboardEvent): void {
     if (!this.core) return;
 
-    const { key, code } = event;
+    const { key } = event;
+    const timestamp = performance.now();
 
     // Remove from pressed keys
     this.pressedKeys.delete(key);
 
-    // Emit raw keyup event
-    this.core.eventBus.emit('keyboard:keyup', {
-      key,
-      code,
-      timestamp: performance.now(),
-    });
+    // Dispatch key release to store (unidirectional flow)
+    this.core.store.dispatch(keyRelease(key, timestamp));
   }
 
   // ========================================

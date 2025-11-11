@@ -12,11 +12,12 @@ export { NavigatorCore } from './NavigatorCore';
 export { UserSessionHistory } from './intelligence/UserSessionHistory';
 export type { Action, SessionMetrics } from './intelligence/UserSessionHistory';
 
-// Redux-like Store (v3.1+)
+// Store (Sprint 1)
 export { createStore, combineReducers } from './store';
 export { rootReducer, historyActions, historySelectors, uiActions, navigationActions } from './store';
+export { keyPress, keyRelease, gestureDetected, voiceCommand, INPUT_ACTIONS } from './store';
 
-// Sprint 2: Navigation Actions (Unidirectional Flow)
+// Actions (Sprint 2 & 3)
 export { navigate, NAVIGATE } from './actions/navigation';
 export type { NavigateAction, NavigatePayload, NavigationDirection, NavigationSource } from './actions/navigation';
 

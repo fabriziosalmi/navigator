@@ -61,6 +61,20 @@ export {
   type NavigationState,
 } from './reducers/navigationReducer';
 
+// Input reducer and actions (Sprint 3)
+export {
+  inputReducer,
+  INPUT_ACTIONS,
+  keyPress,
+  keyRelease,
+  gestureDetected,
+  voiceCommand,
+  type InputState,
+  type KeyboardInputState,
+  type GestureInputState,
+  type VoiceInputState,
+} from './reducers/inputReducer';
+
 // Placeholder reducers (will be replaced in future sprints)
 export {
   cognitiveReducer,

@@ -81,10 +81,11 @@ describe('KeyboardPlugin', () => {
   });
 
   // ========================================
-  // Area 2: Key Event Emission
+  // Area 2: Key Event Emission - LEGACY TESTS (DEPRECATED)
+  // These tests verify legacy eventBus emissions being replaced with store actions
   // ========================================
 
-  describe('Key Event Emission', () => {
+  describe.skip('Key Event Emission (LEGACY - DEPRECATED)', () => {
     beforeEach(async () => {
       await core.registerPlugin(plugin).init();
       await core.start();
@@ -495,6 +496,103 @@ describe('KeyboardPlugin', () => {
       const action = navAction![0] as any;
       expect(action.payload.metadata.timestamp).toBeGreaterThanOrEqual(before);
       expect(action.payload.metadata.timestamp).toBeLessThanOrEqual(after);
+    });
+  });
+
+  // ========================================
+  // Area 8: Raw Input Store Actions (Sprint 3)
+  // TDD: Store dispatch for raw keyboard events
+  // ========================================
+
+  describe('Raw Input Store Actions', () => {
+    beforeEach(async () => {
+      await core.registerPlugin(plugin).init();
+      await core.start();
+    });
+
+    it('should dispatch KEY_PRESS action on any key press', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', { key: 'a' });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'input/KEYBOARD_KEY_PRESS',
+          payload: expect.objectContaining({
+            key: 'a',
+            timestamp: expect.any(Number),
+          }),
+        })
+      );
+    });
+
+    it('should dispatch KEY_RELEASE action on key release', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      // Press key first
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'b' }));
+      
+      // Reset spy
+      dispatchSpy.mockClear();
+
+      // Release key
+      const keyEvent = new KeyboardEvent('keyup', { key: 'b' });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'input/KEYBOARD_KEY_RELEASE',
+          payload: expect.objectContaining({
+            key: 'b',
+            timestamp: expect.any(Number),
+          }),
+        })
+      );
+    });
+
+    it('should update store state with last key pressed', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'x' }));
+
+      const state = core.store.getState();
+      expect(state.input.keyboard.lastKey).toBe('x');
+      expect(state.input.keyboard.activeKeys).toContain('x');
+    });
+
+    it('should remove key from activeKeys on release', () => {
+      // Press key
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'y' }));
+      
+      let state = core.store.getState();
+      expect(state.input.keyboard.activeKeys).toContain('y');
+
+      // Release key
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'y' }));
+      
+      state = core.store.getState();
+      expect(state.input.keyboard.activeKeys).not.toContain('y');
+    });
+
+    it('should dispatch both KEY_PRESS and NAVIGATE for arrow keys', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+
+      // Should dispatch KEY_PRESS
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'input/KEYBOARD_KEY_PRESS',
+          payload: expect.objectContaining({ key: 'ArrowLeft' }),
+        })
+      );
+
+      // Should also dispatch NAVIGATE
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'navigation/NAVIGATE',
+          payload: expect.objectContaining({ direction: 'left' }),
+        })
+      );
     });
   });
 });

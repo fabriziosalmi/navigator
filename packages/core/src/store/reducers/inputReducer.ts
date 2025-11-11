@@ -82,6 +82,41 @@ export const INPUT_ACTIONS = {
 } as const;
 
 /**
+ * Action Creators for Input Events
+ */
+
+// Keyboard action creators
+export const keyPress = (key: string, timestamp: number = Date.now()) => ({
+  type: INPUT_ACTIONS.KEYBOARD_KEY_PRESS,
+  payload: { key, timestamp },
+} as const);
+
+export const keyRelease = (key: string, timestamp: number = Date.now()) => ({
+  type: INPUT_ACTIONS.KEYBOARD_KEY_RELEASE,
+  payload: { key, timestamp },
+} as const);
+
+// Gesture action creators
+export const gestureDetected = (
+  gesture: string, 
+  confidence: number, 
+  timestamp: number = Date.now()
+) => ({
+  type: INPUT_ACTIONS.GESTURE_DETECTED,
+  payload: { gesture, confidence, timestamp },
+} as const);
+
+// Voice action creators
+export const voiceCommand = (
+  command: string,
+  confidence: number,
+  timestamp: number = Date.now()
+) => ({
+  type: INPUT_ACTIONS.VOICE_COMMAND,
+  payload: { command, confidence, timestamp },
+} as const);
+
+/**
  * Initial keyboard state
  */
 const keyboardInitialState: KeyboardInputState = {
