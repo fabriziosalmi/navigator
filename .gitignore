@@ -49,6 +49,12 @@ coverage/
 playwright-report/
 test-results/
 .last-run.json
+
+# Video exports (heavy files for demos)
+**/video-exports/
+*.webm
+*.mp4
+*.gif
 .nyc_output/
 
 # Backup files
