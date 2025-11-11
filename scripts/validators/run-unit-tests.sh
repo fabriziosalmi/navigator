@@ -9,6 +9,12 @@ set -e
 echo "🧪 Running unit tests with coverage..."
 echo ""
 
+# Build packages first to ensure dist/ artifacts exist
+# Required for Vite to resolve package imports during tests
+echo "📦 Building packages before tests..."
+pnpm -r build
+echo ""
+
 # Check if test script exists in root package.json
 if ! grep -q '"test"' package.json; then
   echo "⚠️  No test script found in root package.json"
