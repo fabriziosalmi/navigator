@@ -10,16 +10,21 @@ describe('DomRendererPlugin', () => {
 
   beforeEach(() => {
     core = new NavigatorCore({ debugMode: false });
-    plugin = new DomRendererPlugin({ debugMode: false });
+    plugin = new DomRendererPlugin({ 
+      debugMode: false,
+      target: document.body, // v17.1: Use HTMLElement directly
+    });
     documentBody = document.body;
     
-    // Clean body classes
+    // Clean body classes and styles
     documentBody.className = '';
+    documentBody.removeAttribute('style');
   });
 
   afterEach(async () => {
     await plugin.destroy?.();
     documentBody.className = '';
+    documentBody.removeAttribute('style');
   });
 
   describe('Plugin Lifecycle', () => {
@@ -153,6 +158,7 @@ describe('DomRendererPlugin', () => {
 
       // Emit intent prediction
       const payload: IntentPredictionPayload = {
+        intent: 'navigate',
         targetCardId: 'card-5',
         confidence: 0.85,
         trajectory: [
@@ -177,6 +183,7 @@ describe('DomRendererPlugin', () => {
       await plugin.start();
 
       const payload: IntentPredictionPayload = {
+        intent: 'navigate',
         targetCardId: 'non-existent-card',
         confidence: 0.9,
         trajectory: [],
@@ -304,6 +311,7 @@ describe('DomRendererPlugin', () => {
       document.addEventListener('navigatorIntentPrediction', eventSpy);
 
       const payload: IntentPredictionPayload = {
+        intent: 'navigate',
         targetCardId: 'card-5',
         confidence: 0.85,
         trajectory: [],
@@ -315,10 +323,202 @@ describe('DomRendererPlugin', () => {
       expect(eventSpy).toHaveBeenCalled();
       
       const customEvent = eventSpy.mock.calls[0][0] as CustomEvent;
-      expect(customEvent.detail.targetCardId).toBe('card-5');
+      expect(customEvent.detail.targetId).toBe('card-5'); // v17.1: Changed to targetId
       expect(customEvent.detail.confidence).toBe(0.85);
 
       document.removeEventListener('navigatorIntentPrediction', eventSpy);
+    });
+  });
+
+  describe('v17.1: CSS Custom Properties', () => {
+    it('should set --animation-speed-multiplier on state change', async () => {
+      await core.init();
+      await plugin.init(core);
+      await plugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'frustrated',
+        confidence: 0.8,
+        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const multiplier = documentBody.style.getPropertyValue('--animation-speed-multiplier');
+      expect(multiplier).toBe('1.5'); // frustrated = slower
+    });
+
+    it('should use concentrated speed multiplier', async () => {
+      await core.init();
+      await plugin.init(core);
+      await plugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'concentrated',
+        confidence: 0.9,
+        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const multiplier = documentBody.style.getPropertyValue('--animation-speed-multiplier');
+      expect(multiplier).toBe('0.6'); // concentrated = faster
+    });
+
+    it('should support custom speed multipliers', async () => {
+      const customPlugin = new DomRendererPlugin({
+        target: documentBody,
+        speedMultipliers: {
+          frustrated: 2.0, // Custom value
+        },
+      });
+
+      await core.init();
+      await customPlugin.init(core);
+      await customPlugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'frustrated',
+        confidence: 0.8,
+        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const multiplier = documentBody.style.getPropertyValue('--animation-speed-multiplier');
+      expect(multiplier).toBe('2'); // toString() removes trailing .0
+
+      await customPlugin.destroy();
+    });
+
+    it('should clean up CSS property on destroy', async () => {
+      await core.init();
+      await plugin.init(core);
+      await plugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'frustrated',
+        confidence: 0.8,
+        signals: { frustrated: 5, concentrated: 0, exploring: 0, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      await plugin.destroy();
+
+      const multiplier = documentBody.style.getPropertyValue('--animation-speed-multiplier');
+      expect(multiplier).toBe(''); // Cleaned up
+    });
+  });
+
+  describe('v17.1: Configurable Target', () => {
+    it('should accept HTMLElement as target', async () => {
+      const customDiv = document.createElement('div');
+      customDiv.id = 'custom-container';
+      document.body.appendChild(customDiv);
+
+      const customPlugin = new DomRendererPlugin({
+        target: customDiv,
+      });
+
+      await core.init();
+      await customPlugin.init(core);
+      await customPlugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'concentrated',
+        confidence: 0.9,
+        signals: { frustrated: 0, concentrated: 6, exploring: 0, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(customDiv.classList.contains('state-concentrated')).toBe(true);
+      expect(documentBody.classList.contains('state-concentrated')).toBe(false);
+
+      await customPlugin.destroy();
+      customDiv.remove();
+    });
+
+    it('should accept selector string as target', async () => {
+      const customDiv = document.createElement('div');
+      customDiv.id = 'another-container';
+      document.body.appendChild(customDiv);
+
+      const customPlugin = new DomRendererPlugin({
+        target: '#another-container',
+      });
+
+      await core.init();
+      await customPlugin.init(core);
+      await customPlugin.start();
+
+      core.eventBus.emit('system_state:change', {
+        from: 'neutral',
+        to: 'exploring',
+        confidence: 0.7,
+        signals: { frustrated: 0, concentrated: 0, exploring: 4, learning: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(customDiv.classList.contains('state-exploring')).toBe(true);
+
+      await customPlugin.destroy();
+      customDiv.remove();
+    });
+
+    it('should throw error if target not found', async () => {
+      const customPlugin = new DomRendererPlugin({
+        target: '#non-existent-element',
+      });
+
+      await core.init();
+      
+      await expect(customPlugin.init(core)).rejects.toThrow(
+        '[DomRenderer] Target element "#non-existent-element" not found.'
+      );
+    });
+  });
+
+  describe('v17.1: Prediction Threshold', () => {
+    it('should respect custom prediction threshold', async () => {
+      const customPlugin = new DomRendererPlugin({
+        target: documentBody,
+        predictionThreshold: 0.90, // Higher threshold
+      });
+
+      await core.init();
+      await customPlugin.init(core);
+      await customPlugin.start();
+
+      const card = document.createElement('div');
+      card.id = 'card-test';
+      document.body.appendChild(card);
+
+      // Low confidence (below custom threshold)
+      core.eventBus.emit('intent:prediction', {
+        intent: 'navigate',
+        targetCardId: 'card-test',
+        confidence: 0.85, // Below 0.90
+        trajectory: [],
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(card.classList.contains('card--preloading')).toBe(false);
+
+      // High confidence (above threshold)
+      core.eventBus.emit('intent:prediction', {
+        intent: 'navigate',
+        targetCardId: 'card-test',
+        confidence: 0.95,
+        trajectory: [],
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(card.classList.contains('card--preloading')).toBe(true);
+
+      await customPlugin.destroy();
+      card.remove();
     });
   });
 });

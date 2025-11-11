@@ -21,6 +21,19 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    
+    // Monorepo Path Mapping (FASE 1)
+    "baseUrl": ".",
+    "paths": {
+      "@navigator.menu/core": ["packages/core/src/index.ts"],
+      "@navigator.menu/types": ["packages/types/src/index.d.ts"],
+      "@navigator.menu/pdk": ["packages/pdk/src/index.ts"],
+      "@navigator.menu/plugin-cognitive": ["packages/plugin-cognitive/src/index.ts"],
+      "@navigator.menu/plugin-dom-renderer": ["packages/plugin-dom-renderer/src/index.ts"],
+      "@navigator.menu/plugin-keyboard": ["packages/plugin-keyboard/src/index.ts"],
+      "@navigator.menu/plugin-logger": ["packages/plugin-logger/src/index.ts"],
+      "@navigator.menu/react": ["packages/react/src/index.ts"]
+    }
   }
 }
