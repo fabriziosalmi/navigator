@@ -26,10 +26,15 @@ dist/
 build/
 *.min.js
 *.min.css
+.cache/
+.vite/
+.tsbuildinfo
 
 # Logs
 logs/
 *.log
+npm-debug.log*
+pnpm-debug.log*
 
 # Temporary files
 tmp/
@@ -39,9 +44,12 @@ temp/
 # E2E temporary test app
 tests/e2e-temp-app/
 
-# Playwright test artifacts
+# Test & Coverage artifacts
+coverage/
 playwright-report/
 test-results/
+.last-run.json
+.nyc_output/
 
 # Backup files
 *.bak
@@ -49,5 +57,13 @@ test-results/
 *.backup
 
 # OS files
+.DS_Store
 Thumbs.db
 desktop.ini
+
+# Process documents (archived)
+claude_report.md
+*-test-output.log
+*-e2e-results.log
+debug-*.log
+FINAL-TEST-WITH-FIX.log
