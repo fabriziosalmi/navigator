@@ -18,12 +18,13 @@
  * - learning: Increasing performance over time
  */
 
-import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
 import type { 
+  NavigatorCore, 
+  INavigatorPlugin,
   CognitiveState, 
   SessionMetrics,
   CognitiveStateChangePayload 
-} from '@navigator.menu/types';
+} from '@navigator.menu/core';
 
 export interface CognitiveModelConfig {
   /** Analysis interval in milliseconds (default: 500) */

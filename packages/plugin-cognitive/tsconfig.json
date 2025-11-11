@@ -6,8 +6,8 @@
     "lib": ["ES2022"],
     "types": ["vitest/globals", "node"],
     "paths": {
-      "@navigator.menu/types": ["../types/dist/index.d.ts"],
-      "@navigator.menu/core": ["../core/dist/index.d.ts"]
+      "@navigator.menu/types": ["../types/src/index.d.ts"],
+      "@navigator.menu/core": ["../core/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

@@ -17,8 +17,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
-import type { Action } from '@navigator.menu/types';
+import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;

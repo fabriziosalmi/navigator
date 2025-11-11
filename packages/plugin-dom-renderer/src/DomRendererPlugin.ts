@@ -16,8 +16,7 @@
  * - Configurable selectors for multi-carousel support
  */
 
-import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
-import type { CognitiveState } from '@navigator.menu/types';
+import type { NavigatorCore, INavigatorPlugin, CognitiveState } from '@navigator.menu/core';
 
 export interface DomRendererConfig {
   /** Root element selector or HTMLElement (default: 'body') */
