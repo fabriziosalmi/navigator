@@ -1,95 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useNavigator } from '@navigator.menu/react';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
-import './App.css';
 
 function App() {
   // 📊 State management
   const [lastKey, setLastKey] = useState<string>('none');
   const [eventCount, setEventCount] = useState(0);
-  const [intent, setIntent] = useState<string>('waiting...');
+  const [keyHistory, setKeyHistory] = useState<string[]>([]);
   const [navigatorStatus, setNavigatorStatus] = useState<string>('Initializing...');
 
-  // 🚀 Initialize Navigator
+  // 🚀 Initialize Navigator with KeyboardPlugin
   const { core } = useNavigator({
-    autoStart: false, // We'll start after registering plugins
+    plugins: [new KeyboardPlugin()],
+    autoStart: true,
     debugMode: true
   });
-
-  // 📦 Register plugins and start Navigator
-  useEffect(() => {
-    if (!core) return;
-
-    console.log('[App] Registering plugins...');
-    
-    // Register KeyboardPlugin
-    core.registerPlugin(new KeyboardPlugin());
-    
-    // Initialize and start Navigator
-    (async () => {
-      console.log('[App] Starting Navigator...');
-      await core.start();
-      console.log('[App] Navigator started successfully');
-      setNavigatorStatus('Running');
-    })();
-
-    return () => {
-      console.log('[App] Stopping Navigator...');
-      core.stop();
-    };
-  }, [core]);
 
   // 📡 Subscribe to Navigator events
   useEffect(() => {
     if (!core) return;
 
-    console.log('[App] Subscribing to events...');
+    // Check if already running and update status immediately
+    if (core.isRunning) {
+      setNavigatorStatus('Running');
+    }
 
     // Track Navigator status changes
     const unsubscribeStart = core.eventBus.on('core:start:complete', () => {
-      console.log('[App] Navigator started event');
       setNavigatorStatus('Running');
     });
 
     const unsubscribeStop = core.eventBus.on('core:stop:complete', () => {
-      console.log('[App] Navigator stopped event');
       setNavigatorStatus('Stopped');
     });
 
     // Subscribe to keyboard events from the plugin
     const unsubscribeKeyboard = core.eventBus.on('keyboard:keydown', (event: any) => {
-      console.log('[App] Keyboard event received:', event);
-      const key = event.key;
+      const key = event.payload.key;  // Access key from payload!
       setLastKey(key);
       setEventCount((prev) => prev + 1);
-      
-      // Map keys to intents
-      switch(key) {
-        case 'ArrowLeft':
-          setIntent('⬅️ Navigate Left');
-          break;
-        case 'ArrowRight':
-          setIntent('➡️ Navigate Right');
-          break;
-        case 'ArrowUp':
-          setIntent('⬆️ Navigate Up');
-          break;
-        case 'ArrowDown':
-          setIntent('⬇️ Navigate Down');
-          break;
-        case 'Enter':
-          setIntent('✅ Select');
-          break;
-        case 'Escape':
-          setIntent('❌ Cancel');
-          break;
-        default:
-          setIntent(`🔤 Key: ${key}`);
-      }
+      setKeyHistory((prev) => [...prev.slice(-9), key]); // Keep last 10 keys
     });
 
     return () => {
-      console.log('[App] Cleaning up event subscriptions');
       unsubscribeStart();
       unsubscribeStop();
       unsubscribeKeyboard();
@@ -97,74 +50,48 @@ function App() {
   }, [core]);
 
   return (
-    <div className="app">
-      <header>
-        <h1>🎯 Navigator.Menu - React Test App</h1>
-        <p>End-to-End Architecture Validation</p>
-      </header>
+    <div className="container" tabIndex={0}>
+      <h1>Navigator E2E Test App</h1>
+      <p className="subtitle">Testing Navigator Core Functionality</p>
 
-      <main>
-        <div className="demo-card">
-          <h2>🎹 Keyboard Plugin Demo</h2>
-          <p>Press any key to see the decoupled architecture in action!</p>
-
-          <div className="status-grid">
-            <div className="status-item">
-              <span className="label">Navigator Status:</span>
-              <span className="status-value" data-testid="navigator-status">
-                {navigatorStatus}
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="label">Last Key:</span>
-              <span className="status-value" data-testid="last-key">
-                {lastKey}
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="label">Event Count:</span>
-              <span className="status-value" data-testid="event-count">
-                {eventCount}
-              </span>
-            </div>
-            <div className="status-item full-width">
-              <span className="label">Intent:</span>
-              <span className="value intent">{intent}</span>
-            </div>
-          </div>
-
-          <div className="instructions">
-            <h3>Try these keys:</h3>
-            <ul>
-              <li><kbd>Arrow Keys</kbd> - Navigation intents</li>
-              <li><kbd>Enter</kbd> - Select intent</li>
-              <li><kbd>Escape</kbd> - Cancel intent</li>
-              <li><kbd>Any Key</kbd> - Trigger event</li>
-            </ul>
-          </div>
+      <div className="status-card">
+        <div className="status-label">Navigator Status</div>
+        <div className="status-value" data-testid="navigator-status">
+          {navigatorStatus}
         </div>
+      </div>
 
-        <div className="architecture-info">
-          <h3>🏗️ Architecture Flow</h3>
-          <div className="flow">
-            <div className="flow-step">KeyboardPlugin</div>
-            <div className="flow-arrow">→</div>
-            <div className="flow-step">EventBus</div>
-            <div className="flow-arrow">→</div>
-            <div className="flow-step">React Component</div>
-          </div>
-          <p className="flow-description">
-            ✨ <strong>Decoupled Design:</strong> KeyboardPlugin emits events through the EventBus, 
-            and React components subscribe without tight coupling.
-          </p>
+      <div className="status-card">
+        <div className="status-label">Last Key Pressed</div>
+        <div className="status-value" data-testid="last-key">
+          {lastKey}
         </div>
-      </main>
+      </div>
 
-      <footer>
+      <div className="status-card">
+        <div className="status-label">Total Events</div>
+        <div className="status-value" data-testid="event-count">
+          {eventCount}
+        </div>
+      </div>
+
+      <div className="status-card">
+        <div className="status-label">Key History</div>
+        <div className="status-value" data-testid="key-history">
+          {keyHistory.length > 0 ? keyHistory.join(', ') : 'No keys pressed yet'}
+        </div>
+      </div>
+
+      <div className="instructions">
+        <h3>E2E Test Instructions</h3>
+        <p>Press any key to test keyboard event capture:</p>
         <p>
-          Powered by <strong>@navigator.menu/core v2.0</strong>
+          <span className="key-hint">Arrow Keys</span>
+          <span className="key-hint">Enter</span>
+          <span className="key-hint">Space</span>
+          <span className="key-hint">Any Key</span>
         </p>
-      </footer>
+      </div>
     </div>
   );
 }

@@ -23,21 +23,28 @@ test.describe('Issue #2: Keyboard Events Not Captured', () => {
   test('should capture arrow key presses', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Press ArrowUp key
     await page.keyboard.press('ArrowUp');
-    
+
     // Wait for event processing
     await page.waitForTimeout(200);
-    
+
     // CRITICAL ASSERTION: lastKey should be updated
     const lastKey = page.getByTestId('last-key');
-    
+
     // This assertion should FAIL with current code
     await expect(lastKey).toContainText('ArrowUp', {
       timeout: 2000
     });
-    
+
     // Should NOT still be "none"
     await expect(lastKey).not.toContainText('none');
   });
