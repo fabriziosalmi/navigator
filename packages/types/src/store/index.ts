@@ -3,11 +3,11 @@
  * @description Store types barrel export
  * 
  * Central export point for all Redux-style store type definitions.
- * Import from here to access Action, Reducer, Store, and Middleware types.
+ * Import from here to access Action, Reducer, Store, State, and Middleware types.
  * 
  * @example
  * ```ts
- * import type { Store, Action, Reducer, Middleware } from '@navigator.menu/types/store';
+ * import type { Store, Action, Reducer, RootState, Middleware } from '@navigator.menu/types/store';
  * ```
  */
 
@@ -64,3 +64,46 @@ export type {
   ThunkAction,
   ThunkMiddleware,
 } from './Store';
+
+// State types
+export type {
+  // Navigation (direction and source are re-exported from actions/navigation.ts)
+  NavigationHistoryEntry,
+  NavigationState,
+  
+  // Cognitive
+  CognitiveStateType,
+  CognitiveSignal,
+  CognitiveMetrics,
+  CognitiveState,
+  
+  // Input
+  KeyboardInputState,
+  GestureInputState,
+  VoiceInputState,
+  InputState,
+  
+  // UI
+  UIError,
+  ThemeType,
+  UIState,
+  
+  // Root
+  RootState,
+  SliceState,
+  DeepPartial,
+  PreloadedRootState,
+} from './State';
+
+export {
+  // Initial states
+  navigationInitialState,
+  cognitiveInitialState,
+  inputInitialState,
+  uiInitialState,
+  rootInitialState,
+  
+  // Type guards
+  isRootState,
+} from './State';
+
