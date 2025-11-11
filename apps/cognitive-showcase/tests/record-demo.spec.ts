@@ -94,7 +94,7 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     await waitForCognitiveState(page, 'neutral');
     
     // Opening pause - let viewers see the initial state
-    await dramaticPause(page, 2500);
+    await dramaticPause(page, 1500);
     
     
     // ==========================================================================
@@ -105,26 +105,20 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     
     await actConcentrated(page, 18);
     
-    // Wait for state to change - accept any state change from neutral
-    // The cognitive model may need more time/actions to detect "concentrated"
-    await page.waitForTimeout(2000); // Give the model time to process actions
+    // SMART WAIT: Wait for cognitive state to change to "concentrated"
+    await waitForCognitiveState(page, 'concentrated');
     
-    // Wait for UI to visually reflect the concentrated state
+    // Verify UI has adapted to concentrated state (faster animations)
     const carousel = page.locator('[data-testid="carousel-wrapper"]');
     await expect(carousel).toBeVisible();
     
-    // Verify metrics are updating
-    const cognitiveState = page.locator('[data-testid="cognitive-state"]');
+    // Verify error rate is low (concentrated users are precise)
     const errorRate = page.locator('[data-testid="error-rate"]');
-    
-    const stateText = await cognitiveState.textContent();
-    console.log(`📊 Current state after concentration: ${stateText || 'EMPTY'}`);
-    
     const errorRateText = await errorRate.textContent();
-    console.log(`📊 Error Rate: ${errorRateText}`);
+    console.log(`📊 Error Rate after concentration: ${errorRateText}`);
     
-    // Shorter dramatic pause now that we've confirmed the state
-    await dramaticPause(page, 2000);
+    // Brief pause to show the concentrated state
+    await dramaticPause(page, 1500);
     
     
     // ==========================================================================
@@ -135,22 +129,18 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     
     await actFrustrated(page, 15);
     
-    // Wait for frustration to be detected - give model time to process
-    await page.waitForTimeout(2000);
+    // SMART WAIT: Wait for cognitive state to change to "frustrated"
+    await waitForCognitiveState(page, 'frustrated');
     
-    // Check state again
-    const frustratedState = await cognitiveState.textContent();
-    console.log(`📊 Current state after frustration: ${frustratedState || 'EMPTY'}`);
-    
-    // Check error rate has increased
+    // Verify error rate has increased (frustrated users make mistakes)
     const frustratedErrorRate = await errorRate.textContent();
-    console.log(`📊 Error Rate: ${frustratedErrorRate}`);
+    console.log(`📊 Error Rate after frustration: ${frustratedErrorRate}`);
     
-    // Verify carousel is visible and has adapted to frustrated state
+    // Verify carousel has adapted to frustrated state (slower animations)
     await expect(carousel).toBeVisible();
     
-    // Shorter dramatic pause now that we've confirmed the state change
-    await dramaticPause(page, 2500);
+    // Pause to show the frustrated state and UI adaptation
+    await dramaticPause(page, 1500);
     
     
     // ==========================================================================
@@ -161,11 +151,12 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     
     await actLearning(page, 10);
     
-    // Wait for state to normalize - could be 'learning', 'neutral', or 'concentrated'
-    // We'll wait for the state element to update (any change from 'frustrated')
-    await page.waitForTimeout(1000); // Brief wait for state detection
+    // SMART WAIT: Wait for state to normalize (could be 'learning', 'neutral', or 'concentrated')
+    // We check that it's no longer 'frustrated'
+    const cognitiveState = page.locator('[data-testid="cognitive-state"]');
+    await expect(cognitiveState).not.toContainText('frustrated', { timeout: 10000 });
     
-    // Check final state
+    // Get final state
     const recoveredState = await cognitiveState.textContent();
     console.log(`📊 Final state: ${recoveredState}`);
     
@@ -178,8 +169,8 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     // Verify carousel is still responsive
     await expect(carousel).toBeVisible();
     
-    // Final dramatic pause - show the stable state (reduced from 3000ms)
-    await dramaticPause(page, 2000);
+    // Final dramatic pause - show the stable recovered state
+    await dramaticPause(page, 1500);
     
     
     // ==========================================================================
@@ -187,7 +178,7 @@ test.describe('🎬 Navigator Cognitive Showcase - Automated Demo Recording', ()
     // ==========================================================================
     console.log('\n🎬 CLOSING - Demo Complete!\n');
     
-    // Final pause before ending (reduced for efficiency)
+    // Final pause before ending
     await dramaticPause(page, 1000);
     
     console.log('\n✅ Recording complete! Check test-results/ for the video file.\n');
