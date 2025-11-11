@@ -1,11 +1,10 @@
 {
-  "name": "@navigator.menu/plugin-keyboard",
+  "name": "@navigator.menu/plugin-cognitive",
   "version": "1.0.0",
-  "description": "Keyboard navigation plugin for Navigator.Menu",
+  "description": "Cognitive modeling plugin for Navigator.menu - Interprets user behavior and adapts UI",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,38 +13,41 @@
     }
   },
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
   "scripts": {
     "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
     "test": "vitest --run",
-    "test:coverage": "vitest run --coverage",
-    "type-check": "tsc --noEmit"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "navigator",
-    "keyboard",
-    "plugin",
-    "navigation",
-    "accessibility"
+    "cognitive",
+    "ai",
+    "ux",
+    "adaptive",
+    "plugin"
   ],
-  "author": "Navigator.Menu Team",
+  "author": "Navigator.menu",
   "license": "MIT",
   "peerDependencies": {
-    "@navigator.menu/core": "workspace:*"
+    "@navigator.menu/core": "workspace:*",
+    "@navigator.menu/types": "workspace:*"
   },
   "devDependencies": {
     "@navigator.menu/core": "workspace:*",
-    "@types/node": "^20.17.10",
+    "@navigator.menu/types": "workspace:*",
+    "@types/node": "^22.10.5",
     "@vitest/coverage-v8": "^1.6.1",
     "happy-dom": "^20.0.10",
     "tsup": "^8.3.5",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.2",
     "vitest": "^1.6.1"
   },
-  "dependencies": {
-    "nanoid": "^5.1.6"
+  "publishConfig": {
+    "access": "public"
   }
 }

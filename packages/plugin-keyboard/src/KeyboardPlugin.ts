@@ -16,7 +16,9 @@
  * - intent:cancel - Escape key intent
  */
 
+import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
+import type { Action } from '@navigator.menu/types';
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -32,6 +34,9 @@ export class KeyboardPlugin implements INavigatorPlugin {
   private pressedKeys: Set<string> = new Set();
   private handleKeyDown: ((event: KeyboardEvent) => void) | null = null;
   private handleKeyUp: ((event: KeyboardEvent) => void) | null = null;
+  
+  // Track action start time for duration calculation
+  private actionStartTime: number | null = null;
 
   constructor(config: KeyboardPluginConfig = {}) {
     this.config = {
@@ -104,8 +109,14 @@ export class KeyboardPlugin implements INavigatorPlugin {
     if (!this.core) return;
 
     const { key, code } = event;
+    const timestamp = performance.now();
 
     console.log('[KeyboardPlugin] KeyDown event received:', { key, code, target: event.target });
+
+    // Mark action start for duration tracking
+    if (!this.actionStartTime) {
+      this.actionStartTime = timestamp;
+    }
 
     // Prevent default for navigation keys
     if (this.config.preventDefaults) {
@@ -126,6 +137,9 @@ export class KeyboardPlugin implements INavigatorPlugin {
         combo,
         action: this.config.keyCombos[combo],
       });
+      
+      // Record combo action
+      this._recordAction(`keyboard:combo:${combo}`, true, timestamp);
       return;
     }
 
@@ -138,11 +152,16 @@ export class KeyboardPlugin implements INavigatorPlugin {
       shiftKey: event.shiftKey,
       metaKey: event.metaKey,
       repeat: event.repeat,
-      timestamp: performance.now(),
+      timestamp,
     });
 
-    // Emit navigation intents
-    this._emitNavigationIntent(key);
+    // Emit navigation intents and record action
+    const intentEmitted = this._emitNavigationIntent(key, timestamp);
+    
+    // Record keydown action (successful if it's a known navigation key)
+    if (!intentEmitted) {
+      this._recordAction(`keyboard:keydown:${key}`, true, timestamp);
+    }
   }
 
   private _onKeyUp(event: KeyboardEvent): void {
@@ -165,8 +184,8 @@ export class KeyboardPlugin implements INavigatorPlugin {
   // Helper Methods
   // ========================================
 
-  private _emitNavigationIntent(key: string): void {
-    if (!this.core) return;
+  private _emitNavigationIntent(key: string, timestamp: number): boolean {
+    if (!this.core) return false;
 
     const intentMap: Record<string, string> = {
       ArrowLeft: 'intent:navigate_left',
@@ -180,7 +199,42 @@ export class KeyboardPlugin implements INavigatorPlugin {
     const intentEvent = intentMap[key];
     if (intentEvent) {
       this.core.eventBus.emit(intentEvent, { key });
+      
+      // Record navigation intent action
+      this._recordAction(intentEvent, true, timestamp);
+      
+      return true;
     }
+    
+    return false;
+  }
+
+  /**
+   * Record a user action in the session history
+   * This feeds the cognitive modeling system
+   */
+  private _recordAction(type: string, success: boolean, timestamp: number): void {
+    if (!this.core) return;
+    
+    const duration_ms = this.actionStartTime 
+      ? timestamp - this.actionStartTime 
+      : undefined;
+    
+    const action: Action = {
+      id: nanoid(),
+      timestamp,
+      type,
+      success,
+      duration_ms,
+      metadata: {
+        plugin: this.name,
+      },
+    };
+    
+    this.core.recordAction(action);
+    
+    // Reset action start time
+    this.actionStartTime = null;
   }
 
   private _getKeyCombo(): string | null {

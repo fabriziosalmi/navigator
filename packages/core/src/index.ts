@@ -9,6 +9,7 @@
 export { EventBus } from './EventBus';
 export { AppState } from './AppState';
 export { NavigatorCore } from './NavigatorCore';
+export { UserSessionHistory } from './intelligence/UserSessionHistory';
 export type {
   NavigatorEvent,
   EventHandler,
@@ -28,3 +29,4 @@ export type {
   INavigatorPlugin,
   PluginOptions
 } from './NavigatorCore';
+

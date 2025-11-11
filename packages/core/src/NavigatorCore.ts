@@ -11,7 +11,9 @@
 
 import { EventBus } from './EventBus';
 import { AppState, NavigatorState } from './AppState';
+import { UserSessionHistory } from './intelligence/UserSessionHistory';
 import type { DeepPartial } from './AppState';
+import type { Action } from '@navigator.menu/types';
 
 /**
  * Core configuration options
@@ -23,6 +25,8 @@ export interface NavigatorCoreConfig {
   autoStart?: boolean;
   /** Initial state to pass to AppState */
   initialState?: DeepPartial<NavigatorState>;
+  /** Maximum size of session history buffer */
+  historyMaxSize?: number;
 }
 
 /**
@@ -73,6 +77,9 @@ export class NavigatorCore {
   /** App state instance (read-only access) */
   public readonly state: AppState;
   
+  /** User session history tracker */
+  public readonly history: UserSessionHistory;
+  
   /** Initialization status */
   public isInitialized: boolean;
   
@@ -97,7 +104,8 @@ export class NavigatorCore {
     this.config = {
       debugMode: config.debugMode || false,
       autoStart: config.autoStart || false,
-      initialState: config.initialState || {}
+      initialState: config.initialState || {},
+      historyMaxSize: config.historyMaxSize || 100
     };
 
     // Initialize core systems
@@ -107,6 +115,8 @@ export class NavigatorCore {
     });
 
     this.state = new AppState(this.eventBus, this.config.initialState);
+    
+    this.history = new UserSessionHistory(this.config.historyMaxSize);
 
     // Plugin management
     this.plugins = new Map();
@@ -296,6 +306,44 @@ export class NavigatorCore {
     } catch (error) {
       console.error('NavigatorCore: Destroy failed', error);
       throw error;
+    }
+  }
+
+  // ========================================
+  // Session History Management
+  // ========================================
+
+  /**
+   * Record a user action in the session history
+   * This is the key method for cognitive modeling
+   * 
+   * @param action The action to record
+   * 
+   * @example
+   * ```ts
+   * core.recordAction({
+   *   id: nanoid(),
+   *   timestamp: performance.now(),
+   *   type: 'intent:navigate',
+   *   success: true,
+   *   duration_ms: 350
+   * });
+   * ```
+   */
+  recordAction(action: Action): void {
+    this.history.add(action);
+    
+    // Emit event for potential listeners (analytics, debugging)
+    this.eventBus.emit('history:action:recorded', {
+      action,
+      historySize: this.history.size()
+    });
+    
+    if (this.config.debugMode) {
+      console.log('📝 Action recorded:', action.type, {
+        success: action.success,
+        duration: action.duration_ms
+      });
     }
   }
 

@@ -128,6 +128,52 @@ export interface INavigatorCore {
 }
 
 /**
+ * User Action - Core unit of interaction history
+ */
+export interface Action {
+  /** Unique action identifier */
+  id: string;
+  
+  /** Timestamp when action occurred (performance.now()) */
+  timestamp: number;
+  
+  /** Action type (e.g., 'intent:navigate', 'gesture:swipe_left', 'system:error') */
+  type: string;
+  
+  /** Whether action completed successfully */
+  success: boolean;
+  
+  /** Duration of action in milliseconds */
+  duration_ms?: number;
+  
+  /** Additional action-specific data */
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Session Metrics calculated from action history
+ */
+export interface SessionMetrics {
+  /** Error rate (failed actions / total actions) */
+  errorRate: number;
+  
+  /** Number of recent errors */
+  recentErrors: number;
+  
+  /** Average action duration in milliseconds */
+  averageDuration: number;
+  
+  /** Number of unique action types */
+  actionVariety: number;
+  
+  /** Total number of actions analyzed */
+  totalActions: number;
+  
+  /** Time span covered by metrics (ms) */
+  timeWindow: number;
+}
+
+/**
  * Cognitive States
  */
 export type CognitiveState = 
@@ -179,6 +225,52 @@ export interface CognitiveStateChangePayload {
     learning: number;
   };
   confidence: number;
+  metrics?: SessionMetrics;
+}
+
+/**
+ * Intent Prediction Event Payload
+ */
+export interface IntentPredictionPayload {
+  /** Predicted intent type */
+  intent: string;
+  
+  /** Prediction confidence (0-1) */
+  confidence: number;
+  
+  /** Target index/position for navigation */
+  target?: number;
+  
+  /** Target card ID for preloading */
+  targetCardId?: string;
+  
+  /** Direction of predicted movement */
+  direction?: 'left' | 'right' | 'up' | 'down';
+  
+  /** Velocity of gesture (pixels/ms) */
+  velocity?: number;
+  
+  /** Trajectory points for gesture analysis */
+  trajectory?: Array<{ x: number; y: number; timestamp: number }>;
+}
+
+/**
+ * Raw Gesture Update Event Payload
+ */
+export interface RawGestureUpdatePayload {
+  /** Current position */
+  x: number;
+  y: number;
+  
+  /** Timestamp of this update */
+  timestamp: number;
+  
+  /** Gesture phase */
+  phase: 'start' | 'move' | 'end';
+  
+  /** Delta from last position */
+  deltaX?: number;
+  deltaY?: number;
 }
 
 /**
@@ -218,6 +310,9 @@ export type ExtractPayload<T extends string> =
   T extends 'input:gesture:swipe_right' ? GestureEventPayload :
   T extends 'input:gesture:swipe_up' ? GestureEventPayload :
   T extends 'input:gesture:swipe_down' ? GestureEventPayload :
+  T extends 'input:gesture:raw_update' ? RawGestureUpdatePayload :
+  T extends 'system_state:change' ? CognitiveStateChangePayload :
+  T extends 'intent:prediction' ? IntentPredictionPayload :
   T extends 'cognitive_state:change' ? CognitiveStateChangePayload :
   T extends 'intent:navigate_left' ? IntentEventPayload :
   T extends 'intent:navigate_right' ? IntentEventPayload :

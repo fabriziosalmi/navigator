@@ -39,6 +39,7 @@ export interface NavigatorState {
     navigationCount: number;
     gesturesDetected: number;
     achievements: string[];
+    cognitive_state?: 'frustrated' | 'concentrated' | 'exploring' | 'learning' | 'neutral';
   };
   system: {
     isIdle: boolean;
