@@ -86,6 +86,16 @@ export interface ComputedProperties {
 type WatcherCallback = (newValue: any) => void;
 
 /**
+ * State watcher options (Sprint 2 Task 2)
+ */
+export interface WatchOptions {
+  /** Watcher mode: 'sync' for immediate callbacks, 'debounce' for debounced callbacks */
+  mode?: 'sync' | 'debounce';
+  /** Debounce delay in milliseconds (default: 16ms for ~60fps) */
+  debounceMs?: number;
+}
+
+/**
  * State update options
  */
 interface SetStateOptions {
@@ -102,6 +112,12 @@ export class AppState {
   private maxHistorySize: number;
   public computed: ComputedProperties;
   private watchers: Map<string, Set<WatcherCallback>>;
+  
+  // Sprint 2 Task 2: Debounce support
+  private debouncedWatchers: Map<WatcherCallback, {
+    timeout: NodeJS.Timeout | null;
+    options: WatchOptions;
+  }>;
 
   constructor(eventBus: EventBus, initialState: DeepPartial<NavigatorState> = {}) {
     if (!eventBus || !(eventBus instanceof EventBus)) {
@@ -113,6 +129,7 @@ export class AppState {
     this.stateHistory = [];
     this.maxHistorySize = 50;
     this.watchers = new Map();
+    this.debouncedWatchers = new Map(); // Sprint 2 Task 2
 
     // Setup computed properties object
     this.computed = {} as ComputedProperties;
@@ -240,13 +257,26 @@ export class AppState {
    * Watch a specific state path for changes
    * @param path - State path to watch
    * @param callback - (newValue) => {}
+   * @param options - Watch options (mode, debounceMs)
    * @returns Unwatch function
    */
-  watch(path: string, callback: WatcherCallback): () => void {
+  watch(path: string, callback: WatcherCallback, options?: WatchOptions): () => void {
     if (!this.watchers.has(path)) {
       this.watchers.set(path, new Set());
     }
     this.watchers.get(path)!.add(callback);
+
+    // Sprint 2 Task 2: Store debounce options if provided
+    const mode = options?.mode ?? 'sync';
+    if (mode === 'debounce') {
+      this.debouncedWatchers.set(callback, {
+        timeout: null,
+        options: {
+          mode: 'debounce',
+          debounceMs: options?.debounceMs ?? 16 // Default 16ms (~60fps)
+        }
+      });
+    }
 
     // Return unwatch function
     return () => {
@@ -254,6 +284,13 @@ export class AppState {
       if (watchers) {
         watchers.delete(callback);
       }
+
+      // Sprint 2 Task 2: Cleanup debounce timeout if exists
+      const debounceData = this.debouncedWatchers.get(callback);
+      if (debounceData && debounceData.timeout) {
+        clearTimeout(debounceData.timeout);
+      }
+      this.debouncedWatchers.delete(callback);
     };
   }
 
@@ -422,10 +459,30 @@ export class AppState {
 
       if (isAffected) {
         for (const callback of watchers) {
-          try {
-            callback(newValue);
-          } catch (error) {
-            console.error('AppState: Watcher error', error);
+          // Sprint 2 Task 2: Check if this callback is debounced
+          const debounceData = this.debouncedWatchers.get(callback);
+
+          if (debounceData) {
+            // Debounce mode: clear existing timeout and schedule new one
+            if (debounceData.timeout) {
+              clearTimeout(debounceData.timeout);
+            }
+
+            debounceData.timeout = setTimeout(() => {
+              try {
+                callback(newValue);
+              } catch (error) {
+                console.error('AppState: Debounced watcher error', error);
+              }
+              debounceData.timeout = null;
+            }, debounceData.options.debounceMs ?? 16);
+          } else {
+            // Sync mode (default): call immediately
+            try {
+              callback(newValue);
+            } catch (error) {
+              console.error('AppState: Watcher error', error);
+            }
           }
         }
       }

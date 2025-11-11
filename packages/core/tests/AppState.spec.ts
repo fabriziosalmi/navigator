@@ -211,6 +211,129 @@ describe('AppState', () => {
       expect(() => appState.setState('user.level', 5)).not.toThrow();
       expect(normalWatcher).toHaveBeenCalledWith(5);
     });
+
+    // Sprint 2 Task 2: Async State Watchers (Debounce Mode)
+    describe('debounce mode', () => {
+      it('should debounce rapid state updates', async () => {
+        const watcher = vi.fn();
+        appState.watch('user.level', watcher, { mode: 'debounce', debounceMs: 50 });
+
+        // Rapid updates
+        appState.setState('user.level', 1);
+        appState.setState('user.level', 2);
+        appState.setState('user.level', 3);
+        appState.setState('user.level', 4);
+        appState.setState('user.level', 5);
+
+        // Watcher should not be called immediately
+        expect(watcher).not.toHaveBeenCalled();
+
+        // Wait for debounce to fire
+        await new Promise(resolve => setTimeout(resolve, 60));
+
+        // Watcher should be called only once with the last value
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith(5);
+      });
+
+      it('should support default debounceMs of 16ms (~60fps)', async () => {
+        const watcher = vi.fn();
+        appState.watch('user.level', watcher, { mode: 'debounce' });
+
+        appState.setState('user.level', 1);
+        appState.setState('user.level', 2);
+        appState.setState('user.level', 3);
+
+        expect(watcher).not.toHaveBeenCalled();
+
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith(3);
+      });
+
+      it('should maintain backward compatibility with sync mode by default', () => {
+        const watcher = vi.fn();
+        appState.watch('user.level', watcher); // No options = sync mode
+
+        appState.setState('user.level', 42);
+
+        // Should be called immediately
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith(42);
+      });
+
+      it('should explicitly support sync mode', () => {
+        const watcher = vi.fn();
+        appState.watch('user.level', watcher, { mode: 'sync' });
+
+        appState.setState('user.level', 42);
+
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith(42);
+      });
+
+      it('should cleanup debounce timeout on unwatch', async () => {
+        const watcher = vi.fn();
+        const unwatch = appState.watch('user.level', watcher, { mode: 'debounce', debounceMs: 50 });
+
+        appState.setState('user.level', 1);
+        appState.setState('user.level', 2);
+
+        // Unwatch before debounce fires
+        unwatch();
+
+        await new Promise(resolve => setTimeout(resolve, 60));
+
+        // Watcher should never be called
+        expect(watcher).not.toHaveBeenCalled();
+      });
+
+      it('should allow multiple watchers with different modes on same path', async () => {
+        const syncWatcher = vi.fn();
+        const debounceWatcher = vi.fn();
+
+        appState.watch('user.level', syncWatcher, { mode: 'sync' });
+        appState.watch('user.level', debounceWatcher, { mode: 'debounce', debounceMs: 50 });
+
+        appState.setState('user.level', 1);
+        appState.setState('user.level', 2);
+        appState.setState('user.level', 3);
+
+        // Sync watcher called immediately for each update
+        expect(syncWatcher).toHaveBeenCalledTimes(3);
+        expect(syncWatcher).toHaveBeenLastCalledWith(3);
+
+        // Debounce watcher not called yet
+        expect(debounceWatcher).not.toHaveBeenCalled();
+
+        await new Promise(resolve => setTimeout(resolve, 60));
+
+        // Debounce watcher called once with last value
+        expect(debounceWatcher).toHaveBeenCalledTimes(1);
+        expect(debounceWatcher).toHaveBeenCalledWith(3);
+      });
+
+      it('should reset debounce timer on each new update', async () => {
+        const watcher = vi.fn();
+        appState.watch('user.level', watcher, { mode: 'debounce', debounceMs: 50 });
+
+        appState.setState('user.level', 1);
+        await new Promise(resolve => setTimeout(resolve, 30)); // Wait 30ms (not enough)
+
+        appState.setState('user.level', 2); // Reset timer
+        await new Promise(resolve => setTimeout(resolve, 30)); // Wait another 30ms (still not enough)
+
+        // Watcher still not called (timer keeps resetting)
+        expect(watcher).not.toHaveBeenCalled();
+
+        await new Promise(resolve => setTimeout(resolve, 25)); // Wait final 25ms (total 55ms from last update)
+
+        // Now it should fire with the last value
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith(2);
+      });
+    });
   });
 
   describe('getState()', () => {
