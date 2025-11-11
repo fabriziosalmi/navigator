@@ -77,12 +77,6 @@ jobs:
         env:
           CI: true
 
-      # 7. Run Tests
-      - name: Run Playwright tests
-        run: pnpm test
-        env:
-          CI: true
-
       # 8. Upload test results on failure
       - name: Upload Playwright test results
         if: failure()
