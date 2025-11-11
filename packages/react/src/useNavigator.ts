@@ -27,12 +27,14 @@
  * ```
  */
 
-import { useRef, useEffect } from 'react';
-import type { NavigatorCore, NavigatorCoreConfig } from '@navigator.menu/core';
+import { useState, useEffect } from 'react';
+import type { NavigatorCore, NavigatorCoreConfig, INavigatorPlugin } from '@navigator.menu/core';
 
 export interface UseNavigatorOptions extends NavigatorCoreConfig {
   /** Whether to automatically start the core after initialization (default: true) */
   autoStart?: boolean;
+  /** Plugins to register before initialization */
+  plugins?: INavigatorPlugin[];
 }
 
 export interface UseNavigatorReturn {
@@ -41,30 +43,45 @@ export interface UseNavigatorReturn {
 }
 
 export function useNavigator(config?: UseNavigatorOptions): UseNavigatorReturn {
-  const coreRef = useRef<NavigatorCore | null>(null);
-  const { autoStart = true, ...coreConfig } = config || {};
+  const [core, setCore] = useState<NavigatorCore | null>(null);
+  const { autoStart = true, plugins = [], ...coreConfig } = config || {};
 
   useEffect(() => {
+    let isSubscribed = true;
+
     // Dynamically import NavigatorCore to avoid SSR issues
     import('@navigator.menu/core').then(async ({ NavigatorCore }) => {
-      // Create and initialize the core
-      coreRef.current = new NavigatorCore(coreConfig);
-      await coreRef.current.init();
+      if (!isSubscribed) return;
+
+      // Create the core
+      const newCore = new NavigatorCore(coreConfig);
+
+      // Register plugins before initialization
+      for (const plugin of plugins) {
+        newCore.registerPlugin(plugin);
+      }
+
+      // Initialize the core (this will init all registered plugins)
+      await newCore.init();
 
       // Auto-start if enabled
       if (autoStart) {
-        await coreRef.current.start();
+        await newCore.start();
+      }
+
+      if (isSubscribed) {
+        setCore(newCore);
       }
     });
 
     // Cleanup on unmount
     return () => {
-      if (coreRef.current) {
-        coreRef.current.destroy();
-        coreRef.current = null;
+      isSubscribed = false;
+      if (core) {
+        core.destroy();
       }
     };
   }, []); // Empty deps - only run once
 
-  return { core: coreRef.current };
+  return { core };
 }

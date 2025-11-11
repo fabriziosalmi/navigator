@@ -38,15 +38,28 @@ test.describe('Navigator Core Initialization', () => {
 
 test.describe('Keyboard Input Detection', () => {
   test('should detect arrow key presses', async ({ page }) => {
+    // Capture console logs
+    page.on('console', msg => {
+      console.log(`[BROWSER ${msg.type()}]:`, msg.text());
+    });
+
     await page.goto('/');
-    
+
+    // PHASE 3: Wait for Navigator to be Running
+    const navigatorStatus = page.getByTestId('navigator-status');
+    await expect(navigatorStatus).toContainText('Running', { timeout: 5000 });
+
+    // PHASE 1: Give focus to the app container
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100); // Small delay after focus
+
     // Press arrow keys
     await page.keyboard.press('ArrowUp');
-    
+
     // Check that last key was updated
     const lastKey = page.getByTestId('last-key');
     await expect(lastKey).toContainText('ArrowUp');
-    
+
     // Check event count incremented
     const eventCount = page.getByTestId('event-count');
     await expect(eventCount).not.toContainText('0');
@@ -54,17 +67,24 @@ test.describe('Keyboard Input Detection', () => {
 
   test('should track multiple key presses', async ({ page }) => {
     await page.goto('/');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Press multiple keys
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowRight');
-    
+
     // Check that last key is the most recent
     const lastKey = page.getByTestId('last-key');
     await expect(lastKey).toContainText('ArrowRight');
-    
+
     // Check event count is correct
     const eventCount = page.getByTestId('event-count');
     const count = await eventCount.textContent();
@@ -73,16 +93,23 @@ test.describe('Keyboard Input Detection', () => {
 
   test('should display key history', async ({ page }) => {
     await page.goto('/');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Press some keys
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
-    
+
     // Check that history is displayed
     const history = page.getByTestId('key-history');
     await expect(history).toBeVisible();
-    
+
     // Verify history contains pressed keys
     const historyText = await history.textContent();
     expect(historyText).toContain('ArrowUp');
@@ -92,12 +119,19 @@ test.describe('Keyboard Input Detection', () => {
 
   test('should handle special keys (Enter, Space)', async ({ page }) => {
     await page.goto('/');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Test Enter key
     await page.keyboard.press('Enter');
     const lastKeyAfterEnter = page.getByTestId('last-key');
     await expect(lastKeyAfterEnter).toContainText('Enter');
-    
+
     // Test Space key
     await page.keyboard.press('Space');
     const lastKeyAfterSpace = page.getByTestId('last-key');
@@ -108,30 +142,44 @@ test.describe('Keyboard Input Detection', () => {
 test.describe('Navigator React Integration', () => {
   test('should use useNavigator hook correctly', async ({ page }) => {
     await page.goto('/');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Press a key to trigger the hook
     await page.keyboard.press('ArrowUp');
-    
+
     // Wait for React to update
     await page.waitForTimeout(100);
-    
+
     // Verify that all hook values are displayed
     const lastKey = page.getByTestId('last-key');
     const eventCount = page.getByTestId('event-count');
-    
+
     await expect(lastKey).not.toContainText('none');
     await expect(eventCount).not.toContainText('0');
   });
 
   test('should maintain state across interactions', async ({ page }) => {
     await page.goto('/');
-    
+
+    // Wait for Navigator to be Running
+    await expect(page.getByTestId('navigator-status')).toContainText('Running', { timeout: 5000 });
+
+    // Give focus to the app
+    await page.locator('.container').focus();
+    await page.waitForTimeout(100);
+
     // Perform multiple interactions
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(50);
     }
-    
+
     // Verify count is cumulative
     const eventCount = page.getByTestId('event-count');
     const count = await eventCount.textContent();

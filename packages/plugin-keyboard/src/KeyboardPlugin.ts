@@ -66,9 +66,14 @@ export class KeyboardPlugin implements INavigatorPlugin {
       throw new Error('KeyboardPlugin not initialized');
     }
 
+    // Debug: Log active element
+    console.log('[KeyboardPlugin] Attaching listeners. Active element is:', document.activeElement);
+
     // Attach keyboard listeners
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
+
+    console.log('[KeyboardPlugin] Keyboard listeners attached to window');
   }
 
   async stop?(): Promise<void> {
@@ -99,6 +104,8 @@ export class KeyboardPlugin implements INavigatorPlugin {
     if (!this.core) return;
 
     const { key, code } = event;
+
+    console.log('[KeyboardPlugin] KeyDown event received:', { key, code, target: event.target });
 
     // Prevent default for navigation keys
     if (this.config.preventDefaults) {
