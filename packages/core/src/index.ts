@@ -16,10 +16,22 @@ export type { Action, SessionMetrics } from './intelligence/UserSessionHistory';
 export { createStore, combineReducers } from './store';
 export { rootReducer, historyActions, historySelectors, uiActions, navigationActions } from './store';
 export { keyPress, keyRelease, gestureDetected, voiceCommand, INPUT_ACTIONS } from './store';
+export { getInteractionState } from './store/reducers/placeholderReducer';
 
 // Actions (Sprint 2 & 3)
 export { navigate, NAVIGATE } from './actions/navigation';
 export type { NavigateAction, NavigatePayload, NavigationDirection, NavigationSource } from './actions/navigation';
+
+export { select, cancel, confirm, SELECT, CANCEL, CONFIRM } from './actions/interaction';
+export type { 
+  SelectAction, 
+  CancelAction, 
+  ConfirmAction, 
+  InteractionAction,
+  SelectPayload,
+  CancelPayload,
+  ConfirmPayload
+} from './actions/interaction';
 
 // Cognitive Model Types
 export type { CognitiveState, CognitiveStateChangePayload, IntentPredictionPayload } from './types/cognitive';

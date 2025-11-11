@@ -80,6 +80,15 @@ export const cognitiveReducer: Reducer<CognitiveStateSlice, Action> = (
 };/**
  * UI reducer (placeholder)
  */
+
+// Interaction state tracking
+interface InteractionState {
+  lastAction: 'select' | 'cancel' | 'confirm' | null;
+  lastSource: 'keyboard' | 'mouse' | 'touch' | 'voice' | null;
+  lastTimestamp: number | null;
+  target?: string;
+}
+
 const uiInitialState: UIState = {
   theme: 'light',
   focusMode: false,
@@ -87,12 +96,44 @@ const uiInitialState: UIState = {
   overlaysVisible: true,
 };
 
+// Internal interaction state (not exposed in UIState yet)
+let interactionState: InteractionState = {
+  lastAction: null,
+  lastSource: null,
+  lastTimestamp: null,
+};
+
 export const uiReducer: Reducer<UIState, Action> = (
   state = uiInitialState,
   action
 ) => {
-  // Placeholder - will be implemented in Sprint 3+
+  // Handle interaction actions
   switch (action.type) {
+    case 'interaction/SELECT':
+      interactionState = {
+        lastAction: 'select',
+        lastSource: action.payload?.source || null,
+        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
+        target: action.payload?.target,
+      };
+      return state; // UI doesn't change on select yet
+
+    case 'interaction/CANCEL':
+      interactionState = {
+        lastAction: 'cancel',
+        lastSource: action.payload?.source || null,
+        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
+      };
+      return state; // UI doesn't change on cancel yet
+
+    case 'interaction/CONFIRM':
+      interactionState = {
+        lastAction: 'confirm',
+        lastSource: action.payload?.source || null,
+        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
+      };
+      return state; // UI doesn't change on confirm yet
+
     case '@@ui/INIT':
       return { ...uiInitialState };
 
@@ -112,6 +153,11 @@ export const uiReducer: Reducer<UIState, Action> = (
       return state;
   }
 };
+
+/**
+ * Selector to get current interaction state
+ */
+export const getInteractionState = () => interactionState;
 
 /**
  * Session reducer (placeholder)

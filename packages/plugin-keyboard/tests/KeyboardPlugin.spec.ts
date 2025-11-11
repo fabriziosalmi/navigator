@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NavigatorCore } from '@navigator.menu/core';
+import { NavigatorCore, getInteractionState } from '@navigator.menu/core';
 import { KeyboardPlugin } from '../src/KeyboardPlugin';
 
 describe('KeyboardPlugin', () => {
@@ -595,4 +595,135 @@ describe('KeyboardPlugin', () => {
       );
     });
   });
+
+  // ========================================
+  // Area 9: Interaction Actions (Sprint 3 FASE 2)
+  // TDD: Store dispatch for user interaction events (SELECT, CANCEL)
+  // ========================================
+
+  describe('Interaction Actions', () => {
+    beforeEach(async () => {
+      await core.registerPlugin(plugin).init();
+      await core.start();
+    });
+
+    it('should dispatch SELECT action on Enter key', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      window.dispatchEvent(keyEvent);
+
+      expect(
+        (() => {
+          const ok = wasActionDispatched(
+            dispatchSpy,
+            'interaction/SELECT',
+            (p) => p?.source === 'keyboard' && typeof p?.metadata?.timestamp === 'number'
+          );
+          if (!ok) {/* debug omitted */}
+          return ok;
+        })()
+      ).toBeTruthy();
+    });
+
+    it('should dispatch CANCEL action on Escape key', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      window.dispatchEvent(keyEvent);
+
+      expect(
+        (() => {
+          const ok = wasActionDispatched(
+            dispatchSpy,
+            'interaction/CANCEL',
+            (p) => p?.source === 'keyboard' && typeof p?.metadata?.timestamp === 'number'
+          );
+          if (!ok) {/* debug omitted */}
+          return ok;
+        })()
+      ).toBeTruthy();
+    });
+
+    it('should update uiReducer interaction state on SELECT', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    // Access internal interaction state from the reducer
+    const interactionState = getInteractionState();
+      
+      expect(interactionState).toBeTruthy();
+      expect(interactionState?.lastAction).toBe('select');
+      expect(interactionState?.lastSource).toBe('keyboard');
+    });
+
+    it('should update uiReducer interaction state on CANCEL', () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    const interactionState = getInteractionState();
+      
+      expect(interactionState).toBeTruthy();
+      expect(interactionState?.lastAction).toBe('cancel');
+      expect(interactionState?.lastSource).toBe('keyboard');
+    });
+
+    it('should dispatch both KEY_PRESS and SELECT on Enter key', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+      // Should dispatch KEY_PRESS
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'input/KEYBOARD_KEY_PRESS',
+          payload: expect.objectContaining({ key: 'Enter' }),
+        })
+      );
+
+      // Should also dispatch SELECT
+      expect(
+        wasActionDispatched(dispatchSpy, 'interaction/SELECT', (p) => p?.source === 'keyboard')
+      ).toBeTruthy();
+    });
+
+    it('should dispatch both KEY_PRESS and CANCEL on Escape key', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+      // Should dispatch KEY_PRESS
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'input/KEYBOARD_KEY_PRESS',
+          payload: expect.objectContaining({ key: 'Escape' }),
+        })
+      );
+
+      // Should also dispatch CANCEL
+      expect(
+        wasActionDispatched(dispatchSpy, 'interaction/CANCEL', (p) => p?.source === 'keyboard')
+      ).toBeTruthy();
+    });
+  });
 });
+
+// Helper to check if a particular action type (possibly wrapped by history middleware)
+// was dispatched and matches the expected payload properties.
+function wasActionDispatched(spy: any, actionType: string, matcher?: (payload: any) => boolean) {
+  const altType = actionType.replace('/', ':').toLowerCase();
+  return spy.mock.calls.some((call: any[]) => {
+    const action = call[0];
+    if (!action) return false;
+  if (action.type === actionType || action.type === altType) {
+      if (!matcher) return true;
+      return matcher(action.payload);
+    }
+    if (
+      action.type === 'legacy/history:action:recorded' &&
+      (action.payload?.action?.type === actionType || action.payload?.action?.type === altType)
+    ) {
+      if (!matcher) return true;
+      return matcher(action.payload.action.payload);
+    }
+    return false;
+  });
+}

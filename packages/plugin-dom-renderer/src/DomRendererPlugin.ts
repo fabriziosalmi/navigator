@@ -254,49 +254,17 @@ export class DomRendererPlugin implements INavigatorPlugin {
     // COGNITIVE: Check if cognitive state changed
     if (this.config.enableCognitiveStates) {
       const cognitiveState = currentState.cognitive.currentState;
-      
+
       if (cognitiveState !== this.previousCognitiveState) {
         if (this.config.debugMode) {
-          console.log('[DomRenderer] Cognitive state detected!', {
-            from: this.previousCognitiveState,
-            to: cognitiveState,
-            confidence: currentState.cognitive.confidence,
-          });
+          console.log(
+            `[DomRenderer] Cognitive state change detected via Store: ${this.previousCognitiveState} -> ${cognitiveState}`
+          );
         }
-        
-        // Update cognitive state visuals
-        if (this.container) {
-          // Remove old state class
-          if (this.previousCognitiveState) {
-            this.container.classList.remove(`state-${this.previousCognitiveState}`);
-          }
-          
-          // Add new state class
-          this.container.classList.add(`state-${cognitiveState}`);
-          this.currentCognitiveState = cognitiveState;
-          
-          // Update speed multiplier via CSS custom property
-          this.updateSpeedMultiplier(cognitiveState);
-          
-          // Update debug indicator
-          if (this.config.debugMode) {
-            this.container.setAttribute('data-cognitive-state', cognitiveState);
-          }
-          
-          // Emit custom DOM event for external listeners
-          const domEvent = new CustomEvent('navigatorStateChange', {
-            detail: { 
-              from: this.previousCognitiveState, 
-              to: cognitiveState, 
-              state: cognitiveState,
-              confidence: currentState.cognitive.confidence,
-            },
-            bubbles: true,
-            cancelable: false,
-          });
-          document.dispatchEvent(domEvent);
-        }
-        
+
+        // Apply cognitive state changes using helper
+        this.applyCognitiveStateStyles(cognitiveState, this.previousCognitiveState, currentState.cognitive.confidence);
+
         // Save current state for next comparison
         this.previousCognitiveState = cognitiveState;
       }
@@ -454,6 +422,43 @@ export class DomRendererPlugin implements INavigatorPlugin {
     if (this.config.debugMode) {
       console.log(`[DomRenderer] Speed multiplier: ${multiplier} (state: ${state})`);
     }
+  }
+
+  /**
+   * Apply CSS classes and other side effects for cognitive state changes
+   */
+  private applyCognitiveStateStyles(currentState: CognitiveState, previousState?: CognitiveState, confidence?: number): void {
+    if (!this.container) return;
+
+    // Remove previous state class
+    if (previousState) {
+      this.container.classList.remove(`state-${previousState}`);
+    }
+
+    // Add current state class
+    this.container.classList.add(`state-${currentState}`);
+    this.currentCognitiveState = currentState;
+
+    // Update animation speed multiplier
+    this.updateSpeedMultiplier(currentState);
+
+    // Update debug attributes
+    if (this.config.debugMode) {
+      this.container.setAttribute('data-cognitive-state', currentState);
+    }
+
+    // Emit custom DOM event for external listeners
+    const domEvent = new CustomEvent('navigatorStateChange', {
+      detail: {
+        from: previousState,
+        to: currentState,
+        state: currentState,
+        confidence: confidence ?? null,
+      },
+      bubbles: true,
+      cancelable: false,
+    });
+    document.dispatchEvent(domEvent);
   }
 
   /**

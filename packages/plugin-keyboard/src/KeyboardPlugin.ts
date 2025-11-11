@@ -18,7 +18,7 @@
 
 import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
-import { navigate, keyPress, keyRelease } from '@navigator.menu/core';
+import { navigate, keyPress, keyRelease, select, cancel } from '@navigator.menu/core';
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -196,19 +196,16 @@ export class KeyboardPlugin implements INavigatorPlugin {
       return true;
     }
     
-    // Handle non-navigation keys (Enter, Escape)
-    const otherIntentMap: Record<string, string> = {
-      Enter: 'intent:select',
-      Escape: 'intent:cancel',
-    };
+    // Handle interaction keys (Enter, Escape)
+    if (key === 'Enter') {
+      this.core.store.dispatch(select('keyboard'));
+      this._recordAction('interaction:select', true, timestamp);
+      return true;
+    }
     
-    const intentEvent = otherIntentMap[key];
-    if (intentEvent) {
-      this.core.eventBus.emit(intentEvent, { key });
-      
-      // Record action
-      this._recordAction(intentEvent, true, timestamp);
-      
+    if (key === 'Escape') {
+      this.core.store.dispatch(cancel('keyboard'));
+      this._recordAction('interaction:cancel', true, timestamp);
       return true;
     }
     
