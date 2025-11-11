@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/plugin-cognitive",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Cognitive modeling plugin for Navigator.menu - Interprets user behavior and adapts UI",
   "type": "module",
   "main": "./dist/index.cjs",
