@@ -26,6 +26,7 @@ NC='\033[0m' # No Color
 # ==========================================
 
 TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm workspace issues
+SERVER_PORT=${SERVER_PORT:-5173} # Default server port for preview
 SERVER_URL="http://localhost:5173"
 SERVER_PID=""
 PLAYWRIGHT_CONFIG="tests/e2e/playwright.config.ts"
@@ -49,6 +50,7 @@ cleanup() {
   fi
   
   # Remove temp directory
+  TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm workspace issues
   if [ -d "$TEMP_APP_DIR" ]; then
     echo "   Removing temporary app directory: $TEMP_APP_DIR"
     rm -rf "$TEMP_APP_DIR"
@@ -117,6 +119,7 @@ echo ""
 
 # Copy template directly (CLI not published yet)
 TEMPLATE_DIR="packages/create-navigator-app/templates/react-ts-e2e"
+APP_TO_TEST=${APP_TO_TEST:-}
 WORKSPACE_ROOT="$(pwd)"
 
 if [ ! -d "$TEMPLATE_DIR" ]; then
@@ -124,9 +127,20 @@ if [ ! -d "$TEMPLATE_DIR" ]; then
   exit 1
 fi
 
-if ! cp -r "$TEMPLATE_DIR" "$TEMP_APP_DIR"; then
-  echo -e "${RED}❌ Failed to copy template${NC}"
-  exit 1
+if [[ -n "$APP_TO_TEST" ]]; then
+  # If an app is provided, run that app directly (do not copy to temp dir)
+  if [[ -d "$WORKSPACE_ROOT/$APP_TO_TEST" ]]; then
+    echo "   Using workspace app: $APP_TO_TEST"
+    TEMP_APP_DIR="$WORKSPACE_ROOT/$APP_TO_TEST"
+  else
+    echo -e "${RED}❌ Specified APP_TO_TEST not found: $APP_TO_TEST${NC}"
+    exit 1
+  fi
+else
+  if ! rsync -a --exclude 'node_modules' --exclude 'dist' --exclude 'test-results' "$TEMPLATE_DIR/" "$TEMP_APP_DIR/"; then
+    echo -e "${RED}❌ Failed to copy template${NC}"
+    exit 1
+  fi
 fi
 
 # Fix package.json paths to use absolute paths
@@ -138,11 +152,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
   sed -i '' "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
   sed -i '' "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
+  # Ensure local types package is linked in the temp app to satisfy workspace:* deps
+  sed -i '' "s|"@navigator.menu/react": \(".*"\),|\n    \"@navigator.menu/react\": \1,\n    \"@navigator.menu/types\": \"file:$WORKSPACE_ROOT/packages/types\",|g" package.json || true
 else
   # Linux
   sed -i "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
   sed -i "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
   sed -i "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
+  # Ensure local types package is linked in the temp app to satisfy workspace:* deps
+  sed -i "s|\"@navigator.menu/react\": \(".*"\),|\n    \"@navigator.menu/react\": \1,\n    \"@navigator.menu/types\": \"file:$WORKSPACE_ROOT/packages/types\",|g" package.json || true
 fi
 
 cd "$WORKSPACE_ROOT"
@@ -160,11 +178,25 @@ echo ""
 echo "   Installing dependencies with local package links..."
 echo ""
 
-# Install dependencies in the temp app directory
-# file: protocol will link to local packages
-if ! pnpm install --dir="$TEMP_APP_DIR" --no-frozen-lockfile; then
-  echo -e "${RED}❌ Failed to install dependencies${NC}"
-  exit 1
+if [[ -n "$APP_TO_TEST" ]]; then
+  # If a workspace app is used, ensure workspace and app dependencies are installed
+  echo "   Installing workspace dependencies (root)..."
+  if ! pnpm install --no-frozen-lockfile; then
+    echo -e "${RED}❌ Failed to install workspace dependencies${NC}"
+    exit 1
+  fi
+  echo "   Installing dependencies for app: $TEMP_APP_DIR"
+  if ! (cd "$TEMP_APP_DIR" && pnpm install --no-frozen-lockfile); then
+    echo -e "${RED}❌ Failed to install app dependencies${NC}"
+    exit 1
+  fi
+else
+  # Install dependencies in the temp app directory
+  # file: protocol will link to local packages
+  if ! pnpm install --dir="$TEMP_APP_DIR" --no-frozen-lockfile; then
+    echo -e "${RED}❌ Failed to install dependencies${NC}"
+    exit 1
+  fi
 fi
 
 echo ""
@@ -181,14 +213,27 @@ echo ""
 # Check that Navigator packages are linked
 echo "   Checking Navigator package links..."
 
-if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ]; then
-  echo -e "${RED}❌ @navigator.menu/core not found${NC}"
-  exit 1
-fi
+if [[ -n "$APP_TO_TEST" ]]; then
+  # For workspace apps, node_modules may be in workspace root
+  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ] && [ ! -d "$WORKSPACE_ROOT/node_modules/@navigator.menu/core" ]; then
+    echo -e "${RED}❌ @navigator.menu/core not found${NC}"
+    exit 1
+  fi
 
-if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ]; then
-  echo -e "${RED}❌ @navigator.menu/react not found${NC}"
-  exit 1
+  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ] && [ ! -d "$WORKSPACE_ROOT/node_modules/@navigator.menu/react" ]; then
+    echo -e "${RED}❌ @navigator.menu/react not found${NC}"
+    exit 1
+  fi
+else
+  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ]; then
+    echo -e "${RED}❌ @navigator.menu/core not found${NC}"
+    exit 1
+  fi
+
+  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ]; then
+    echo -e "${RED}❌ @navigator.menu/react not found${NC}"
+    exit 1
+  fi
 fi
 
 echo -e "${GREEN}   ✓ @navigator.menu/core linked${NC}"
@@ -213,11 +258,23 @@ if lsof -i :5173 > /dev/null 2>&1; then
   sleep 2
 fi
 
-# Start server in background and capture logs
+# Ensure port is free and start server at explicit port
 WORKSPACE_ROOT_ABS="$(pwd)"
-echo "   [$(date +%H:%M:%S)] Starting Vite process..."
-(cd "$TEMP_APP_DIR" && npx vite) > "$SERVER_LOG" 2>&1 &
+echo "   [$(date +%H:%M:%S)] Verifying port ${SERVER_PORT} is free..."
+if lsof -i :${SERVER_PORT} > /dev/null 2>&1; then
+  echo "   ⚠️ Port ${SERVER_PORT} is in use. Attempting to kill existing process..."
+  kill $(lsof -t -i:${SERVER_PORT}) 2>/dev/null || true
+  sleep 1
+fi
+echo "   [$(date +%H:%M:%S)] Starting Vite preview on explicit port ${SERVER_PORT}..."
+if [[ -n "$APP_TO_TEST" ]]; then
+  # If testing an app inside the workspace, ensure the app is built
+  echo "   Building app: $TEMP_APP_DIR"
+  (cd "$TEMP_APP_DIR" && pnpm build) > /dev/null 2>&1 || true
+fi
+(cd "$TEMP_APP_DIR" && pnpm preview --port "${SERVER_PORT}") > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
+SERVER_URL="http://localhost:${SERVER_PORT}"
 
 echo -e "${GREEN}   ✓ Server started (PID: $SERVER_PID)${NC}"
 echo "   Server logs: $SERVER_LOG"
@@ -283,7 +340,7 @@ echo ""
 export BASE_URL="$SERVER_URL"
 
 # Run Playwright tests using centralized config
-if pnpm playwright test --config="$PLAYWRIGHT_CONFIG"; then
+if pnpm playwright test --config="$WORKSPACE_ROOT/$PLAYWRIGHT_CONFIG"; then
   echo ""
   echo -e "${GREEN}✅ ALL E2E TESTS PASSED!${NC}"
   EXIT_CODE=0
