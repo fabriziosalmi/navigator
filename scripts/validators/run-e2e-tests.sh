@@ -105,9 +105,20 @@ fi
 
 # Fix package.json paths to use absolute paths
 cd "$TEMP_APP_DIR"
-sed -i '' "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
-sed -i '' "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
-sed -i '' "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
+
+# Detect OS for sed compatibility
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  sed -i '' "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
+  sed -i '' "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
+  sed -i '' "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
+else
+  # Linux
+  sed -i "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
+  sed -i "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
+  sed -i "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
+fi
+
 cd "$WORKSPACE_ROOT"
 
 echo ""
