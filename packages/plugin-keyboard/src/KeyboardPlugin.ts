@@ -199,21 +199,11 @@ export class KeyboardPlugin implements INavigatorPlugin {
     
     // Handle arrow key navigation with new unidirectional flow
     if (direction) {
-      // NEW: Dispatch action to store (unidirectional flow)
+      // Dispatch action to store (unidirectional flow)
       this.core.store.dispatch(navigate(direction, 'keyboard'));
       
-      // LEGACY: Keep old eventBus emission for backward compatibility
-      // TODO: Remove in future sprint after all consumers migrate
-      const legacyIntentMap: Record<string, string> = {
-        ArrowLeft: 'intent:navigate_left',
-        ArrowRight: 'intent:navigate_right',
-        ArrowUp: 'intent:navigate_up',
-        ArrowDown: 'intent:navigate_down',
-      };
-      this.core.eventBus.emit(legacyIntentMap[key]!, { key });
-      
-      // Record navigation intent action
-      this._recordAction(legacyIntentMap[key]!, true, timestamp);
+      // Record navigation action for cognitive tracking
+      this._recordAction(`navigation:${direction}`, true, timestamp);
       
       return true;
     }

@@ -147,10 +147,12 @@ describe('KeyboardPlugin', () => {
   });
 
   // ========================================
-  // Area 3: Arrow Key Navigation Intents
+  // Area 3: Arrow Key Navigation - LEGACY TESTS (DEPRECATED)
+  // These tests verify legacy eventBus emissions that are being phased out.
+  // New unidirectional flow tests are in "Area 7: Unidirectional Flow"
   // ========================================
 
-  describe('Arrow Key Navigation Intents', () => {
+  describe.skip('Arrow Key Navigation Intents (LEGACY - DEPRECATED)', () => {
     beforeEach(async () => {
       await core.registerPlugin(plugin).init();
       await core.start();

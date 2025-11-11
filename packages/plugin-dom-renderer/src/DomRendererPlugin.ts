@@ -132,15 +132,6 @@ export class DomRendererPlugin implements INavigatorPlugin {
       if (this.config.enableCognitiveStates) {
         this.previousCognitiveState = core.store.getState().cognitive.currentState;
       }
-      
-      // LEGACY: Keep old eventBus subscription for backward compatibility
-      // TODO: Remove in future sprint after all consumers migrate
-      if (this.config.enableNavigation) {
-        const unsubNavigate = core.eventBus.on('intent:navigate',
-          this.onNavigate.bind(this)
-        );
-        this.unsubscribers.push(unsubNavigate);
-      }
     }
 
     // Set initial state
@@ -384,37 +375,6 @@ export class DomRendererPlugin implements INavigatorPlugin {
         confidence,
         threshold: this.config.predictionThreshold,
       },
-      bubbles: true,
-      cancelable: false,
-    });
-    document.dispatchEvent(domEvent);
-  };
-
-  /**
-   * Handle navigation events
-   * v17.1 feature: Cleanup preloading state, execute final animation
-   */
-  private onNavigate = (event: any): void => {
-    if (!this.container) return;
-
-    const payload = event.payload || event;
-    const { direction, target } = payload;
-
-    if (this.config.debugMode) {
-      console.log('[DomRenderer] Navigation:', { direction, target });
-    }
-
-    // Remove preloading classes (no longer needed)
-    if (this.lastPreloadedElement) {
-      this.lastPreloadedElement.classList.remove('card--preloading');
-      this.lastPreloadedElement = null;
-    }
-
-    // Execute navigation animation
-    // (Implementation depends on your specific carousel/layer logic)
-    // For now, just emit custom event
-    const domEvent = new CustomEvent('navigatorNavigate', {
-      detail: { direction, target },
       bubbles: true,
       cancelable: false,
     });
