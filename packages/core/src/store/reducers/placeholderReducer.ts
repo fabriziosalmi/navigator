@@ -9,21 +9,18 @@
  * with full implementations.
  * 
  * NOTE: NavigationState and navigationReducer migrated to navigationReducer.ts in Sprint 2
+ * NOTE: CognitiveState migrated to cognitiveMiddleware.ts in Sprint 3
  */
 
 import type { Action, Reducer } from '../types';
+import type { CognitiveState, CognitiveStateChangeAction } from '../middleware/cognitiveMiddleware';
 
 /**
- * Cognitive state shape (to be implemented in Sprint 3+)
+ * Cognitive state shape - now a simple wrapper for middleware-managed state
  */
-export interface CognitiveState {
-  profile: {
-    speed: number;
-    accuracy: number;
-    errorRate: number;
-    adaptiveLevel: number;
-  };
-  isLearning: boolean;
+export interface CognitiveStateSlice {
+  currentState: CognitiveState;
+  confidence: number;
   lastUpdate: number | null;
 }
 
@@ -47,26 +44,29 @@ export interface SessionState {
 }
 
 /**
- * Cognitive reducer (placeholder)
+ * Cognitive reducer - now handles COGNITIVE_STATE_CHANGE from middleware
  */
-const cognitiveInitialState: CognitiveState = {
-  profile: {
-    speed: 1.0,
-    accuracy: 1.0,
-    errorRate: 0.0,
-    adaptiveLevel: 1.0,
-  },
-  isLearning: false,
+const cognitiveInitialState: CognitiveStateSlice = {
+  currentState: 'neutral',
+  confidence: 0,
   lastUpdate: null,
 };
 
-export const cognitiveReducer: Reducer<CognitiveState, Action> = (
+export const cognitiveReducer: Reducer<CognitiveStateSlice, Action> = (
   state = cognitiveInitialState,
   action
 ) => {
-  // Placeholder - will be implemented in Sprint 3+
   switch (action.type) {
-    case '@@cognitive/INIT':
+    case 'cognitive/STATE_CHANGE': {
+      const cognitiveAction = action as CognitiveStateChangeAction;
+      return {
+        currentState: cognitiveAction.payload.newState,
+        confidence: cognitiveAction.payload.confidence,
+        lastUpdate: cognitiveAction.payload.timestamp,
+      };
+    }
+
+    case '@@cognitive/RESET':
       return { ...cognitiveInitialState };
 
     default:

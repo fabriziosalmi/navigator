@@ -13,6 +13,8 @@ import { EventBus } from './EventBus';
 import { AppState, NavigatorState } from './AppState';
 import { UserSessionHistory, type Action } from './intelligence/UserSessionHistory';
 import { createStore } from './store/createStore';
+import { applyMiddleware } from './store/applyMiddleware';
+import { createCognitiveMiddleware } from './store/middleware/cognitiveMiddleware';
 import { rootReducer, type RootState } from './store/reducers';
 import type { DeepPartial } from './AppState';
 import type { Store, Action as StoreAction } from './store/types';
@@ -123,8 +125,22 @@ export class NavigatorCore {
 
     this.state = new AppState(this.eventBus, this.config.initialState);
 
-    // Initialize Redux-like Store (Shadow Mode - v3.1+)
-    this.store = createStore(rootReducer);
+    // Initialize Redux-like Store with Cognitive Middleware (Sprint 3)
+    // The cognitive middleware analyzes every action and dispatches COGNITIVE_STATE_CHANGE
+    // when user behavior patterns indicate a state transition
+    const cognitiveMiddleware = createCognitiveMiddleware({
+      metricsWindow: 20,
+      frustratedThreshold: 3,
+      concentratedThreshold: 5,
+      exploringThreshold: 4,
+      debugMode: this.config.debugMode,
+    });
+    
+    this.store = createStore(
+      rootReducer,
+      undefined, // No preloaded state
+      applyMiddleware(cognitiveMiddleware)
+    );
 
     this.history = new UserSessionHistory(this.config.historyMaxSize);
 

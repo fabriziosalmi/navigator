@@ -8,6 +8,16 @@
 // Core store functions
 export { createStore } from './createStore';
 export { combineReducers, assertReducerShape } from './combineReducers';
+export { applyMiddleware } from './applyMiddleware';
+export type { Middleware, MiddlewareAPI } from './applyMiddleware';
+
+// Middleware implementations
+export { createCognitiveMiddleware } from './middleware/cognitiveMiddleware';
+export type { 
+  CognitiveState,
+  CognitiveStateChangeAction,
+  CognitiveMiddlewareConfig
+} from './middleware/cognitiveMiddleware';
 
 // Types
 export type {
@@ -17,8 +27,6 @@ export type {
   Dispatch,
   Listener,
   Unsubscribe,
-  Middleware,
-  MiddlewareAPI,
   StoreEnhancer,
   StoreCreator,
   ActionCreator,
@@ -53,7 +61,7 @@ export {
   uiReducer,
   sessionReducer,
   uiActions, // Example actions to test the system
-  type CognitiveState,
+  type CognitiveStateSlice,
   type UIState,
   type SessionState,
 } from './reducers/placeholderReducer';

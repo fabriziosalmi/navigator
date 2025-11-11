@@ -16,7 +16,7 @@ import {
   cognitiveReducer,
   uiReducer,
   sessionReducer,
-  type CognitiveState,
+  type CognitiveStateSlice,
   type UIState,
   type SessionState,
 } from './placeholderReducer';
@@ -41,7 +41,7 @@ export interface RootState {
   /**
    * Cognitive model state (user profiling, adaptation)
    */
-  cognitive: CognitiveState;
+  cognitive: CognitiveStateSlice;
 
   /**
    * UI state (theme, debug mode, overlays)
@@ -71,7 +71,7 @@ export const rootReducer = combineReducers<RootState>({
 export type {
   HistoryState,
   NavigationState,
-  CognitiveState,
+  CognitiveStateSlice,
   UIState,
   SessionState,
 };

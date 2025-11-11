@@ -296,25 +296,19 @@ describe('placeholderReducers', () => {
       const state = cognitiveReducer(undefined, { type: '@@INIT' });
 
       expect(state).toEqual({
-        profile: {
-          speed: 1.0,
-          accuracy: 1.0,
-          errorRate: 0.0,
-          adaptiveLevel: 1.0,
-        },
-        isLearning: false,
+        currentState: 'neutral',
+        confidence: 0,
         lastUpdate: null,
       });
     });
 
-    it('should handle @@cognitive/INIT action', () => {
-      const state = cognitiveReducer(undefined, { type: '@@cognitive/INIT' });
+    it('should handle @@cognitive/RESET action', () => {
+      const state = cognitiveReducer(undefined, { type: '@@cognitive/RESET' });
 
-      expect(state.profile).toEqual({
-        speed: 1.0,
-        accuracy: 1.0,
-        errorRate: 0.0,
-        adaptiveLevel: 1.0,
+      expect(state).toEqual({
+        currentState: 'neutral',
+        confidence: 0,
+        lastUpdate: null,
       });
     });
   });
