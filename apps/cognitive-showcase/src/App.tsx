@@ -31,17 +31,12 @@ function App() {
   const [lastAction, setLastAction] = useState<Action | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const { core, status } = useNavigator({
+  const { core } = useNavigator({
     autoStart: true,
-    config: {
-      target: '#root',
-      enableCognitiveStates: true,
-      enableIntentPreloading: true,
-      enableNavigation: true,
-    },
+    debugMode: false,
     plugins: [
-      new CognitiveModelPlugin({ priority: 1 }),
-      new KeyboardPlugin({ priority: 0 }),
+      new CognitiveModelPlugin(),
+      new KeyboardPlugin(),
     ],
   });
 
@@ -141,8 +136,8 @@ function App() {
           <span className="gradient-text">Navigator</span>
           <span className="subtitle">Cognitive Showcase</span>
         </h1>
-        <div className="status-badge" data-status={status}>
-          {status}
+        <div className="status-badge" data-status={core ? 'running' : 'initializing'}>
+          {core ? 'running' : 'initializing'}
         </div>
       </header>
 
