@@ -42,6 +42,7 @@ tests/e2e-temp-app/
 # Playwright test artifacts
 playwright-report/
 test-results/
+.last-run.json
 
 # Backup files
 *.bak
