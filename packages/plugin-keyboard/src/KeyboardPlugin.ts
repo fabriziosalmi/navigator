@@ -230,6 +230,9 @@ export class KeyboardPlugin implements INavigatorPlugin {
       },
     };
     
+    // 🔍 SONDA #4: KeyboardPlugin
+    console.log(`[DIAGNOSTIC] KeyboardPlugin._recordAction called:`, { type, success, duration_ms });
+    
     this.core.recordAction(action);
     
     // Reset action start time

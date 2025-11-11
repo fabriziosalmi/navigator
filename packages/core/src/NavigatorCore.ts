@@ -333,6 +333,9 @@ export class NavigatorCore {
   recordAction(action: Action): void {
     this.history.add(action);
     
+    // 🔍 SONDA #1: Sempre attiva per debugging
+    console.log(`[DIAGNOSTIC] Action recorded: ${action.type}, Success: ${action.success}, Duration: ${action.duration_ms}ms`);
+    
     // Emit event for potential listeners (analytics, debugging)
     this.eventBus.emit('history:action:recorded', {
       action,

@@ -146,8 +146,18 @@ export class CognitiveModelPlugin implements INavigatorPlugin {
     // Get metrics from session history
     const metrics = this.core.history.getMetrics(this.config.metricsWindow);
 
+    // 🔍 SONDA #2: Sempre attiva per debugging
+    console.log('[DIAGNOSTIC] Analyzing history...', { 
+      totalActions: this.core.history.getAll().length,
+      errorRate: metrics.errorRate,
+      avgSpeed: metrics.averageDuration,
+      recentErrors: metrics.recentErrors,
+      actionVariety: metrics.actionVariety
+    });
+
     // Need minimum data for reliable analysis
     if (metrics.totalActions < 3) {
+      console.log('[DIAGNOSTIC] Not enough actions for analysis (need 3+, have ' + metrics.totalActions + ')');
       return;
     }
 
@@ -266,6 +276,17 @@ export class CognitiveModelPlugin implements INavigatorPlugin {
     if (!this.core) return;
 
     const oldState = this.currentState;
+    
+    // 🔍 SONDA #3: Sempre attiva per debugging
+    console.log(`[DIAGNOSTIC] STATE TRANSITION DETECTED! From: ${oldState}, To: ${newState}`, {
+      signals: { ...this.signals },
+      metrics: {
+        errorRate: metrics.errorRate,
+        avgDuration: metrics.averageDuration,
+        recentErrors: metrics.recentErrors
+      }
+    });
+    
     this.currentState = newState;
 
     // Update app state

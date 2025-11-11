@@ -1,0 +1,166 @@
+.carousel-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: #000;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.carousel-track.speed-fast {
+  transition-duration: 200ms;
+}
+
+.carousel-track.speed-normal {
+  transition-duration: 400ms;
+}
+
+.carousel-track.speed-medium {
+  transition-duration: 600ms;
+}
+
+.carousel-track.speed-slow {
+  transition-duration: 1200ms;
+  transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.carousel-slide {
+  min-width: 100%;
+  position: relative;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+}
+
+.slide-number {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: monospace;
+}
+
+.carousel-caption h3 {
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.indicator {
+  width: 2rem;
+  height: 0.25rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  transition: all 300ms;
+}
+
+.indicator.active {
+  background: rgba(147, 51, 234, 0.9);
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.6);
+}
+
+.cognitive-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+.state-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+  border: 1px solid;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.cognitive-overlay[data-state="neutral"] .state-badge {
+  background: rgba(107, 114, 128, 0.3);
+  color: #d1d5db;
+  border-color: rgba(107, 114, 128, 0.5);
+}
+
+.cognitive-overlay[data-state="concentrated"] .state-badge {
+  background: rgba(6, 182, 212, 0.3);
+  color: #06b6d4;
+  border-color: rgba(6, 182, 212, 0.5);
+  animation: pulse-concentrated 1s ease-in-out infinite;
+}
+
+.cognitive-overlay[data-state="frustrated"] .state-badge {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
+  animation: pulse-frustrated 0.5s ease-in-out infinite;
+}
+
+.cognitive-overlay[data-state="learning"] .state-badge {
+  background: rgba(167, 139, 250, 0.3);
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-concentrated {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+  }
+}
+
+@keyframes pulse-frustrated {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
+  }
+}
