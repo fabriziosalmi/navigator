@@ -24,6 +24,7 @@
  */
 
 import type { NavigatorCore, INavigatorPlugin } from '@navigator.menu/core';
+import { navigate } from '@navigator.menu/core';
 
 export interface MockGesturePluginOptions {
   /** Interval between auto-emitted events in milliseconds (default: 2000) */
@@ -97,6 +98,12 @@ export class MockGesturePlugin implements INavigatorPlugin {
     
     const eventName = `gesture:swipe_${this.direction}`;
     const intentName = `intent:navigate_${this.direction}`;
+    
+    // NEW: Dispatch action to store (unidirectional flow)
+    this.core.store.dispatch(navigate(this.direction, 'gesture', { mock: true }));
+    
+    // LEGACY: Keep old eventBus emission for backward compatibility
+    // TODO: Remove in future sprint after all consumers migrate
     
     // Emit raw gesture event
     const gestureEvent = {
