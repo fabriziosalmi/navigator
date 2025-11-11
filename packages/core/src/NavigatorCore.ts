@@ -161,10 +161,29 @@ export class NavigatorCore {
     this.eventBus.emit('core:init:start', { source: 'NavigatorCore' });
 
     try {
-      // Initialize plugins in order
+      // Sprint 2: Parallel Plugin Initialization
+      // Separate plugins into critical (priority >= 100) and deferred (priority < 100)
+      const criticalPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
+      const deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
+
       for (const name of this.pluginOrder) {
         const plugin = this.plugins.get(name)!;
-        await this._initPlugin(name, plugin);
+        // Default priority: 100 (critical) for backward compatibility
+        // Plugins must explicitly set priority < 100 to be deferred
+        const priority = plugin._priority ?? 100;
+
+        if (priority >= 100) {
+          criticalPlugins.push({ name, plugin });
+        } else {
+          deferredPlugins.push({ name, plugin });
+        }
+      }
+
+      // Initialize critical plugins in parallel using Promise.all
+      if (criticalPlugins.length > 0) {
+        await Promise.all(
+          criticalPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
+        );
       }
 
       this.isInitialized = true;
@@ -172,6 +191,18 @@ export class NavigatorCore {
 
       if (this.config.debugMode) {
         console.log('✅ NavigatorCore initialized successfully');
+      }
+
+      // Initialize deferred plugins in background (non-blocking)
+      if (deferredPlugins.length > 0) {
+        this._initDeferredPlugins(deferredPlugins).catch((error) => {
+          console.error('NavigatorCore: Deferred plugin initialization failed', error);
+          this.eventBus.emit('core:error', {
+            message: 'Deferred plugin initialization failed',
+            error,
+            source: 'NavigatorCore'
+          });
+        });
       }
 
       // Auto-start if configured
@@ -182,6 +213,34 @@ export class NavigatorCore {
     } catch (error) {
       // L'evento di errore viene già emesso da _initPlugin
       // Non lo riemmettiamo qui per evitare duplicati
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize deferred plugins in background (Sprint 2)
+   */
+  private async _initDeferredPlugins(
+    deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }>
+  ): Promise<void> {
+    try {
+      // Initialize deferred plugins in parallel
+      await Promise.all(
+        deferredPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
+      );
+
+      // Emit event when all deferred plugins are ready
+      this.eventBus.emit('core:deferred:ready', {
+        source: 'NavigatorCore',
+        pluginCount: deferredPlugins.length,
+        plugins: deferredPlugins.map(({ name }) => name)
+      });
+
+      if (this.config.debugMode) {
+        console.log(`✅ Deferred plugins initialized (${deferredPlugins.length})`);
+      }
+    } catch (error) {
+      console.error('NavigatorCore: Error initializing deferred plugins', error);
       throw error;
     }
   }
@@ -375,14 +434,15 @@ export class NavigatorCore {
     this.plugins.set(plugin.name, plugin);
     this.pluginStates.set(plugin.name, 'registered');
 
-    // Add to order (respecting priority)
-    const priority = options.priority || 0;
+    // Set priority: use options.priority if provided, otherwise use plugin._priority, otherwise default to 100
+    const priority = options.priority ?? plugin._priority ?? 100;
     plugin._priority = priority;
 
     let inserted = false;
     for (let i = 0; i < this.pluginOrder.length; i++) {
       const existingPlugin = this.plugins.get(this.pluginOrder[i])!;
-      if (priority > (existingPlugin._priority || 0)) {
+      const existingPriority = existingPlugin._priority ?? 100;
+      if (priority > existingPriority) {
         this.pluginOrder.splice(i, 0, plugin.name);
         inserted = true;
         break;

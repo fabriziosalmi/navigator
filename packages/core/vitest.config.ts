@@ -6,6 +6,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom', // Changed from 'node' to 'jsdom' for DOM APIs
+    // Don't use fake timers by default - let tests opt-in explicitly
+    fakeTimers: {
+      toFake: [] // Empty array = no fake timers
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
