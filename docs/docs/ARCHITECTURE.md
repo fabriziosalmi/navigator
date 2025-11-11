@@ -1,5 +1,230 @@
 # Architecture Documentation
 
+> **Note**: This document covers both the **legacy monolithic implementation** (sections below) and the **new SDK architecture** (NavigatorCore, plugins, framework wrappers).
+
+---
+
+## New SDK Architecture (v3.0+)
+
+Navigator SDK is built on a **plugin-based, event-driven architecture** with three core components:
+
+### Core Components
+
+#### 1. NavigatorCore (`packages/core/src/NavigatorCore.ts`)
+
+The orchestrator responsible for plugin lifecycle management:
+
+```typescript
+class NavigatorCore {
+  // Public API
+  registerPlugin(name: string, plugin: INavigatorPlugin, options?: RegisterPluginOptions)
+  async init(): Promise<void>
+  async start(): Promise<void>
+  async stop(): Promise<void>
+  
+  // Core systems
+  eventBus: EventBus
+  appState: AppState
+}
+```
+
+**Plugin Lifecycle**:
+1. **Registration**: `registerPlugin()` adds plugin to registry with priority
+2. **Initialization**: `init()` calls `plugin.init()` for all plugins
+   - **Parallel Loading** (Sprint 2 Task 1): Critical plugins (priority ≥100) load in parallel
+   - **Deferred Loading**: Non-critical plugins (priority <100) load in background
+3. **Starting**: `start()` calls `plugin.start()` for all plugins
+4. **Stopping**: `stop()` calls `plugin.stop()` for all plugins
+5. **Destruction**: `destroy()` calls `plugin.destroy()` for cleanup
+
+**Performance Optimization** (Sprint 2):
+- **Parallel Initialization**: 55-93% faster startup time
+- **Priority-based Loading**: Critical plugins block, deferred plugins don't
+- **Background Ready Event**: `core:deferred:ready` emitted when all deferred plugins complete
+
+#### 2. EventBus (`packages/core/src/EventBus.ts`)
+
+Decoupled pub/sub messaging system:
+
+```typescript
+class EventBus {
+  on(event: string, callback: Function): () => void
+  once(event: string, callback: Function): void
+  emit(event: string, data?: any): void
+  off(event: string, callback?: Function): void
+}
+```
+
+**Event Flow**:
+```
+Plugin → EventBus.emit() → EventBus → Subscribed callbacks
+```
+
+**Standard Events**:
+- `core:init:start` / `core:init:complete`
+- `core:start:begin` / `core:start:complete`
+- `core:plugin:registered` / `core:plugin:initialized` / `core:plugin:started`
+- `core:deferred:ready` (Sprint 2: deferred plugins complete)
+- `state:changed` / `state:reset`
+
+#### 3. AppState (`packages/core/src/AppState.ts`)
+
+Centralized reactive state management:
+
+```typescript
+class AppState {
+  get(path: string, defaultValue?: any): any
+  setState(pathOrUpdates: string | object, value?: any, options?: SetStateOptions): void
+  watch(path: string, callback: WatcherCallback, options?: WatchOptions): () => void
+  getState(): NavigatorState
+  reset(): void
+}
+```
+
+**State Structure**:
+```typescript
+interface NavigatorState {
+  navigation: { currentLayer, totalLayers, isTransitioning, ... }
+  user: { level, experiencePoints, cognitive_state, ... }
+  system: { isIdle, cameraActive, performanceMode, ... }
+  ui: { hudVisible, debugPanelVisible, ... }
+  input: { lastGesture, keyboardEnabled, ... }
+  performance: { fps, averageFps, ... }
+  plugins: Record<string, any>
+}
+```
+
+**Watchers** (Sprint 2 Task 2):
+```typescript
+// Sync mode (default): immediate callbacks
+appState.watch('user.level', (newLevel) => {
+  updateUI(newLevel);
+});
+
+// Debounce mode: prevent main thread blocking
+appState.watch('user.mousePosition', (pos) => {
+  renderCursor(pos);
+}, { mode: 'debounce', debounceMs: 16 });
+```
+
+**Performance** (Sprint 2):
+- **Debounced Watchers**: 99% callback reduction in burst scenarios
+- **Trailing Edge Debounce**: Fires after updates stop
+- **Configurable Delay**: Default 16ms (~60fps), customizable
+- **Backward Compatible**: Opt-in, no breaking changes
+
+### Plugin Architecture
+
+#### Plugin Interface (`packages/types/src/index.d.ts`)
+
+```typescript
+interface INavigatorPlugin {
+  readonly name: string
+  readonly version: string
+  _priority?: number
+  
+  init?(core: NavigatorCore): Promise<void> | void
+  start?(core: NavigatorCore): Promise<void> | void
+  stop?(): Promise<void> | void
+  destroy?(): Promise<void> | void
+}
+```
+
+#### Plugin Priority System (Sprint 2)
+
+Plugins are categorized by priority for optimal loading:
+
+- **Critical (≥100)**: UI-blocking, loaded in parallel (e.g., KeyboardPlugin, DOMRenderer)
+- **Deferred (<100)**: Background tasks, non-blocking (e.g., Analytics, Logger)
+- **Default**: 100 (backward compatible)
+
+**Registration**:
+```typescript
+core.registerPlugin('keyboard', new KeyboardPlugin(), { priority: 100 });
+core.registerPlugin('analytics', new AnalyticsPlugin(), { priority: 50 });
+```
+
+#### Official Plugins
+
+| Plugin | Package | Priority | Purpose |
+|--------|---------|----------|---------|
+| KeyboardPlugin | `@navigator.menu/plugin-keyboard` | 100 | Keyboard input capture |
+| DOMRendererPlugin | `@navigator.menu/plugin-dom-renderer` | 100 | DOM manipulation helpers |
+| CognitiveModelPlugin | `@navigator.menu/plugin-cognitive` | 80 | User state detection |
+| LoggerPlugin | `@navigator.menu/plugin-logger` | 50 | Configurable logging |
+| MockGesturePlugin | `@navigator.menu/plugin-mock-gesture` | 10 | Testing utilities |
+
+### Framework Wrappers
+
+#### React (`@navigator.menu/react`)
+
+```typescript
+import { useNavigator } from '@navigator.menu/react';
+
+function App() {
+  const { core, isReady } = useNavigator({
+    plugins: [new KeyboardPlugin()],
+    autoStart: true
+  });
+  
+  // Subscribe to events
+  useEffect(() => {
+    return core?.eventBus.on('keyboard:keydown', handleKey);
+  }, [core]);
+}
+```
+
+#### Vue (`@navigator.menu/vue`)
+
+```typescript
+import { useNavigator } from '@navigator.menu/vue';
+
+export default {
+  setup() {
+    const { core, isReady } = useNavigator({
+      plugins: [new KeyboardPlugin()],
+      autoStart: true
+    });
+    
+    return { core, isReady };
+  }
+}
+```
+
+### Data Flow
+
+```
+User Action (keyboard, gesture, voice)
+  ↓
+Plugin captures input
+  ↓
+Plugin emits event via EventBus
+  ↓
+Other plugins/app subscribe to event
+  ↓
+AppState updated (if needed)
+  ↓
+Watchers triggered (sync or debounced)
+  ↓
+UI updates
+```
+
+### Performance Characteristics
+
+| Metric | Sprint 1 (Baseline) | Sprint 2 (Optimized) |
+|--------|---------------------|----------------------|
+| **Startup Time (3 critical plugins)** | 2850ms | 200ms (-93%) |
+| **Startup Time (mixed workload)** | 400ms | 180ms (-55%) |
+| **State Watcher Callbacks (100 rapid updates)** | 100 | 1 (-99%) |
+| **Main Thread Blocking** | Yes | No (debounced) |
+| **Bundle Size (core)** | 4.18 KB | 4.32 KB (+3.3%) |
+
+---
+
+## Legacy Monolithic Implementation
+
+> The sections below document the original monolithic implementation. For new projects, use the SDK architecture above.
+
 ## System Overview
 
 Aetherium Navigator is built with a **fully modular ES6+ architecture** - 12 independent modules with clear separation of concerns, zero dependencies on external frameworks.
