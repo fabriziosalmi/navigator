@@ -4,7 +4,7 @@
 
 [![CI/CD Pipeline](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml/badge.svg)](https://github.com/fabriziosalmi/navigator/actions/workflows/validation.yml)
 [![Test Coverage](https://img.shields.io/badge/Coverage-95%25%2B-brightgreen)](./packages/core)
-[![Tests](https://img.shields.io/badge/Tests-139%2B%20Passing-success)](./packages)
+[![Tests](https://img.shields.io/badge/Tests-207%2B%20Passing-success)](./packages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)](https://www.typescriptlang.org/)
 
@@ -20,7 +20,7 @@ Navigator is a **decoupled, plugin-based SDK** for building next-generation web 
 *   🔮 **Predictive Intent System:** Predicts user actions *before* they are completed, enabling zero-latency interactions.
 *   🔌 **Fully Plugin-Based:** The entire architecture is modular. Add or remove capabilities like gesture, voice, or keyboard input by simply adding a plugin.
 *   ⚛️ **Framework Agnostic:** Works with any framework. Comes with official wrappers for **React** (`@navigator.menu/react`) and **Vue** (`@navigator.menu/vue`).
-*   🛡️ **Robust & Tested:** Built with TypeScript, with **139+ tests** and **95%+ code coverage** on the core engine.
+*   🛡️ **Robust & Tested:** Built with TypeScript, with **207+ tests** and **96%+ code coverage** on the core engine.
 *   🧑‍💻 **World-Class DX:** A powerful CLI (`create-app`), a Plugin Development Kit (PDK), and a "Cookbook" full of practical recipes get you started in minutes.
 
 ---
@@ -100,7 +100,7 @@ function App() {
 
 ---
 
-## �️ Architecture
+## 🏗️ Architecture
 
 Navigator is a **monorepo** containing the core SDK, official plugins, framework wrappers, and demo applications.
 
@@ -132,13 +132,13 @@ Navigator is a **monorepo** containing the core SDK, official plugins, framework
 
 Navigator is built on a **philosophy**, not just a pattern:
 
-1. **🎤 Input Plugins Capture, They Don't Act**  
+1. **🎤 Input Plugins Capture, They Don't Act**
    Plugins translate physical inputs into standardized events. They never manipulate your app.
 
-2. **👂 Your App Listens to Intents, Not Inputs**  
+2. **👂 Your App Listens to Intents, Not Inputs**
    Subscribe to `intent:navigate`, not `keydown`. Change input method with zero app code changes.
 
-3. **💫 The Core is the Decoupled Heart**  
+3. **💫 The Core is the Decoupled Heart**
    All communication flows through the Event Bus. Plugins and your app never directly talk.
 
 **[Learn more in our documentation →](./docs/docs/ARCHITECTURE.md)**
@@ -151,7 +151,7 @@ We take quality seriously. Every commit pushed to `main` must pass our **Ecosyst
 
 -   ✅ **Dependency & Security Audit** (0 vulnerabilities)
 -   ✅ **Code Linting & Quality Checks** (ESLint, Complexity Analysis)
--   ✅ **Unit & Integration Tests** (139+ tests, 95%+ coverage)
+-   ✅ **Unit & Integration Tests** (207+ tests, 96%+ coverage)
 -   ✅ **Production Build** for all packages
 -   ✅ **End-to-End Tests** (Playwright, 19+ scenarios)
 -   ✅ **Bundle Size Checks** (Core: 3.25 KB gzipped)
@@ -177,11 +177,15 @@ packages/react:             E2E validated      ✓
 | Package | Version | Size | Description |
 |---------|---------|------|-------------|
 | [`@navigator.menu/core`](./packages/core) | 2.0.0 | 3.25 KB | Core engine with Event Bus |
-| [`@navigator.menu/react`](./packages/react) | 0.1.0 | 5.92 KB | React integration hooks |
-| [`@navigator.menu/plugin-keyboard`](./packages/plugin-keyboard) | 1.0.0 | 802 B | Keyboard input plugin |
-| [`@navigator.menu/plugin-logger`](./packages/plugin-logger) | 1.0.0 | - | Configurable logging |
+| [`@navigator.menu/react`](./packages/react) | 0.1.0 | 6.28 KB | React integration hooks |
 | [`@navigator.menu/pdk`](./packages/pdk) | 2.0.0 | - | Plugin Development Kit |
 | [`@navigator.menu/types`](./packages/types) | 2.0.0 | - | TypeScript definitions |
+| [`@navigator.menu/cli`](./packages/cli) | 2.0.0 | - | Scaffolding CLI tool |
+| [`@navigator.menu/plugin-keyboard`](./packages/plugin-keyboard) | 1.0.0 | 1.07 KB | Keyboard input plugin |
+| [`@navigator.menu/plugin-cognitive`](./packages/plugin-cognitive) | 1.0.0 | - | Cognitive AI modeling |
+| [`@navigator.menu/plugin-dom-renderer`](./packages/plugin-dom-renderer) | 1.0.0 | - | DOM manipulation helpers |
+| [`@navigator.menu/plugin-logger`](./packages/plugin-logger) | 1.0.0 | - | Configurable logging |
+| [`@navigator.menu/plugin-mock-gesture`](./packages/plugin-mock-gesture) | 2.0.0 | - | Testing utilities |
 
 ---
 
@@ -216,7 +220,7 @@ Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Condu
 
 ---
 
-## � Documentation
+## 📚 Documentation
 
 - **[Getting Started Guide](./docs/docs/GETTING_STARTED.md)** - Installation and first steps
 - **[Cookbook](./docs/docs/COOKBOOK.md)** - Complete working examples
@@ -240,7 +244,7 @@ Navigator is open-source software licensed under the **[MIT License](./LICENSE)*
 
 ---
 
-## � Acknowledgments
+## 🙏 Acknowledgments
 
 Navigator is built with modern tools and inspired by great projects:
 
@@ -259,384 +263,3 @@ Navigator is built with modern tools and inspired by great projects:
 [⭐ Star us on GitHub](https://github.com/fabriziosalmi/navigator) • [📖 Read the docs](https://fabriziosalmi.github.io/navigator/docs/)
 
 </div>
-    ├── VisualEffects.js            # Canvas-based visual effects
-    ├── LightBeamSystem.js          # ⭐ Akira-style light beams
-    ├── VoiceCommandModule.js       # ⭐ Speech recognition (EN/IT)
-    └── NavigationHistoryHUD.js     # ⭐ Action history tracking
-```
-
----
-
-## 🛠️ Technology Stack
-
-- **HTML5** - Semantic structure
-- **CSS3** - Glassmorphism, GPU-accelerated animations, backdrop filters
-- **JavaScript (ES6+ Modules)** - Fully modular, 12 independent modules
-- **MediaPipe Hands** - Real-time 21-landmark hand tracking
-- **Web Speech API** - Continuous voice recognition (bilingual)
-- **Web Audio API** - Spatial sound synthesis
-- **Canvas API** - Light beams and visual effects rendering
-
----
-
-## 📋 Prerequisites
-
-- **Modern browser**: Chrome 90+, Edge 90+ (best), Firefox 88+, Safari 14+
-- **Webcam**: For gesture input
-- **Microphone**: For voice commands (optional)
-- **Local server**: Required for ES6 modules and media access
-
----
-
-## 🚀 Getting Started
-
-### Quick Start with Python
-
-```bash
-cd /path/to/navigator
-python3 -m http.server 8000
-```
-
-Open: `http://localhost:8000`
-
-### Alternative Servers
-
-**Node.js:**
-```bash
-npx http-server -p 8000
-```
-
-**PHP:**
-```bash
-php -S localhost:8000
-```
-
-**VS Code:** Install "Live Server" extension → Right-click `index.html` → "Open with Live Server"
-
----
-
-## 🎮 How to Use
-
-### First Launch
-
-1. **Click "🚀 Start Experience"** - Grants camera/audio/microphone permissions
-2. **Position your hand** - Hold hand clearly in front of webcam
-3. **See the green hand icon** in quantum HUD (bottom) when detected
-
-### Navigation Methods
-
-**🖐️ Hand Gestures**:
-- **Swipe left/right**: Navigate cards horizontally
-- **Swipe up/down**: Change layers vertically
-- **Point (hold 2s)**: Focus mode (Kamehameha effect)
-- **Advanced gestures** unlock at Level 2 and Level 3
-
-**⌨️ Keyboard**:
-- `A` / `D` or `←` / `→`: Navigate cards
-- `W` / `S` or `↑` / `↓`: Navigate layers
-- `M`: Toggle voice commands
-- `F`: Fullscreen toggle
-- `V`: Toggle webcam view
-- `D`: Delete current card
-
-**🎤 Voice Commands** (press `M` to activate):
-- **English**: "left", "right", "up", "down", "next", "back"
-- **Italian**: "sinistra", "destra", "su", "giù", "avanti", "indietro"
-- Look for 🎤 icon (top-right) when listening
-
-### Understanding the HUD
-
-**Bottom quantum HUD shows**:
-- **Left**: Layer name + card position (e.g., "Videos 1/4")
-- **Center**: 4 navigation buttons (clickable)
-- **Middle**: Adaptive level progress bar
-- **Right**: Hand status + gesture legend
-- **Far right**: Last 5 navigation actions (color-coded history)
-
-### Adaptive Level System
-
-Start at **Level 1** with basic gestures. System tracks your:
-- **Accuracy**: Successful vs failed gestures
-- **Speed**: Average gesture completion time
-- **Stability**: Consistency of movements
-
-**Unlock progression**:
-- **Level 2** (85% accuracy): Pinch gestures, fan cards
-- **Level 3** (90% accuracy): Fist collapse, explosion effects
-
-Watch the progress bar in HUD - green = ready to upgrade!
-
----
-
-## ⚙️ Configuration
-
-All settings in `js/config.js` - modify without breaking anything!
-
-### Adjust Grid Lock Sensitivity
-
-```javascript
-CONFIG.gridLock = {
-    threshold: 0.12,              // Horizontal sensitivity (higher = less sensitive)
-    thresholdVertical: 0.10,      // Vertical sensitivity (lower = easier)
-    minIntentVelocity: 0.015,     // Horizontal movement speed threshold
-    minIntentVelocityVertical: 0.012 // Vertical movement speed threshold
-}
-```
-
-### Adjust Adaptive System
-
-```javascript
-CONFIG.adaptiveNavigation = {
-    enabled: true,
-    levels: {
-        1: { accuracyThreshold: 0.75, speedThreshold: 60, stabilityThreshold: 0.70 },
-        2: { accuracyThreshold: 0.85, speedThreshold: 75, stabilityThreshold: 0.80 },
-        3: { accuracyThreshold: 0.90, speedThreshold: 90, stabilityThreshold: 0.85 }
-    }
-```
-
-### Audio Settings
-
-```javascript
-CONFIG.audio = {
-    masterVolume: 0.3,           // Overall volume (0-1)
-    spatialEnabled: true,        // 3D spatial positioning
-    gestureEffectsEnabled: true  // Whoosh/beep sounds
-}
-```
-
-### Camera & Hand Tracking
-
-```javascript
-CONFIG.camera = {
-    maxNumHands: 1,              // Track one hand
-    modelComplexity: 1,          // 0=lite, 1=full (recommended)
-    minDetectionConfidence: 0.7, // Detection threshold
-    minTrackingConfidence: 0.6   // Tracking threshold
-}
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Camera Not Working
-- Use `http://` or `https://` (not `file://`)
-- Allow camera permissions in browser settings
-- Try Chrome/Edge (best MediaPipe compatibility)
-- Press `V` to toggle webcam view and verify feed
-
-### Voice Commands Not Responding
-- Press `M` to toggle voice recognition on
-- Look for 🎤 icon (top-right) - green = listening
-- Speak clearly in English or Italian
-- Chrome/Edge have best Web Speech API support
-- Check browser microphone permissions
-
-### Gestures Not Detected
-- Ensure good lighting conditions
-- Position hand clearly in webcam frame
-- Move hand slowly and deliberately
-- Check quantum HUD for green hand icon
-- Locked gestures show 🔒 hints - level up to unlock
-
-### Performance Issues
-- Close other browser tabs
-- Reduce camera resolution in MediaPipe settings
-- Disable dynamic background: set `CONFIG.effects.dynamicBackgroundEnabled = false`
-- Check browser console for errors (F12)
-
-### Navigation History Not Showing
-- Widget appears far-right in quantum HUD
-- Requires at least one navigation action to populate
-- Color-coded: cyan (cards), magenta (layers), green (voice), orange (keyboard)
-
----
-
-## 🎯 Performance Metrics
-
-- **Hand Tracking**: 30 FPS (MediaPipe Hands)
-- **Gesture Response**: <100ms with grid lock optimization
-- **Frame Rate**: Target 60 FPS (browser-dependent)
-- **Memory**: ~80MB (including MediaPipe + Web Speech)
-- **Startup Time**: ~2-3s (MediaPipe model loading)
-
----
-
-## 🔐 Security & Privacy
-
-- **100% Client-Side**: All processing in browser
-- **No Data Transmission**: Webcam/microphone data never leaves device
-- **No Tracking**: Zero analytics or external services
-- **No Storage**: No cookies, localStorage, or persistent data
-- **Open Source**: Full code transparency
-
----
-
-## 🚀 Advanced Features
-
-### Voice Command Customization
-
-Add custom voice commands in `VoiceCommandModule.js`:
-
-```javascript
-// Add new command mapping
-voiceCommands.addCommand('home', 'layer-up');
-voiceCommands.addCommand('casa', 'layer-up'); // Italian
-```
-
-### Navigation History API
-
-Access history programmatically:
-
-```javascript
-const history = navHistory.getHistory();      // Get all entries
-const count = navHistory.getCount();           // Get count
-navHistory.clear();                            // Clear all history
-navHistory.addAction('card-left', 'custom');   // Add custom action
-```
-
-### Adaptive System Callbacks
-
-Hook into level changes:
-
-```javascript
-adaptiveNav.on('levelChange', (newLevel) => {
-    console.log(`Unlocked Level ${newLevel}!`);
-    // Custom actions when user levels up
-});
-```
-
-### Light Beam Customization
-
-Trigger custom light beams:
-
-```javascript
-lightBeams.createBeam('left', 0.8);           // Horizontal beam (intensity 0-1)
-lightBeams.createVerticalBeam('up', 0.5);     // Vertical beam
-```
-
----
-
-## 📝 Module Reference
-
-### Core Modules
-
-| Module | Lines | Purpose |
-|--------|-------|---------|
-| `AdaptiveNavigationSystem.js` | 455 | 3-level progression tracking |
-| `VoiceCommandModule.js` | 390 | Bilingual speech recognition |
-| `AudioManager.js` | 709 | Spatial audio synthesis |
-| `NavigationController.js` | ~400 | Navigation state management |
-| `GestureDetector.js` | ~350 | Hand gesture recognition |
-| `LightBeamSystem.js` | 195 | Akira-style visual beams |
-| `NavigationHistoryHUD.js` | 180 | Action history tracking |
-
-### Support Modules
-
-| Module | Purpose |
-|--------|---------|
-| `LayerManager.js` | Multi-layer state management |
-| `GridLockSystem.js` | Gesture smoothing & thresholds |
-| `DOMLODManager.js` | Performance optimization (LOD) |
-| `VisualEffects.js` | Canvas effects (Kamehameha, singularity) |
-| `AdaptiveNavigationHUD.js` | Progress bar UI |
-
----
-
-## 🎨 Design Philosophy
-
-**Principles**:
-1. **Content First**: Cards are hero element, UI is minimal
-2. **Progressive Disclosure**: Advanced features unlock with skill
-3. **Multi-Modal**: Support all input types (gesture/keyboard/voice)
-4. **Immediate Feedback**: Every action has visual/audio response
-5. **Zero Learning Curve**: Start navigating immediately
-
-**Visual Language**:
-- **Glassmorphism**: Translucent surfaces with blur
-- **Cyber Aesthetics**: Akira-inspired light beams
-- **Color Coding**: Consistent color = consistent meaning
-- **Spatial Audio**: Sound follows visual position
-
----
-
-## 🏆 Credits & Acknowledgments
-
-**Technologies**:
-- **[MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands)** - Google's hand tracking
-- **[Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)** - Browser voice recognition
-- **[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)** - Spatial audio synthesis
-
-**Design Inspiration**:
-- **Akira** - Light beam aesthetics
-- **Blade Runner** - Cyber UI elements
-- **Apple Vision Pro** - Glassmorphism design
-
----
-
-## 📄 License
-
-MIT License - Free to use, modify, and distribute
-
----
-
-## 📧 Contact
-
-Questions? Open an issue or PR on GitHub!
-
----
-
-**Built with ❤️ using modern web standards - no frameworks, just pure JavaScript magic.** ✨
-
-- Try Chrome/Edge (best compatibility)
-
-### Gesture Not Responding
-- Ensure good lighting
-- Move hand more slowly
-- Position hand clearly in frame
-- Press `V` to see webcam view
-- Check gesture info panel (top-left)
-
-### Audio Not Playing
-- Click "Start Experience" button (required for Web Audio API)
-- Check browser audio is not muted
-- Adjust `CONFIG.audio.masterVolume` if too quiet
-
-### Performance Issues
-- Disable dynamic background: `CONFIG.effects.dynamicBackgroundEnabled = false`
-- Reduce prediction history: `CONFIG.predictiveTracking.historySize = 5`
-- Close other browser tabs
-
-## 🎯 Performance Metrics
-
-- **Prediction Latency**: ~50ms compensation
-- **Frame Rate**: Target 60 FPS
-- **GPU Acceleration**: Full hardware compositing
-- **Gesture Response**: <100ms with predictive tracking
-- **Memory Footprint**: ~50MB (including Three.js + MediaPipe)
-
-## 🔐 Security & Privacy
-
-- **100% Client-Side**: All processing happens in your browser
-- **No Data Transmission**: Webcam feed never leaves your device
-- **No Tracking**: No analytics or external services
-- **Open Source**: Inspect all code
-
-## 📝 License
-
-MIT License - Free to use, modify, and distribute
-
-## 🙏 Acknowledgments
-
-- **Three.js** - 3D graphics engine
-- **MediaPipe** - Google's hand tracking ML
-- **Web Audio API** - Procedural audio synthesis
-
-## 📧 Contact
-
-Questions? Open an issue or PR on GitHub!
-
----
-
-**Powered by predictive AI, procedural audio, and pure JavaScript magic.** ✨

@@ -397,7 +397,7 @@ This plugin's **only responsibility** is detecting swipes and emitting standardi
 
 ```javascript
 // plugins/TouchGesturePlugin.js
-import { BasePlugin } from '@navigator.menu/core';
+import { BasePlugin } from '@navigator.menu/pdk';
 
 export class TouchGesturePlugin extends BasePlugin {
   constructor() {
@@ -698,7 +698,7 @@ This plugin's **only responsibility** is detecting voice commands and emitting s
 
 ```javascript
 // plugins/VoiceInputPlugin.js
-import { BasePlugin } from '@navigator.menu/core';
+import { BasePlugin } from '@navigator.menu/pdk';
 
 export class VoiceInputPlugin extends BasePlugin {
   constructor() {
@@ -2024,6 +2024,6 @@ describe('ShakeDetectionPlugin', () => {
 
 ---
 
-**Want to contribute a recipe?** Open a PR at [github.com/navigator/navigator](https://github.com/navigator/navigator)!
+**Want to contribute a recipe?** Open a PR at [github.com/fabriziosalmi/navigator](https://github.com/fabriziosalmi/navigator)!
 
 **License**: MIT

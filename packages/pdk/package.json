@@ -28,8 +28,13 @@
     "sdk",
     "development-kit"
   ],
-  "author": "Navigator Team",
+  "author": "Navigator SDK Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/pdk"
+  },
   "dependencies": {
     "@navigator.menu/types": "workspace:*"
   },
@@ -40,5 +45,8 @@
   "files": [
     "dist",
     "README.md"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

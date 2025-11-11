@@ -27,8 +27,13 @@
     "logger",
     "plugin"
   ],
-  "author": "Navigator.menu",
+  "author": "Navigator SDK Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/plugin-logger"
+  },
   "devDependencies": {
     "@types/node": "^22.10.5",
     "tsup": "^8.3.5",

@@ -23,7 +23,7 @@
     "scaffolding",
     "boilerplate"
   ],
-  "author": "Navigator Team",
+  "author": "Navigator SDK Team",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.4.1",

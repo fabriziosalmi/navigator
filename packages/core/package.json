@@ -37,8 +37,8 @@
     "state-management",
     "framework-agnostic"
   ],
-  "author": "Navigator Team",
-  "license": "ISC",
+  "author": "Navigator SDK Team",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/fabriziosalmi/navigator.git",

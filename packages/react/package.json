@@ -31,8 +31,13 @@
     "navigation",
     "ui"
   ],
-  "author": "Navigator.Menu Team",
+  "author": "Navigator SDK Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/react"
+  },
   "peerDependencies": {
     "@navigator.menu/core": "workspace:*",
     "react": "^18.0.0"
@@ -49,5 +54,8 @@
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",
     "vitest": "^1.6.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -31,8 +31,13 @@
     "navigation",
     "accessibility"
   ],
-  "author": "Navigator.Menu Team",
+  "author": "Navigator SDK Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/plugin-keyboard"
+  },
   "peerDependencies": {
     "@navigator.menu/core": "workspace:*"
   },

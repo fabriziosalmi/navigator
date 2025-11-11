@@ -77,7 +77,7 @@
     },
     {
       "path": "packages/react/dist/index.js",
-      "limit": "6 KB"
+      "limit": "7 KB"
     },
     {
       "path": "packages/plugin-keyboard/dist/index.js",

@@ -30,8 +30,13 @@
     "ui",
     "plugin"
   ],
-  "author": "Navigator.menu",
+  "author": "Navigator SDK Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabriziosalmi/navigator.git",
+    "directory": "packages/plugin-dom-renderer"
+  },
   "peerDependencies": {
     "@navigator.menu/core": "workspace:*",
     "@navigator.menu/types": "workspace:*"
