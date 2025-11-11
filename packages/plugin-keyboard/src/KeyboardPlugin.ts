@@ -4,20 +4,21 @@
  * Keyboard navigation plugin for Navigator.Menu.
  * Captures keyboard input and emits both raw events and navigation intents.
  * 
+ * Sprint 2 Migration: Now dispatches navigation actions to store
+ * 
  * Events emitted:
  * - keyboard:keydown - Raw keydown events with full details
  * - keyboard:keyup - Raw keyup events
  * - keyboard:combo - Key combination events (e.g., Ctrl+d)
- * - intent:navigate_left - Left arrow intent
- * - intent:navigate_right - Right arrow intent
- * - intent:navigate_up - Up arrow intent
- * - intent:navigate_down - Down arrow intent
- * - intent:select - Enter key intent
- * - intent:cancel - Escape key intent
+ * - intent:navigate_* - Legacy events (deprecated, will be removed)
+ * 
+ * Actions dispatched:
+ * - navigation/NAVIGATE - Unidirectional navigation actions
  */
 
 import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
+import { navigate } from '@navigator.menu/core';
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -186,20 +187,48 @@ export class KeyboardPlugin implements INavigatorPlugin {
   private _emitNavigationIntent(key: string, timestamp: number): boolean {
     if (!this.core) return false;
 
-    const intentMap: Record<string, string> = {
-      ArrowLeft: 'intent:navigate_left',
-      ArrowRight: 'intent:navigate_right',
-      ArrowUp: 'intent:navigate_up',
-      ArrowDown: 'intent:navigate_down',
+    // Map keys to navigation directions
+    const navigationMap: Record<string, 'left' | 'right' | 'up' | 'down' | null> = {
+      ArrowLeft: 'left',
+      ArrowRight: 'right',
+      ArrowUp: 'up',
+      ArrowDown: 'down',
+    };
+
+    const direction = navigationMap[key];
+    
+    // Handle arrow key navigation with new unidirectional flow
+    if (direction) {
+      // NEW: Dispatch action to store (unidirectional flow)
+      this.core.store.dispatch(navigate(direction, 'keyboard'));
+      
+      // LEGACY: Keep old eventBus emission for backward compatibility
+      // TODO: Remove in future sprint after all consumers migrate
+      const legacyIntentMap: Record<string, string> = {
+        ArrowLeft: 'intent:navigate_left',
+        ArrowRight: 'intent:navigate_right',
+        ArrowUp: 'intent:navigate_up',
+        ArrowDown: 'intent:navigate_down',
+      };
+      this.core.eventBus.emit(legacyIntentMap[key]!, { key });
+      
+      // Record navigation intent action
+      this._recordAction(legacyIntentMap[key]!, true, timestamp);
+      
+      return true;
+    }
+    
+    // Handle non-navigation keys (Enter, Escape)
+    const otherIntentMap: Record<string, string> = {
       Enter: 'intent:select',
       Escape: 'intent:cancel',
     };
-
-    const intentEvent = intentMap[key];
+    
+    const intentEvent = otherIntentMap[key];
     if (intentEvent) {
       this.core.eventBus.emit(intentEvent, { key });
       
-      // Record navigation intent action
+      // Record action
       this._recordAction(intentEvent, true, timestamp);
       
       return true;

@@ -58,11 +58,15 @@ export class DomRendererPlugin implements INavigatorPlugin {
   
   private config: DomRendererConfig;
   private container: HTMLElement | null = null;
+  private core: NavigatorCore | null = null;
   
   // State tracking
   private currentCognitiveState: CognitiveState = 'neutral';
   private unsubscribers: Array<() => void> = [];
   private lastPreloadedElement: HTMLElement | null = null;
+  
+  // Sprint 2: Navigation state tracking for unidirectional flow
+  private previousNavigationState: any = null;
 
   constructor(config: DomRendererConfig = {}) {
     this.config = {
@@ -90,6 +94,9 @@ export class DomRendererPlugin implements INavigatorPlugin {
   // ========================================
 
   async init(core: NavigatorCore): Promise<void> {
+    // Store core reference
+    this.core = core;
+    
     // Find container element
     const target = this.config.target;
     const el = typeof target === 'string' 
@@ -116,7 +123,17 @@ export class DomRendererPlugin implements INavigatorPlugin {
       this.unsubscribers.push(unsubPrediction);
     }
 
+    // SPRINT 2: Subscribe to store for navigation state changes (unidirectional flow)
     if (this.config.enableNavigation) {
+      // NEW: Subscribe to store changes
+      const unsubStore = core.store.subscribe(this.handleStateChange);
+      this.unsubscribers.push(unsubStore);
+      
+      // Initialize previous state
+      this.previousNavigationState = core.store.getState().navigation;
+      
+      // LEGACY: Keep old eventBus subscription for backward compatibility
+      // TODO: Remove in future sprint after all consumers migrate
       const unsubNavigate = core.eventBus.on('intent:navigate',
         this.onNavigate.bind(this)
       );
@@ -184,6 +201,60 @@ export class DomRendererPlugin implements INavigatorPlugin {
   // ========================================
   // Event Handlers
   // ========================================
+
+  /**
+   * SPRINT 2: Handle store state changes (unidirectional flow)
+   * React to navigation state updates from the store
+   */
+  private handleStateChange = (): void => {
+    if (!this.core) return;
+    
+    const currentState = this.core.store.getState();
+    const navState = currentState.navigation;
+    
+    // Check if navigation state changed
+    if (!this.previousNavigationState) {
+      this.previousNavigationState = navState;
+      return;
+    }
+    
+    const hasCardChanged = navState.currentCard !== this.previousNavigationState.currentCard;
+    const hasLayerChanged = navState.currentLayer !== this.previousNavigationState.currentLayer;
+    
+    if (hasCardChanged || hasLayerChanged) {
+      if (this.config.debugMode) {
+        console.log('[DomRenderer] Navigation detected!', {
+          from: {
+            card: this.previousNavigationState.currentCard,
+            layer: this.previousNavigationState.currentLayer,
+          },
+          to: {
+            card: navState.currentCard,
+            layer: navState.currentLayer,
+          },
+          direction: navState.direction,
+        });
+      }
+      
+      // Update carousel/layer DOM
+      this.updateCarouselDOM(navState);
+      
+      // Emit custom DOM event for external listeners
+      const domEvent = new CustomEvent('navigatorNavigate', {
+        detail: {
+          currentCard: navState.currentCard,
+          currentLayer: navState.currentLayer,
+          direction: navState.direction,
+        },
+        bubbles: true,
+        cancelable: false,
+      });
+      document.dispatchEvent(domEvent);
+    }
+    
+    // Save current state for next comparison
+    this.previousNavigationState = navState;
+  };
 
   /**
    * Handle cognitive state changes from CognitiveModelPlugin
@@ -346,6 +417,60 @@ export class DomRendererPlugin implements INavigatorPlugin {
   // ========================================
   // Helper Methods
   // ========================================
+
+  /**
+   * SPRINT 2: Update carousel DOM based on navigation state
+   * This is the core DOM manipulation logic that responds to store changes
+   */
+  private updateCarouselDOM(navState: any): void {
+    if (!this.container) return;
+    
+    if (this.config.debugMode) {
+      console.log('[DomRenderer] Updating carousel DOM:', {
+        card: navState.currentCard,
+        layer: navState.currentLayer,
+        direction: navState.direction,
+      });
+    }
+    
+    // Example implementation - this would be customized based on your actual DOM structure
+    // In a real implementation, this might:
+    // 1. Find all card elements
+    // 2. Apply CSS transforms based on currentCard index
+    // 3. Add/remove active classes
+    // 4. Trigger CSS animations
+    
+    const cards = this.container.querySelectorAll(this.config.cardSelector || '.card');
+    cards.forEach((card, index) => {
+      const htmlCard = card as HTMLElement;
+      
+      if (index === navState.currentCard) {
+        htmlCard.classList.add('card--active');
+        htmlCard.setAttribute('aria-current', 'true');
+      } else {
+        htmlCard.classList.remove('card--active');
+        htmlCard.removeAttribute('aria-current');
+      }
+      
+      // Apply transform for carousel effect
+      const offset = (index - navState.currentCard) * 100;
+      htmlCard.style.transform = `translateX(${offset}%)`;
+    });
+    
+    // Handle layer changes if needed
+    const layers = this.container.querySelectorAll(this.config.layerSelector || '.layer');
+    layers.forEach((layer, index) => {
+      const htmlLayer = layer as HTMLElement;
+      
+      if (index === navState.currentLayer) {
+        htmlLayer.classList.add('layer--active');
+        htmlLayer.setAttribute('aria-hidden', 'false');
+      } else {
+        htmlLayer.classList.remove('layer--active');
+        htmlLayer.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
 
   /**
    * Update CSS custom property for animation speed

@@ -51,6 +51,7 @@
     "vitest": "^1.6.1"
   },
   "dependencies": {
-    "nanoid": "^5.1.6"
+    "nanoid": "^5.1.6",
+    "@navigator.menu/types": "workspace:*"
   }
 }

@@ -45,6 +45,7 @@
     "directory": "packages/core"
   },
   "devDependencies": {
+    "@navigator.menu/types": "workspace:*",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^1.2.0",

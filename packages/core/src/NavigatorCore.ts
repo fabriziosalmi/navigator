@@ -11,9 +11,11 @@
 
 import { EventBus } from './EventBus';
 import { AppState, NavigatorState } from './AppState';
-import { UserSessionHistory } from './intelligence/UserSessionHistory';
+import { UserSessionHistory, type Action } from './intelligence/UserSessionHistory';
+import { createStore } from './store/createStore';
+import { rootReducer, type RootState } from './store/reducers';
 import type { DeepPartial } from './AppState';
-import type { Action } from '@navigator.menu/types';
+import type { Store, Action as StoreAction } from './store/types';
 
 /**
  * Core configuration options
@@ -78,7 +80,10 @@ export class NavigatorCore {
   
   /** App state instance (read-only access) */
   public readonly state: AppState;
-  
+
+  /** Redux-like Store (v3.1+ - Shadow Mode) */
+  public readonly store: Store<RootState, StoreAction>;
+
   /** User session history tracker */
   public readonly history: UserSessionHistory;
   
@@ -117,7 +122,10 @@ export class NavigatorCore {
     });
 
     this.state = new AppState(this.eventBus, this.config.initialState);
-    
+
+    // Initialize Redux-like Store (Shadow Mode - v3.1+)
+    this.store = createStore(rootReducer);
+
     this.history = new UserSessionHistory(this.config.historyMaxSize);
 
     // Plugin management
@@ -136,6 +144,9 @@ export class NavigatorCore {
 
     // Setup core event listeners
     this._setupCoreListeners();
+
+    // Setup Legacy Bridge (EventBus -> Store)
+    this._setupLegacyBridge();
 
     if (this.config.debugMode) {
       console.log('🚀 NavigatorCore initialized', {
@@ -595,6 +606,59 @@ export class NavigatorCore {
         console.error('System Error:', event.payload);
       }
     });
+  }
+
+  /**
+   * Setup Legacy Bridge - EventBus to Store translation
+   *
+   * This is the critical migration piece. The Legacy Bridge:
+   * 1. Listens to ALL EventBus events
+   * 2. Translates them to Store actions
+   * 3. Dispatches them to the Store (shadow mode)
+   *
+   * This allows the new Store to operate in parallel with the old EventBus
+   * without breaking any existing functionality.
+   */
+  private _setupLegacyBridge(): void {
+    // Subscribe to ALL events using wildcard
+    this.eventBus.on('*', (event) => {
+      const eventName = event.name;
+      const payload = event.payload;
+
+      // Skip internal Redux actions (they're already in the Store)
+      if (eventName.startsWith('@@redux/') || eventName.startsWith('@@store/')) {
+        return;
+      }
+
+      // Translate legacy event to Store action
+      const storeAction: StoreAction = {
+        type: `legacy/${eventName}`,
+        payload,
+        metadata: {
+          source: 'legacy_bridge',
+          timestamp: event.timestamp,
+          originalEvent: eventName,
+        },
+      };
+
+      // Dispatch to Store (shadow mode)
+      try {
+        this.store.dispatch(storeAction);
+
+        if (this.config.debugMode) {
+          console.log(
+            `[BRIDGE] Translated: ${eventName} → legacy/${eventName}`,
+            payload
+          );
+        }
+      } catch (error) {
+        console.error('[BRIDGE] Failed to dispatch action:', storeAction, error);
+      }
+    });
+
+    if (this.config.debugMode) {
+      console.log('🌉 Legacy Bridge active: EventBus → Store');
+    }
   }
 
   private _startPerformanceMonitoring(): void {

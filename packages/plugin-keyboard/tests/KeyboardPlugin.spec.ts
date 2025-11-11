@@ -370,4 +370,129 @@ describe('KeyboardPlugin', () => {
       expect(plugin).toBeDefined(); // Placeholder
     });
   });
+
+  // ========================================
+  // Area 7: Unidirectional Flow (Sprint 2)
+  // TDD: Store.dispatch instead of EventBus.emit
+  // ========================================
+
+  describe('Unidirectional Flow - Navigation Actions', () => {
+    beforeEach(async () => {
+      await core.registerPlugin(plugin).init();
+      await core.start();
+    });
+
+    it('should dispatch NAVIGATE action on ArrowRight', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        code: 'ArrowRight',
+      });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'navigation/NAVIGATE',
+          payload: expect.objectContaining({
+            direction: 'right',
+            source: 'keyboard',
+          }),
+        })
+      );
+    });
+
+    it('should dispatch NAVIGATE action on ArrowLeft', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowLeft',
+        code: 'ArrowLeft',
+      });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'navigation/NAVIGATE',
+          payload: expect.objectContaining({
+            direction: 'left',
+            source: 'keyboard',
+          }),
+        })
+      );
+    });
+
+    it('should dispatch NAVIGATE action on ArrowUp', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowUp',
+        code: 'ArrowUp',
+      });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'navigation/NAVIGATE',
+          payload: expect.objectContaining({
+            direction: 'up',
+            source: 'keyboard',
+          }),
+        })
+      );
+    });
+
+    it('should dispatch NAVIGATE action on ArrowDown', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        code: 'ArrowDown',
+      });
+      window.dispatchEvent(keyEvent);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'navigation/NAVIGATE',
+          payload: expect.objectContaining({
+            direction: 'down',
+            source: 'keyboard',
+          }),
+        })
+      );
+    });
+
+    it('should include timestamp in action metadata', () => {
+      const dispatchSpy = vi.spyOn(core.store, 'dispatch');
+      const before = performance.now();
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
+      const after = performance.now();
+
+      // Check that dispatch was called
+      expect(dispatchSpy).toHaveBeenCalled();
+      
+      // Find the navigation action (may be wrapped by legacy bridge)
+      const navAction = dispatchSpy.mock.calls.find((call: any) => 
+        call[0]?.type === 'navigation/NAVIGATE'
+      );
+      
+      expect(navAction).toBeDefined();
+      expect(navAction![0]).toMatchObject({
+        type: 'navigation/NAVIGATE',
+        payload: expect.objectContaining({
+          direction: 'right',
+          source: 'keyboard',
+          metadata: expect.objectContaining({
+            timestamp: expect.any(Number),
+          }),
+        }),
+      });
+
+      const action = navAction![0] as any;
+      expect(action.payload.metadata.timestamp).toBeGreaterThanOrEqual(before);
+      expect(action.payload.metadata.timestamp).toBeLessThanOrEqual(after);
+    });
+  });
 });

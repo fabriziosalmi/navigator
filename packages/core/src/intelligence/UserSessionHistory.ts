@@ -1,4 +1,39 @@
-import type { Action, SessionMetrics } from '@navigator.menu/types';
+// User action type for session tracking
+export interface Action {
+  id: string;
+  timestamp: number;
+  type: string;
+  success: boolean;
+  duration_ms?: number;
+  metadata?: Record<string, any>;
+}
+
+// Session Metrics type definition
+export interface SessionMetrics {
+  /** Average time (ms) to complete actions */
+  averageDuration: number;
+  
+  /** Percentage of failed/cancelled actions (0-1) */
+  errorRate: number;
+  
+  /** Number of recent errors in the window */
+  recentErrors: number;
+  
+  /** Number of unique action types */
+  actionVariety: number;
+  
+  /** Total number of actions analyzed */
+  totalActions: number;
+  
+  /** Time span of the window in ms */
+  timeWindow: number;
+  
+  /** Speed consistency (lower = more consistent) - deprecated */
+  varianceMs?: number;
+  
+  /** Total number of actions analyzed - deprecated alias */
+  sampleSize?: number;
+}
 
 /**
  * UserSessionHistory - The "Memory System"
