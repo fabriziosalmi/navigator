@@ -1,6 +1,6 @@
 {
   "name": "create-navigator-app",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Create Navigator apps with zero configuration",
   "type": "module",
   "bin": {

@@ -17,6 +17,7 @@ packages:
   # Developer tools
   - 'packages/pdk'
   - 'packages/cli'
+  - 'packages/create-navigator-app'
   
   # Demo applications
   - 'apps/*'
