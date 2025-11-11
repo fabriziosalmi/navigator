@@ -17,81 +17,12 @@ const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     'intro',
     'quick-start',
+    'core-concepts',
     {
       type: 'category',
-      label: 'Core Concepts',
+      label: 'Plugin Development',
       items: [
-        'core-concepts',
-        'architecture',
-        'event-bus',
-        'state-management',
-        'configuration',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Features',
-      items: [
-        'features/gesture-control',
-        'features/keyboard-navigation',
-        'features/voice-commands',
-        'features/adaptive-system',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Guides',
-      items: [
-        'guides/getting-started',
-        'guides/optimization',
-        'guides/testing',
-      ],
-    },
-  ],
-
-  // API Reference sidebar
-  apiSidebar: [
-    'api/overview',
-    {
-      type: 'category',
-      label: 'Core API',
-      items: [
-        'api/core/navigator',
-        'api/core/event-bus',
-        'api/core/state-manager',
-        'api/core/config-loader',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Plugins',
-      items: [
-        'api/plugins/base-plugin',
-        'api/plugins/input-plugins',
-        'api/plugins/output-plugins',
-      ],
-    },
-  ],
-
-  // Plugin Development sidebar
-  pluginSidebar: [
-    'plugin-development/getting-started',
-    'plugin-development/plugin-architecture',
-    {
-      type: 'category',
-      label: 'Creating Plugins',
-      items: [
-        'plugin-development/input-plugin-tutorial',
-        'plugin-development/output-plugin-tutorial',
-        'plugin-development/plugin-api',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Examples',
-      items: [
-        'plugin-development/examples/vr-controller',
-        'plugin-development/examples/philips-hue',
+        'plugin-development/getting-started',
       ],
     },
   ],
