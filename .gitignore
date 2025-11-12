@@ -41,7 +41,8 @@ tmp/
 temp/
 *.tmp
 
-# E2E temporary test app
+# E2E temporary test app (in-workspace strategy)
+/temp-e2e-app/
 tests/e2e-temp-app/
 
 # Test & Coverage artifacts

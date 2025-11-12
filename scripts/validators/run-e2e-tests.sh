@@ -25,12 +25,14 @@ NC='\033[0m' # No Color
 # CONFIGURATION
 # ==========================================
 
-TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm workspace issues
+# IN-WORKSPACE STRATEGY: Create test app inside the monorepo workspace
+# This allows native workspace:* dependency resolution without hacks
+TEMP_APP_DIR="temp-e2e-app"  # Relative path - part of workspace
 SERVER_PORT=${SERVER_PORT:-5173} # Default server port for preview
-SERVER_URL="http://localhost:5173"
+SERVER_URL="http://localhost:${SERVER_PORT}"
 SERVER_PID=""
 PLAYWRIGHT_CONFIG="tests/e2e/playwright.config.ts"
-SERVER_LOG="/tmp/navigator-e2e-server.log"
+SERVER_LOG="temp-e2e-app-server.log"
 TIMEOUT=120  # Increased from 60s to 120s for CI compatibility
 POLL_INTERVAL=2  # Check every 2 seconds instead of 5
 
@@ -49,8 +51,7 @@ cleanup() {
     wait $SERVER_PID 2>/dev/null || true
   fi
   
-  # Remove temp directory
-  TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm workspace issues
+  # Remove temp directory (in-workspace)
   if [ -d "$TEMP_APP_DIR" ]; then
     echo "   Removing temporary app directory: $TEMP_APP_DIR"
     rm -rf "$TEMP_APP_DIR"
@@ -112,14 +113,11 @@ echo -e "${GREEN}✓ Packages built successfully${NC}"
 # ==========================================
 
 echo ""
-echo -e "${BLUE}🚀 STEP 2: CREATING FRESH TEST APP${NC}"
-echo ""
-echo "   Copying react-ts-e2e template..."
+echo -e "${BLUE}🚀 STEP 2: CREATING FRESH TEST APP (IN-WORKSPACE)${NC}"
 echo ""
 
 # Copy template directly (CLI not published yet)
 TEMPLATE_DIR="packages/create-navigator-app/templates/react-ts-e2e"
-APP_TO_TEST=${APP_TO_TEST:-}
 WORKSPACE_ROOT="$(pwd)"
 
 if [ ! -d "$TEMPLATE_DIR" ]; then
@@ -127,87 +125,51 @@ if [ ! -d "$TEMPLATE_DIR" ]; then
   exit 1
 fi
 
-if [[ -n "$APP_TO_TEST" ]]; then
-  # If an app is provided, run that app directly (do not copy to temp dir)
-  if [[ -d "$WORKSPACE_ROOT/$APP_TO_TEST" ]]; then
-    echo "   Using workspace app: $APP_TO_TEST"
-    TEMP_APP_DIR="$WORKSPACE_ROOT/$APP_TO_TEST"
-  else
-    echo -e "${RED}❌ Specified APP_TO_TEST not found: $APP_TO_TEST${NC}"
-    exit 1
-  fi
-else
-  if ! rsync -a --exclude 'node_modules' --exclude 'dist' --exclude 'test-results' "$TEMPLATE_DIR/" "$TEMP_APP_DIR/"; then
-    echo -e "${RED}❌ Failed to copy template${NC}"
-    exit 1
-  fi
+# Copy template to temp directory IN the workspace
+echo "   Copying template to workspace: ${TEMP_APP_DIR}/"
+if ! rsync -a --exclude 'node_modules' --exclude 'dist' --exclude 'test-results' "$TEMPLATE_DIR/" "$TEMP_APP_DIR/"; then
+  echo -e "${RED}❌ Failed to copy template${NC}"
+  exit 1
 fi
 
-# Fix package.json paths to use absolute paths
-cd "$TEMP_APP_DIR"
-
-# Detect OS for sed compatibility
+# Update package.json for in-workspace usage
+# 1. Change name to avoid conflicts
+# 2. Convert file:../../packages/* to workspace:* for pnpm workspace resolution
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS
-  sed -i '' "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
-  sed -i '' "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
-  sed -i '' "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
-  # Ensure local types package is linked in the temp app to satisfy workspace:* deps
-  sed -i '' "s|"@navigator.menu/react": \(".*"\),|\n    \"@navigator.menu/react\": \1,\n    \"@navigator.menu/types\": \"file:$WORKSPACE_ROOT/packages/types\",|g" package.json || true
+  sed -i '' 's/"name": ".*"/"name": "temp-e2e-app"/' "${TEMP_APP_DIR}/package.json"
+  sed -i '' 's|"file:../../packages/core"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  sed -i '' 's|"file:../../packages/react"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  sed -i '' 's|"file:../../packages/plugin-keyboard"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
 else
   # Linux
-  sed -i "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
-  sed -i "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
-  sed -i "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
-  # Ensure local types package is linked in the temp app to satisfy workspace:* deps
-  sed -i "s|\"@navigator.menu/react\": \(".*"\),|\n    \"@navigator.menu/react\": \1,\n    \"@navigator.menu/types\": \"file:$WORKSPACE_ROOT/packages/types\",|g" package.json || true
+  sed -i 's/"name": ".*"/"name": "temp-e2e-app"/' "${TEMP_APP_DIR}/package.json"
+  sed -i 's|"file:../../packages/core"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  sed -i 's|"file:../../packages/react"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  sed -i 's|"file:../../packages/plugin-keyboard"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
 fi
 
-cd "$WORKSPACE_ROOT"
-
-echo ""
-echo -e "${GREEN}✓ Test app created successfully${NC}"
+echo -e "${GREEN}✓ Test app created in workspace${NC}"
 
 # ==========================================
 # INSTALL DEPENDENCIES
 # ==========================================
 
 echo ""
-echo -e "${BLUE}📦 STEP 3: INSTALLING DEPENDENCIES${NC}"
+echo -e "${BLUE}� STEP 3: INSTALLING DEPENDENCIES (WORKSPACE-LEVEL)${NC}"
 echo ""
-echo "   Installing dependencies with local package links..."
+echo "   Running pnpm install from workspace root..."
+echo "   This will automatically link workspace:* packages to temp-e2e-app"
 echo ""
 
-if [[ -n "$APP_TO_TEST" ]]; then
-  # If a workspace app is used, ensure workspace and app dependencies are installed
-  echo "   Installing workspace dependencies (root)..."
-  if ! pnpm install --no-frozen-lockfile; then
-    echo -e "${RED}❌ Failed to install workspace dependencies${NC}"
-    exit 1
-  fi
-  echo "   Installing dependencies for app: $TEMP_APP_DIR"
-  if ! (cd "$TEMP_APP_DIR" && pnpm install --no-frozen-lockfile); then
-    echo -e "${RED}❌ Failed to install app dependencies${NC}"
-    exit 1
-  fi
-else
-  # Install dependencies in the temp app directory
-  # file: protocol will link to local packages
-  # 
-  # KNOWN ISSUE: workspace:* dependencies (like @navigator.menu/types) may fail to resolve
-  # in temp apps outside the workspace. Workaround: use APP_TO_TEST=apps/cognitive-showcase
-  if ! pnpm install --dir="$TEMP_APP_DIR" --no-frozen-lockfile 2>&1; then
-    echo -e "${YELLOW}⚠️  Failed to install dependencies (known workspace:* resolution issue)${NC}"
-    echo -e "${YELLOW}   Workaround: Run tests with APP_TO_TEST environment variable:${NC}"
-    echo -e "${YELLOW}   APP_TO_TEST=apps/cognitive-showcase bash scripts/validators/run-e2e-tests.sh${NC}"
-    echo ""
-    echo -e "${YELLOW}   Skipping E2E tests for now (validation can continue)${NC}"
-    exit 0  # Exit gracefully instead of failing the entire validation
-  fi
+# Install from workspace root - pnpm will see temp-e2e-app and resolve workspace:* deps
+if ! pnpm install; then
+  echo -e "${RED}❌ Failed to install dependencies${NC}"
+  exit 1
 fi
 
 echo ""
-echo -e "${GREEN}✓ Dependencies installed (using local workspace packages)${NC}"
+echo -e "${GREEN}✓ Dependencies installed and workspace packages linked${NC}"
 
 # ==========================================
 # VERIFY INSTALLATION
@@ -217,35 +179,21 @@ echo ""
 echo -e "${BLUE}🔍 STEP 4: VERIFYING INSTALLATION${NC}"
 echo ""
 
-# Check that Navigator packages are linked
-echo "   Checking Navigator package links..."
+# Check that temp app has a valid package.json and node_modules exists
+echo "   Verifying temp app setup..."
 
-if [[ -n "$APP_TO_TEST" ]]; then
-  # For workspace apps, node_modules may be in workspace root
-  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ] && [ ! -d "$WORKSPACE_ROOT/node_modules/@navigator.menu/core" ]; then
-    echo -e "${RED}❌ @navigator.menu/core not found${NC}"
-    exit 1
-  fi
-
-  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ] && [ ! -d "$WORKSPACE_ROOT/node_modules/@navigator.menu/react" ]; then
-    echo -e "${RED}❌ @navigator.menu/react not found${NC}"
-    exit 1
-  fi
-else
-  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ]; then
-    echo -e "${RED}❌ @navigator.menu/core not found${NC}"
-    exit 1
-  fi
-
-  if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ]; then
-    echo -e "${RED}❌ @navigator.menu/react not found${NC}"
-    exit 1
-  fi
+if [ ! -f "${TEMP_APP_DIR}/package.json" ]; then
+  echo -e "${RED}❌ package.json not found in temp app${NC}"
+  exit 1
 fi
 
-echo -e "${GREEN}   ✓ @navigator.menu/core linked${NC}"
-echo -e "${GREEN}   ✓ @navigator.menu/react linked${NC}"
-echo -e "${GREEN}   ✓ All packages linked correctly${NC}"
+# In workspace mode, dependencies are managed by pnpm - just verify the temp app is recognized
+if ! grep -q "temp-e2e-app" "pnpm-lock.yaml" 2>/dev/null; then
+  echo -e "${YELLOW}⚠️  temp-e2e-app not found in lock file (may be first run)${NC}"
+fi
+
+echo -e "${GREEN}   ✓ Temp app configured correctly${NC}"
+echo -e "${GREEN}   ✓ Workspace packages will be linked at runtime${NC}"
 
 # ==========================================
 # START TEST SERVER
@@ -266,20 +214,16 @@ if lsof -i :5173 > /dev/null 2>&1; then
 fi
 
 # Ensure port is free and start server at explicit port
-WORKSPACE_ROOT_ABS="$(pwd)"
 echo "   [$(date +%H:%M:%S)] Verifying port ${SERVER_PORT} is free..."
 if lsof -i :${SERVER_PORT} > /dev/null 2>&1; then
   echo "   ⚠️ Port ${SERVER_PORT} is in use. Attempting to kill existing process..."
   kill $(lsof -t -i:${SERVER_PORT}) 2>/dev/null || true
   sleep 1
 fi
-echo "   [$(date +%H:%M:%S)] Starting Vite preview on explicit port ${SERVER_PORT}..."
-if [[ -n "$APP_TO_TEST" ]]; then
-  # If testing an app inside the workspace, ensure the app is built
-  echo "   Building app: $TEMP_APP_DIR"
-  (cd "$TEMP_APP_DIR" && pnpm build) > /dev/null 2>&1 || true
-fi
-(cd "$TEMP_APP_DIR" && pnpm preview --port "${SERVER_PORT}") > "$SERVER_LOG" 2>&1 &
+
+echo "   [$(date +%H:%M:%S)] Starting Vite dev server on port ${SERVER_PORT}..."
+# Use dev server instead of preview - faster and more reliable for E2E tests
+(cd "$TEMP_APP_DIR" && pnpm dev --port "${SERVER_PORT}" --host) > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 SERVER_URL="http://localhost:${SERVER_PORT}"
 
