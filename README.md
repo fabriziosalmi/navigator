@@ -1,4 +1,4 @@
-# Navigator.Menu ✨
+# Navigator ✨
 
 **The Sentient Interface SDK.** Navigate the web with gesture, voice, and predictive AI.
 
