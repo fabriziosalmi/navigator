@@ -36,11 +36,11 @@ import '../styles/global.css';
 		<!-- Hero Section -->
 		<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
 			<!-- Animated Background -->
-			<div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-950 to-gray-950">
+			<div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950">
 				<div class="absolute inset-0 opacity-30">
-					<div class="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-					<div class="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-					<div class="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+					<div class="absolute top-0 -left-4 w-96 h-96 bg-orange-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+					<div class="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+					<div class="absolute -bottom-8 left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
 				</div>
 			</div>
 			
@@ -64,12 +64,12 @@ import '../styles/global.css';
 				</h1>
 				
 				<!-- Tagline with Glow Effect -->
-				<h2 class="text-3xl md:text-5xl font-light mb-4 text-purple-300 animate-fade-in-up animation-delay-200">
+				<h2 class="text-3xl md:text-5xl font-light mb-4 text-orange-300 animate-fade-in-up animation-delay-200">
 					The Sentient Interface SDK
 				</h2>
 				
 				<p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto animate-fade-in-up animation-delay-400">
-					The first framework that <span class="text-purple-400 font-semibold">understands</span> and <span class="text-cyan-400 font-semibold">adapts</span> to user behavior in real-time.
+					Understand and adapt to user behavior in real-time
 				</p>
 				
 				<!-- CTA Buttons -->
@@ -78,7 +78,7 @@ import '../styles/global.css';
 					<a 
 						href="https://navigator-demo.vercel.app" 
 						target="_blank"
-						class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+						class="group relative px-8 py-4 bg-gradient-to-r from-orange-600 to-blue-600 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105"
 					>
 						<span class="flex items-center gap-2">
 							🚀 Launch Live Demo
@@ -91,7 +91,7 @@ import '../styles/global.css';
 					<!-- Secondary CTA -->
 					<button 
 						onclick="navigator.clipboard.writeText('npm install @navigator.menu/core'); this.querySelector('span').textContent = '✓ Copied!'; setTimeout(() => this.querySelector('span').textContent = 'npm install @navigator.menu/core', 2000)"
-						class="group px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-mono text-sm hover:bg-white/10 hover:border-purple-400 transition-all duration-300 hover:scale-105"
+						class="group px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-mono text-sm hover:bg-white/10 hover:border-orange-400 transition-all duration-300 hover:scale-105"
 					>
 						<span>npm install @navigator.menu/core</span>
 					</button>
@@ -129,35 +129,35 @@ import '../styles/global.css';
 		<!-- Features Section -->
 		<section class="relative py-24 bg-gray-900/50">
 			<div class="max-w-7xl mx-auto px-6">
-				<h2 class="text-4xl md:text-5xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
+				<h2 class="text-4xl md:text-5xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-blue-400">
 					Three Pillars of Sentient Interfaces
 				</h2>
 				
 				<div class="grid md:grid-cols-3 gap-8">
 					<!-- Feature 1: Sentient -->
-					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-purple-900/20 to-purple-950/20 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:scale-105">
-						<div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-orange-900/20 to-orange-950/20 border border-orange-500/20 hover:border-orange-500/50 transition-all duration-300 hover:scale-105">
+						<div class="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 						<div class="relative z-10">
 							<div class="text-5xl mb-6">🧠</div>
-							<h3 class="text-2xl font-bold mb-4 text-purple-300">Sentient</h3>
+							<h3 class="text-2xl font-bold mb-4 text-orange-300">Sentient</h3>
 							<p class="text-gray-300 leading-relaxed">
-								An AI core that <span class="text-purple-400 font-semibold">understands user state</span>, predicts intent, and adapts behavior in real-time through cognitive modeling.
+								An AI core that <span class="text-orange-400 font-semibold">understands user state</span>, predicts intent, and adapts behavior in real-time through cognitive modeling.
 							</p>
 							<ul class="mt-6 space-y-2 text-sm text-gray-400">
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Behavioral modeling
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Intent prediction
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Real-time adaptation
@@ -167,29 +167,29 @@ import '../styles/global.css';
 					</div>
 					
 					<!-- Feature 2: Universal -->
-					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-cyan-900/20 to-cyan-950/20 border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:scale-105">
-						<div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-blue-900/20 to-blue-950/20 border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:scale-105">
+						<div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 						<div class="relative z-10">
 							<div class="text-5xl mb-6">🔗</div>
-							<h3 class="text-2xl font-bold mb-4 text-cyan-300">Universal</h3>
+							<h3 class="text-2xl font-bold mb-4 text-blue-300">Universal</h3>
 							<p class="text-gray-300 leading-relaxed">
-								A <span class="text-cyan-400 font-semibold">plugin-based SDK</span> that works with React, Vue, Svelte, or vanilla JS. Framework-agnostic by design.
+								A <span class="text-blue-400 font-semibold">plugin-based SDK</span> that works with React, Vue, Svelte, or vanilla JS. Framework-agnostic by design.
 							</p>
 							<ul class="mt-6 space-y-2 text-sm text-gray-400">
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Zero-dependency core
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Plugin Development Kit
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									TypeScript-first
@@ -199,29 +199,29 @@ import '../styles/global.css';
 					</div>
 					
 					<!-- Feature 3: Spatial-Ready -->
-					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-pink-900/20 to-pink-950/20 border border-pink-500/20 hover:border-pink-500/50 transition-all duration-300 hover:scale-105">
-						<div class="absolute inset-0 bg-gradient-to-br from-pink-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<div class="group relative p-8 rounded-2xl bg-gradient-to-br from-cyan-900/20 to-cyan-950/20 border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:scale-105">
+						<div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 						<div class="relative z-10">
 							<div class="text-5xl mb-6">🕶️</div>
-							<h3 class="text-2xl font-bold mb-4 text-pink-300">Spatial-Ready</h3>
+							<h3 class="text-2xl font-bold mb-4 text-cyan-300">Spatial-Ready</h3>
 							<p class="text-gray-300 leading-relaxed">
-								Built for the <span class="text-pink-400 font-semibold">next generation</span> of 2D & 3D web experiences. Gesture control, voice commands, and spatial navigation.
+								Built for the <span class="text-cyan-400 font-semibold">next generation</span> of 2D & 3D web experiences. Gesture control, voice commands, and spatial navigation.
 							</p>
 							<ul class="mt-6 space-y-2 text-sm text-gray-400">
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Gesture control
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Voice commands
 								</li>
 								<li class="flex items-center gap-2">
-									<svg class="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
+									<svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
 									</svg>
 									Multi-modal input
@@ -244,7 +244,7 @@ import '../styles/global.css';
 				</p>
 				
 				<div class="relative group">
-					<div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
+					<div class="absolute -inset-1 bg-gradient-to-r from-orange-600 to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
 					<div class="relative bg-gray-900 rounded-lg p-8 border border-gray-800">
 						<div class="flex items-center justify-between mb-4">
 							<div class="flex gap-2">
@@ -254,12 +254,12 @@ import '../styles/global.css';
 							</div>
 							<span class="text-xs text-gray-500 font-mono">main.ts</span>
 						</div>
-						<pre class="text-sm font-mono text-gray-300 overflow-x-auto"><code><span class="text-purple-400">import</span> { <span class="text-cyan-400">NavigatorCore</span> } <span class="text-purple-400">from</span> <span class="text-green-400">'@navigator.menu/core'</span>;
+						<pre class="text-sm font-mono text-gray-300 overflow-x-auto"><code><span class="text-orange-400">import</span> { <span class="text-blue-400">NavigatorCore</span> } <span class="text-orange-400">from</span> <span class="text-green-400">'@navigator.menu/core'</span>;
 
 <span class="text-gray-500">// Initialize the sentient interface</span>
-<span class="text-purple-400">const</span> <span class="text-cyan-400">navigator</span> = <span class="text-purple-400">new</span> <span class="text-cyan-400">NavigatorCore</span>();
-<span class="text-purple-400">await</span> navigator.<span class="text-cyan-400">init</span>();
-navigator.<span class="text-cyan-400">start</span>();
+<span class="text-orange-400">const</span> <span class="text-blue-400">navigator</span> = <span class="text-orange-400">new</span> <span class="text-blue-400">NavigatorCore</span>();
+<span class="text-orange-400">await</span> navigator.<span class="text-blue-400">init</span>();
+navigator.<span class="text-blue-400">start</span>();
 
 <span class="text-gray-500">// Your interface now understands users ✨</span></code></pre>
 					</div>
@@ -268,9 +268,9 @@ navigator.<span class="text-cyan-400">start</span>();
 		</section>
 
 		<!-- CTA Section -->
-		<section class="relative py-32 bg-gradient-to-br from-purple-900/20 via-gray-900 to-cyan-900/20">
+		<section class="relative py-32 bg-gradient-to-br from-orange-900/20 via-gray-900 to-blue-900/20">
 			<div class="max-w-4xl mx-auto px-6 text-center">
-				<h2 class="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
+				<h2 class="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-blue-400">
 					Ready to Build the Future?
 				</h2>
 				<p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
@@ -281,21 +281,21 @@ navigator.<span class="text-cyan-400">start</span>();
 					<a 
 						href="https://navigator-demo.vercel.app" 
 						target="_blank"
-						class="px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+						class="px-8 py-4 bg-gradient-to-r from-orange-600 to-blue-600 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105"
 					>
 						🚀 Launch Live Demo
 					</a>
 					<a 
 						href="https://github.com/fabriziosalmi/navigator" 
 						target="_blank"
-						class="px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transition-all duration-300 hover:scale-105"
+						class="px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-semibold text-lg hover:bg-white/10 hover:border-orange-400 transition-all duration-300 hover:scale-105"
 					>
 						📖 Read the Docs
 					</a>
 					<a 
 						href="https://www.npmjs.com/org/navigator.menu" 
 						target="_blank"
-						class="px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-semibold text-lg hover:bg-white/10 hover:border-cyan-400 transition-all duration-300 hover:scale-105"
+						class="px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-semibold text-lg hover:bg-white/10 hover:border-blue-400 transition-all duration-300 hover:scale-105"
 					>
 						📦 View on NPM
 					</a>
@@ -309,7 +309,7 @@ navigator.<span class="text-cyan-400">start</span>();
 				<div class="grid md:grid-cols-4 gap-8 mb-8">
 					<!-- Brand -->
 					<div>
-						<h3 class="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Navigator.Menu</h3>
+						<h3 class="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-blue-400">Navigator.Menu</h3>
 						<p class="text-gray-400 text-sm">
 							The Sentient Interface SDK for the modern web.
 						</p>
@@ -319,10 +319,10 @@ navigator.<span class="text-cyan-400">start</span>();
 					<div>
 						<h4 class="font-semibold mb-4 text-gray-300">Resources</h4>
 						<ul class="space-y-2 text-sm text-gray-400">
-							<li><a href="https://github.com/fabriziosalmi/navigator" target="_blank" class="hover:text-purple-400 transition-colors">Documentation</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/tree/main/docs/examples" target="_blank" class="hover:text-purple-400 transition-colors">Examples</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator#readme" target="_blank" class="hover:text-purple-400 transition-colors">Getting Started</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/CONTRIBUTING.md" target="_blank" class="hover:text-purple-400 transition-colors">Contributing</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator" target="_blank" class="hover:text-orange-400 transition-colors">Documentation</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/tree/main/docs/examples" target="_blank" class="hover:text-orange-400 transition-colors">Examples</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator#readme" target="_blank" class="hover:text-orange-400 transition-colors">Getting Started</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/CONTRIBUTING.md" target="_blank" class="hover:text-orange-400 transition-colors">Contributing</a></li>
 						</ul>
 					</div>
 					
@@ -330,10 +330,10 @@ navigator.<span class="text-cyan-400">start</span>();
 					<div>
 						<h4 class="font-semibold mb-4 text-gray-300">Community</h4>
 						<ul class="space-y-2 text-sm text-gray-400">
-							<li><a href="https://github.com/fabriziosalmi/navigator" target="_blank" class="hover:text-purple-400 transition-colors">GitHub</a></li>
-							<li><a href="https://www.npmjs.com/org/navigator.menu" target="_blank" class="hover:text-purple-400 transition-colors">NPM</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/issues" target="_blank" class="hover:text-purple-400 transition-colors">Issues</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/discussions" target="_blank" class="hover:text-purple-400 transition-colors">Discussions</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator" target="_blank" class="hover:text-orange-400 transition-colors">GitHub</a></li>
+							<li><a href="https://www.npmjs.com/org/navigator.menu" target="_blank" class="hover:text-orange-400 transition-colors">NPM</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/issues" target="_blank" class="hover:text-orange-400 transition-colors">Issues</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/discussions" target="_blank" class="hover:text-orange-400 transition-colors">Discussions</a></li>
 						</ul>
 					</div>
 					
@@ -341,9 +341,9 @@ navigator.<span class="text-cyan-400">start</span>();
 					<div>
 						<h4 class="font-semibold mb-4 text-gray-300">Legal</h4>
 						<ul class="space-y-2 text-sm text-gray-400">
-							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/LICENSE" target="_blank" class="hover:text-purple-400 transition-colors">MIT License</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/CODE_OF_CONDUCT.md" target="_blank" class="hover:text-purple-400 transition-colors">Code of Conduct</a></li>
-							<li><a href="https://github.com/fabriziosalmi/navigator/security" target="_blank" class="hover:text-purple-400 transition-colors">Security</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/LICENSE" target="_blank" class="hover:text-orange-400 transition-colors">MIT License</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/blob/main/CODE_OF_CONDUCT.md" target="_blank" class="hover:text-orange-400 transition-colors">Code of Conduct</a></li>
+							<li><a href="https://github.com/fabriziosalmi/navigator/security" target="_blank" class="hover:text-orange-400 transition-colors">Security</a></li>
 						</ul>
 					</div>
 				</div>
