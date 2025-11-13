@@ -8,6 +8,7 @@ function App() {
   const [eventCount, setEventCount] = useState(0);
   const [keyHistory, setKeyHistory] = useState<string[]>([]);
   const [navigatorStatus, setNavigatorStatus] = useState<string>('Initializing...');
+  const [cognitiveState, setCognitiveState] = useState<string>('neutral');
 
   // 🚀 Initialize Navigator with KeyboardPlugin
   const { core } = useNavigator({
@@ -34,12 +35,22 @@ function App() {
       setNavigatorStatus('Stopped');
     });
 
-    // Subscribe to keyboard events from the plugin
-    const unsubscribeKeyboard = core.eventBus.on('keyboard:keydown', (event: any) => {
-      const key = event.payload.key;  // Access key from payload!
-      setLastKey(key);
-      setEventCount((prev) => prev + 1);
-      setKeyHistory((prev) => [...prev.slice(-9), key]); // Keep last 10 keys
+    // Subscribe to Store for keyboard events (new unidirectional flow)
+    const unsubscribeKeyboard = core.store.subscribe(() => {
+      const state = core.store.getState();
+      
+      // Get last key from keyboard input state
+      const currentKey = state.input?.keyboard?.lastKey;
+      if (currentKey && currentKey !== lastKey) {
+        setLastKey(currentKey);
+        setEventCount((prev) => prev + 1);
+        setKeyHistory((prev) => [...prev.slice(-9), currentKey]); // Keep last 10 keys
+      }
+      
+      // Update cognitive state
+      if (state.cognitive?.currentState) {
+        setCognitiveState(state.cognitive.currentState);
+      }
     });
 
     return () => {
@@ -58,6 +69,13 @@ function App() {
         <div className="status-label">Navigator Status</div>
         <div className="status-value" data-testid="navigator-status">
           {navigatorStatus}
+        </div>
+      </div>
+
+      <div className="status-card">
+        <div className="status-label">Cognitive State</div>
+        <div className="status-value" data-testid="cognitive-state">
+          {cognitiveState}
         </div>
       </div>
 

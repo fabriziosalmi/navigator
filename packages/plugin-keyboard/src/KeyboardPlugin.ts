@@ -153,19 +153,26 @@ export class KeyboardPlugin implements INavigatorPlugin {
     // Dispatch raw key press to store (unidirectional flow)
     this.core.store.dispatch(keyPress(key, timestamp));
 
+    // Emit raw keydown event for backward compatibility
+    this.core.eventBus.emit('keyboard:keydown', { key, code, timestamp });
+
     // Emit navigation intents and record action
     const intentEmitted = this._emitNavigationIntent(key, timestamp);
     
-    // Record keydown action (successful if it's a known navigation key)
+    // Record non-navigation keys (for apps that want to track all keypresses)
+    // Note: Apps can decide whether these are errors based on their context
     if (!intentEmitted) {
-      this._recordAction(`keyboard:keydown:${key}`, true, timestamp);
+      const isModifier = ['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(key);
+      if (!isModifier) {
+        this._recordAction(`keyboard:keypress:${key}`, true, timestamp);
+      }
     }
   }
 
   private _onKeyUp(event: KeyboardEvent): void {
     if (!this.core) return;
 
-    const { key } = event;
+    const { key, code } = event;
     const timestamp = performance.now();
 
     // Remove from pressed keys
@@ -173,6 +180,9 @@ export class KeyboardPlugin implements INavigatorPlugin {
 
     // Dispatch key release to store (unidirectional flow)
     this.core.store.dispatch(keyRelease(key, timestamp));
+
+    // Emit raw keyup event for backward compatibility
+    this.core.eventBus.emit('keyboard:keyup', { key, code, timestamp });
   }
 
   // ========================================
@@ -240,10 +250,10 @@ export class KeyboardPlugin implements INavigatorPlugin {
         plugin: this.name,
       },
     };
-    
-    // 🔍 SONDA #4: KeyboardPlugin
-    console.log(`[DIAGNOSTIC] KeyboardPlugin._recordAction called:`, { type, success, duration_ms });
-    
+
+    // 🔍 SONDA #4: KeyboardPlugin (commented for production)
+    // console.log(`[DIAGNOSTIC] KeyboardPlugin._recordAction called:`, { type, success, duration_ms });
+
     this.core.recordAction(action);
     
     // Reset action start time

@@ -94,9 +94,29 @@ const cognitiveMiddleware = (store) => (next) => (action) => {
 ```
 
 **Active Middleware** (in order):
-1. **cognitiveMiddleware**: Detects frustration/flow states
+1. **cognitiveMiddleware**: Detects frustration/flow states with context-aware state machine
 2. **historyMiddleware**: Records action history
 3. **loggerMiddleware**: Debug console output (dev mode)
+
+**Cognitive Middleware: Context-Aware State Machine**
+
+The cognitive middleware has evolved into a sophisticated context-aware system that understands the *context* of state transitions, not just the signals themselves.
+
+**Key Innovation: Recovery Cooldown Period**
+
+When a user exits a `frustrated` state, the middleware activates a "recovery cooldown" of 100 actions. During this period:
+- The system prevents premature transitions to `exploring` state
+- This distinguishes genuine exploration (trying new things) from recovery behavior (successfully navigating after frustration)
+- The cooldown accounts for internal action multipliers (each keystroke generates ~7 internal actions)
+
+**Why This Matters:**
+
+Without the cooldown, the middleware would misclassify recovery as exploration because:
+1. User presses correct keys repeatedly during recovery
+2. Each keystroke generates multiple internal actions (KEYBOARD_KEY_PRESS, carousel/NAVIGATE, navigation/NAVIGATE, legacy events, etc.)
+3. High action variety + low error rate = false positive for "exploring"
+
+The cooldown gives the system a "stabilization period" to let the user demonstrate sustained success before transitioning to other states, resulting in more accurate and human-like cognitive state detection.
 
 #### 3. **Reducers**: Pure Functions That Update State
 

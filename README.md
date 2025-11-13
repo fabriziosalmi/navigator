@@ -16,7 +16,7 @@ Navigator is a **decoupled, plugin-based SDK** for building next-generation web 
 
 ## 🌟 Key Features
 
-*   🧠 **Cognitive AI Engine:** Automatically detects user's mental state (frustrated, concentrated, etc.) and adapts the UI to help them.
+*   🧠 **Cognitive AI Engine:** An intelligent core that understands user behavior in real-time, detecting cognitive states like frustration or deep concentration. Features a context-aware state machine with "recovery cooldown" logic that adapts more humanly to user patterns, distinguishing genuine exploration from post-frustration recovery.
 *   🔮 **Predictive Intent System:** Predicts user actions *before* they are completed, enabling zero-latency interactions.
 *   🔌 **Fully Plugin-Based:** The entire architecture is modular. Add or remove capabilities like gesture, voice, or keyboard input by simply adding a plugin.
 *   ⚡ **High-Performance Core:** Redux-like unidirectional data flow ensures **predictable state management** with time-travel debugging. Parallel plugin initialization (55-93% faster startup).

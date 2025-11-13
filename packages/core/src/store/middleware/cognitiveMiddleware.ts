@@ -114,6 +114,9 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
     learning: 0,
   };
 
+  // Cooldown counter: prevents immediate transition to exploring after frustrated recovery
+  let recoveryActions = 0;
+
   /**
    * The middleware function itself
    * Signature: store => next => action => result
@@ -136,15 +139,42 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
 
   /**
    * Records action in session history for cognitive analysis
+   * 
+   * CRITICAL FILTER: Only semantic actions (high-level intents) are recorded.
+   * Low-level input actions (input/*) are ignored to prevent pollution of
+   * cognitive metrics with raw hardware events.
    */
   function recordActionInHistory(action: Action): void {
     // Extract action metadata
     const actionType = action.type;
+    
+    // --- SEMANTIC ACTION FILTER ---
+    // Ignore low-level input actions - they are not semantic intents
+    // Only record high-level actions that represent user intent (navigation, carousel, etc.)
+    const isInputAction = actionType.startsWith('input/');
+    const isInternalAction = actionType.startsWith('@@'); // Redux internal actions
+    
+    if (isInputAction || isInternalAction) {
+      if (mergedConfig.debugMode) {
+        console.log('[CognitiveMiddleware] Ignoring low-level action:', actionType);
+      }
+      return; // Skip recording
+    }
+    // ------------------------------
+    
     const timestamp = performance.now();
     
     // Determine if action represents success or failure (case-insensitive)
+    // Patterns that indicate errors/failures:
+    // - 'error', 'fail' - explicit failure types
+    // - 'invalid' - invalid input/state
+    // - 'reject' - rejected operations
     const actionTypeLower = actionType.toLowerCase();
-    const success = !actionTypeLower.includes('error') && !actionTypeLower.includes('fail');
+    const success = 
+      !actionTypeLower.includes('error') && 
+      !actionTypeLower.includes('fail') &&
+      !actionTypeLower.includes('invalid') &&
+      !actionTypeLower.includes('reject');
     
     // Calculate duration if available (for navigation actions)
     const duration_ms = (action as any).payload?.metadata?.duration;
@@ -160,7 +190,7 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
     });
 
     if (mergedConfig.debugMode) {
-      console.log('[CognitiveMiddleware] Action recorded:', {
+      console.log('[CognitiveMiddleware] Semantic action recorded:', {
         type: actionType,
         success,
         duration_ms,
@@ -170,6 +200,10 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
 
   /**
    * Analyzes session metrics and transitions cognitive state if needed
+   * 
+   * CONTEXTUAL STATE MACHINE: Transition logic depends on current state.
+   * - If FRUSTRATED: only exit to NEUTRAL when errors stop (recovery logic)
+   * - Otherwise: normal priority-based state determination
    */
   function analyzeCognitiveState(store: MiddlewareAPI<RootState, Action>, triggerAction: Action): void {
     // Get recent metrics from history
@@ -177,6 +211,7 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
 
     if (mergedConfig.debugMode) {
       console.log('[CognitiveMiddleware] Analyzing...', {
+        currentState,
         totalActions: metrics.totalActions,
         errorRate: metrics.errorRate,
         avgDuration: metrics.averageDuration,
@@ -193,17 +228,74 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
       return;
     }
 
-    // Run heuristic analyzers
-    checkForFrustration(metrics);
-    checkForConcentration(metrics);
-    checkForExploration(metrics);
+    // --- CONTEXTUAL STATE MACHINE ---
+    let newState: CognitiveState;
 
-    if (mergedConfig.debugMode) {
-      console.log('[MW-DEBUG] After analysis - signals:', { ...signals });
+    if (currentState === 'frustrated') {
+      // RECOVERY LOGIC: If frustrated, only exit to neutral when errors stop
+      // Don't check for exploring/concentrated while in frustrated state
+      if (metrics.recentErrors === 0 && metrics.totalActions >= 5) {
+        if (mergedConfig.debugMode) {
+          console.log('[CognitiveMiddleware] RECOVERY: Exiting frustrated state (no recent errors)');
+        }
+        newState = 'neutral';
+        // Reset signals for clean state
+        signals.frustrated = 0;
+        signals.concentrated = 0;
+        signals.exploring = 0;
+        // Start cooldown: require 100 successful actions before allowing exploring state
+        recoveryActions = 100;
+        if (mergedConfig.debugMode) {
+          console.log('[CognitiveMiddleware] RECOVERY: Cooldown activated for 100 actions');
+        }
+      } else {
+        // Still frustrated - check if frustration continues
+        checkForFrustration(metrics);
+        newState = signals.frustrated >= mergedConfig.frustratedThreshold ? 'frustrated' : 'neutral';
+      }
+    } else {
+      // Decrement cooldown counter if active
+      if (recoveryActions > 0) {
+        recoveryActions--;
+        if (mergedConfig.debugMode) {
+          console.log('[CognitiveMiddleware] RECOVERY: Cooldown active, remaining actions:', recoveryActions);
+        }
+      }
+
+      // Normal state determination: run all heuristics
+      checkForFrustration(metrics);
+      checkForConcentration(metrics);
+
+      // Only check for exploring if NOT in cooldown period
+      if (recoveryActions === 0) {
+        checkForExploration(metrics);
+      } else {
+        // During cooldown, reset exploring signal to prevent state change
+        signals.exploring = 0;
+      }
+
+      if (mergedConfig.debugMode) {
+        console.log('[MW-DEBUG] After analysis - signals:', { ...signals });
+        console.log('[COGNITIVE-DEBUG] Full Analysis:', {
+          metrics: {
+            totalActions: metrics.totalActions,
+            errorRate: (metrics.errorRate * 100).toFixed(1) + '%',
+            recentErrors: metrics.recentErrors,
+            avgDuration: Math.round(metrics.averageDuration) + 'ms',
+            actionVariety: metrics.actionVariety,
+          },
+          signals: { ...signals },
+          thresholds: {
+            frustrated: mergedConfig.frustratedThreshold,
+            concentrated: mergedConfig.concentratedThreshold,
+            exploring: mergedConfig.exploringThreshold,
+          },
+        });
+      }
+
+      // Determine new state based on signal strengths (priority-based)
+      newState = determineState();
     }
-
-    // Determine new state based on signal strengths
-    const newState = determineState();
 
     if (mergedConfig.debugMode) {
       console.log(`[MW-DEBUG] State determination: newState="${newState}", currentState="${currentState}"`);
@@ -214,6 +306,15 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
       if (mergedConfig.debugMode) {
         console.log('[MW-DEBUG] Transition detected! Dispatching STATE_CHANGE...');
       }
+
+      // Activate cooldown when exiting frustrated state to prevent immediate exploring
+      if (currentState === 'frustrated' && newState === 'neutral') {
+        recoveryActions = 100;
+        if (mergedConfig.debugMode) {
+          console.log('[CognitiveMiddleware] RECOVERY: Exiting frustrated → neutral, cooldown activated for 100 actions');
+        }
+      }
+
       transitionState(store, newState, metrics);
     } else {
       if (mergedConfig.debugMode) {
@@ -224,19 +325,24 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
 
   /**
    * Detect frustrated user pattern:
-   * - High error rate (>40%)
+   * - Moderate error rate (>15%) - lowered from 25% to be more sensitive
    * - Multiple recent errors (≥3)
+   * 
+   * Rationale: Users making 1 in 7 actions as errors (~15%) are likely frustrated.
+   * This threshold balances sensitivity without false positives.
    */
   function checkForFrustration(metrics: SessionMetrics): void {
-    const frustrated = metrics.errorRate > 0.4 && metrics.recentErrors >= 3;
-    
-    if (mergedConfig.debugMode) {
+    const frustrated = metrics.errorRate > 0.15 && metrics.recentErrors >= 3;    if (mergedConfig.debugMode) {
       console.log('[MW-DEBUG] checkForFrustration:', {
         errorRate: metrics.errorRate,
+        errorRatePercent: (metrics.errorRate * 100).toFixed(1) + '%',
+        threshold: '15%',
         recentErrors: metrics.recentErrors,
+        minErrors: 3,
         frustrated,
         signalBefore: signals.frustrated,
       });
+      console.log('[MW-DEBUG] checkForFrustration result: signal =', signals.frustrated + (frustrated ? 1 : 0));
     }
     
     if (frustrated) {
@@ -252,18 +358,24 @@ export function createCognitiveMiddleware(config: CognitiveMiddlewareConfig = {}
 
   /**
    * Detect concentrated user pattern:
-   * - Fast actions (<400ms average)
-   * - Low error rate (<10%)
+   * - Fast actions (<400ms average) AND has valid duration data
+   * - Low error rate (<5%)
    */
   function checkForConcentration(metrics: SessionMetrics): void {
+    // Only consider concentration if we have meaningful duration data
+    // (avgDuration > 0 means at least some actions had timing data)
     const concentrated = 
-      metrics.averageDuration < 400 && 
-      metrics.errorRate < 0.1;
+      metrics.averageDuration > 0 &&      // Must have timing data
+      metrics.averageDuration < 400 &&    // Fast actions
+      metrics.errorRate < 0.05;           // Near-perfect accuracy (5% error tolerance)
     
     if (mergedConfig.debugMode) {
       console.log('[MW-DEBUG] checkForConcentration:', {
         avgDuration: metrics.averageDuration,
+        hasDurationData: metrics.averageDuration > 0,
         errorRate: metrics.errorRate,
+        errorRatePercent: (metrics.errorRate * 100).toFixed(1) + '%',
+        threshold: '5%',
         concentrated,
       });
     }
