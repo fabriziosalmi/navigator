@@ -23,6 +23,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
+    "test:ci": "vitest run --config vitest.config.ci.ts --coverage --reporter=verbose",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts,.js",
