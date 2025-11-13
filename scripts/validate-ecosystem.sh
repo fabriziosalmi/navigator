@@ -141,7 +141,7 @@ declare -a STEPS=(
   "quality:Code Quality & Complexity:$VALIDATORS_DIR/check-code-quality.sh"
   "test:Unit & Integration Tests:$VALIDATORS_DIR/run-unit-tests.sh"
   "build:Production Build:$VALIDATORS_DIR/build-all.sh"
-  "e2e:End-to-End Tests:$VALIDATORS_DIR/run-e2e-tests.sh"
+  "e2e:End-to-End Tests:$VALIDATORS_DIR/run-e2e-all.sh"
   "size:Bundle Size Check:$VALIDATORS_DIR/check-bundle-size.sh"
 )
 

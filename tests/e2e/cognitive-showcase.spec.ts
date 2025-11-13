@@ -30,7 +30,9 @@ test.describe('Cognitive Showcase - Frustration & Recovery', () => {
     await expect(overlay.first()).toBeVisible({ timeout: 5000 });
 
     // Act: Recovery - press ArrowRight many times to navigate successfully
-    for (let i = 0; i < 10; i++) {
+    // Need enough successful actions to drop error rate below 40%
+    // With 8 errors, need 13+ successes: 8/(8+13) = 38% < 40%
+    for (let i = 0; i < 15; i++) {
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(30);
     }

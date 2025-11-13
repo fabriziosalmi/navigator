@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigator } from '@navigator.menu/react';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 
@@ -9,6 +9,9 @@ function App() {
   const [keyHistory, setKeyHistory] = useState<string[]>([]);
   const [navigatorStatus, setNavigatorStatus] = useState<string>('Initializing...');
   const [cognitiveState, setCognitiveState] = useState<string>('neutral');
+  
+  // Track last processed timestamp to avoid duplicate counts on same event
+  const lastProcessedTimestampRef = useRef<number | null>(null);
 
   // 🚀 Initialize Navigator with KeyboardPlugin
   const { core } = useNavigator({
@@ -35,19 +38,49 @@ function App() {
       setNavigatorStatus('Stopped');
     });
 
-    // Subscribe to Store for keyboard events (new unidirectional flow)
-    const unsubscribeKeyboard = core.store.subscribe(() => {
+    // ✨ NEW: Subscribe to Store for ALL state changes (unidirectional flow)
+    const unsubscribeStore = core.store.subscribe(() => {
       const state = core.store.getState();
       
-      // Get last key from keyboard input state
+      // Get keyboard state from Store
       const currentKey = state.input?.keyboard?.lastKey;
-      if (currentKey && currentKey !== lastKey) {
+      const currentTimestamp = state.input?.keyboard?.lastTimestamp;
+      
+      // Only update if we have a new event (different timestamp)
+      if (currentKey && currentTimestamp && currentTimestamp !== lastProcessedTimestampRef.current) {
+        lastProcessedTimestampRef.current = currentTimestamp;
+        
+        console.log('[App] KEYPRESS DETECTED:', { currentKey, timestamp: currentTimestamp });
+        
         setLastKey(currentKey);
         setEventCount((prev) => prev + 1);
         setKeyHistory((prev) => [...prev.slice(-9), currentKey]); // Keep last 10 keys
+        
+        // Dispatch error action for non-navigation keys (cognitive tracking)
+        // Navigation keys: arrows, Enter, Space, Tab
+        // Modifier keys: Shift, Control, Alt, Meta - ignored
+        const navigationKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Tab'];
+        const modifierKeys = ['Shift', 'Control', 'Alt', 'Meta'];
+        
+        console.log('[App] Key check:', { currentKey, isNav: navigationKeys.includes(currentKey), isMod: modifierKeys.includes(currentKey) });
+        
+        if (!navigationKeys.includes(currentKey) && !modifierKeys.includes(currentKey)) {
+          console.log('[App] Dispatching INVALID_KEY for:', currentKey);
+          core.store.dispatch({
+            type: 'test-app/INVALID_KEY',
+            payload: {
+              key: currentKey,
+              timestamp: currentTimestamp,
+              metadata: {
+                reason: 'not_a_navigation_key',
+                validKeys: navigationKeys
+              }
+            }
+          });
+        }
       }
       
-      // Update cognitive state
+      // Update cognitive state from Store
       if (state.cognitive?.currentState) {
         setCognitiveState(state.cognitive.currentState);
       }
@@ -56,7 +89,7 @@ function App() {
     return () => {
       unsubscribeStart();
       unsubscribeStop();
-      unsubscribeKeyboard();
+      unsubscribeStore();
     };
   }, [core]);
 
