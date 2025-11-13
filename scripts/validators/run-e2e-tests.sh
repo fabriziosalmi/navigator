@@ -129,8 +129,9 @@ echo -e "${BLUE}🔨 STEP 1.5: BUILDING NAVIGATOR PACKAGES${NC}"
 echo ""
 echo "   Building Navigator SDK packages for E2E test..."
 
-# Build only the packages needed for E2E tests
-if ! pnpm build --filter '@navigator.menu/core' --filter '@navigator.menu/react' --filter '@navigator.menu/plugin-keyboard' 2>&1 | grep -v "Scope:"; then
+# Build all SDK packages in the workspace
+# Note: --filter applies to pnpm, not to individual package build scripts
+if ! pnpm -r --filter './packages/**' build 2>&1 | grep -v "Scope:"; then
   echo -e "${RED}❌ Failed to build Navigator packages${NC}"
   exit 1
 fi
@@ -193,7 +194,9 @@ echo "   This will automatically link workspace:* packages to temp-e2e-app (if c
 echo ""
 
 # Install from workspace root - pnpm will see temp-e2e-app and resolve workspace:* deps
-if ! pnpm install; then
+# Use --no-frozen-lockfile to allow lockfile updates for the temporary app
+# This is safe for E2E tests as we're adding a temporary workspace package
+if ! pnpm install --no-frozen-lockfile; then
   echo -e "${RED}❌ Failed to install dependencies${NC}"
   exit 1
 fi
