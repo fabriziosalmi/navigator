@@ -14,6 +14,7 @@
     "build": "pnpm -r --filter './packages/**' build",
     "build:all": "pnpm -r build",
     "test": "pnpm -r test",
+    "test:ci": "pnpm -r run test:ci",
     "test:unit": "pnpm -r --filter './packages/**' test:unit",
     "test:e2e": "pnpm --filter @navigator.menu/demo test:e2e",
     "lint": "pnpm -r lint",

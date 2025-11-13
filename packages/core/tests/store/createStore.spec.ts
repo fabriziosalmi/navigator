@@ -233,7 +233,6 @@ describe('createStore', () => {
     });
 
     it('should throw error if unsubscribe is called while dispatching', () => {
-      const store = createStore(counterReducer);
       let unsubscribe: () => void;
 
       const recursiveReducer: Reducer<CounterState> = (state = { count: 0 }, action) => {

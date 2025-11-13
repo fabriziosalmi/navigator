@@ -17,6 +17,7 @@ import { applyMiddleware } from './store/applyMiddleware';
 import { createCognitiveMiddleware } from './store/middleware/cognitiveMiddleware';
 import { loggerMiddleware } from './store/middleware/loggerMiddleware';
 import { rootReducer, type RootState } from './store/reducers';
+import type { Middleware } from './store/types';
 import type { DeepPartial } from './AppState';
 import type { Store, Action as StoreAction } from './store/types';
 
@@ -32,6 +33,8 @@ export interface NavigatorCoreConfig {
   initialState?: DeepPartial<NavigatorState>;
   /** Maximum size of session history buffer */
   historyMaxSize?: number;
+  /** Disable logger middleware (useful for stress tests to prevent console flooding) */
+  disableLogger?: boolean;
 }
 
 /**
@@ -123,7 +126,8 @@ export class NavigatorCore {
       debugMode: config.debugMode || false,
       autoStart: config.autoStart || false,
       initialState: config.initialState || {},
-      historyMaxSize: config.historyMaxSize || 100
+      historyMaxSize: config.historyMaxSize || 100,
+      disableLogger: config.disableLogger || false
     };
 
     // Initialize core systems
@@ -147,10 +151,15 @@ export class NavigatorCore {
       debugMode: this.config.debugMode,
     });
     
-    const middleware = [
-      loggerMiddleware,      // Logs actions for debugging
-      cognitiveMiddleware,   // Tracks cognitive states
+    // Conditionally include logger middleware based on configuration
+    // Logger is disabled in stress tests to prevent console flooding with thousands of action logs
+    const middleware: Middleware<RootState>[] = [
+      cognitiveMiddleware,  // Tracks cognitive states (always enabled)
     ];
+    
+    if (!this.config.disableLogger) {
+      middleware.unshift(loggerMiddleware);  // Logs actions for debugging (optional)
+    }
     
     this.store = createStore(
       rootReducer,

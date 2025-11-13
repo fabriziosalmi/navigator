@@ -23,8 +23,19 @@ if ! grep -q '"test"' package.json; then
 fi
 
 # Run tests across all workspaces
-# Use -r for recursive instead of --filter="..."
-pnpm -r test
+# In CI mode with enhanced stability:
+# - --run: ensure tests run once and exit
+# - --coverage: collect coverage data
+# - --reporter=verbose: detailed output for debugging
+# - --pool=forks: use forked processes to prevent hanging
+# - --poolOptions.forks.singleFork: single worker to avoid resource conflicts
+if [ "${CI}" = "true" ]; then
+  echo "🔧 Running in CI mode with stability optimizations..."
+  pnpm test:ci
+else
+  echo "🔧 Running in local mode..."
+  pnpm -r test
+fi
 
 echo ""
 echo "✅ Unit tests completed"

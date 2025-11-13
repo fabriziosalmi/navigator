@@ -3,12 +3,10 @@ import {
   historyReducer,
   historyActions,
   historySelectors,
-  HISTORY_ACTION_TYPES,
   type HistoryState,
 } from '../../src/store/reducers/historyReducer';
 import {
   navigationReducer,
-  navigationActions,
   type NavigationState,
 } from '../../src/store/reducers/navigationReducer';
 import {
@@ -240,8 +238,6 @@ describe('historyReducer', () => {
     });
 
     it('getActionsInRange should filter actions by time range', () => {
-      const start = Date.now();
-
       let state = historyReducer(initialState, { type: 'ACTION_1' });
 
       // Wait a bit

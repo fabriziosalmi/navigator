@@ -1,7 +1,7 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { applyMiddleware } from '../../src/store/applyMiddleware';
 import { createStore } from '../../src/store/createStore';
 import type { Store, Reducer, Action, Middleware } from '../../src/store/types';
