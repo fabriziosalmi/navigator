@@ -10,6 +10,11 @@ export default defineConfig({
     fakeTimers: {
       toFake: [] // Empty array = no fake timers
     },
+    // CI-friendly teardown configuration
+    teardownTimeout: 30000, // Give 30s for cleanup instead of 10s
+    hookTimeout: 30000, // Increase hook timeout for CI
+    // Use default thread pool but with better isolation
+    isolate: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
