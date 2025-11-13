@@ -2,9 +2,14 @@
  * EventBus.ts
  * 
  * Central event-driven communication system for Navigator ecosystem.
- * Provides a decoupled way for plugins to communicate without direct dependencies.
  * 
- * Features:
+ * @deprecated Since v3.0. The EventBus is being phased out in favor of the Redux-like Store.
+ * Use `core.store.subscribe()` for state changes and `core.store.dispatch()` for actions.
+ * This class will be removed in v4.0.
+ * 
+ * Migration Guide: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+ * 
+ * Features (legacy):
  * - Type-safe event emission and listening
  * - Wildcard event subscriptions
  * - Event history and debugging
@@ -68,6 +73,10 @@ export class EventBus {
 
   /**
    * Subscribe to an event
+   * 
+   * @deprecated Since v3.0. Use `core.store.subscribe()` to react to state changes instead.
+   * Example: `core.store.subscribe(() => { const state = core.store.getState(); ... })`
+   * 
    * @param eventName - Event name (use '*' for all events)
    * @param handler - Callback function (event) => {}
    * @param options - { once: boolean, priority: number }
@@ -78,6 +87,13 @@ export class EventBus {
     handler: EventHandler<T>,
     options: SubscriptionOptions = {}
   ): UnsubscribeFunction {
+    if (this.debugMode) {
+      console.warn(
+        `[DEPRECATION] EventBus.on('${eventName}') is deprecated. ` +
+        `Use Store.subscribe() instead. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md`
+      );
+    }
+
     if (typeof handler !== 'function') {
       throw new Error('EventBus.on: handler must be a function');
     }
@@ -154,11 +170,22 @@ export class EventBus {
 
   /**
    * Emit an event to all subscribers
+   * 
+   * @deprecated Since v3.0. Use `core.store.dispatch(action)` to trigger state changes instead.
+   * Example: `core.store.dispatch(navigate({ currentCard: 1, direction: 'right' }))`
+   * 
    * @param eventName - Event name
    * @param payload - Event data
    * @returns Whether any handlers were called
    */
   emit<T = any>(eventName: string, payload: T = {} as T): boolean {
+    if (this.debugMode && !eventName.startsWith('legacy/') && !eventName.startsWith('system:')) {
+      console.warn(
+        `[DEPRECATION] EventBus.emit('${eventName}') is deprecated. ` +
+        `Use Store.dispatch() instead. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md`
+      );
+    }
+
     // ==========================================
     // CIRCUIT BREAKER: Loop Detection
     // ==========================================

@@ -10,48 +10,31 @@ export { EventBus } from './EventBus';
 export { AppState } from './AppState';
 export { NavigatorCore } from './NavigatorCore';
 export { UserSessionHistory } from './intelligence/UserSessionHistory';
+export type { Action, SessionMetrics } from './intelligence/UserSessionHistory';
 
-// --- ARCHITECTURAL FIX: RE-EXPORT PUBLIC TYPES ---
-// Core acts as the single source of truth for all SDK types.
-// Plugins should import from @navigator.menu/core, not @navigator.menu/types directly.
-export type {
-  // Core SDK Types
-  Action,
-  SessionMetrics,
-  
-  // Event Protocol
-  NipEvent,
-  EventListener,
-  
-  // Configuration
-  NavigatorConfig,
-  PluginConfig,
-  
-  // Plugin Interfaces
-  IPlugin,
-  IEventBus,
-  IAppState,
-  INavigatorCore,
-  
-  // Cognitive Intelligence
-  CognitiveState,
-  CognitiveStateChangePayload,
-  IntentPredictionPayload,
-  
-  // Gesture System
-  InputSource,
-  Position,
-  GestureEventPayload,
-  RawGestureUpdatePayload,
-  
-  // Navigation
-  IntentEventPayload,
-  NavigationChangePayload,
-  
-  // Utilities
-  DeepPartial,
-  ExtractPayload,
-} from '@navigator.menu/types';
+// Store (Sprint 1)
+export { createStore, combineReducers } from './store';
+export { rootReducer, historyActions, historySelectors, uiActions, navigationActions } from './store';
+export { keyPress, keyRelease, gestureDetected, voiceCommand, INPUT_ACTIONS } from './store';
+export { getInteractionState } from './store/reducers/placeholderReducer';
+
+// Actions (Sprint 2 & 3)
+export { navigate, NAVIGATE } from './actions/navigation';
+export type { NavigateAction, NavigatePayload, NavigationDirection, NavigationSource } from './actions/navigation';
+
+export { select, cancel, confirm, SELECT, CANCEL, CONFIRM } from './actions/interaction';
+export type { 
+  SelectAction, 
+  CancelAction, 
+  ConfirmAction, 
+  InteractionAction,
+  SelectPayload,
+  CancelPayload,
+  ConfirmPayload
+} from './actions/interaction';
+
+// Cognitive Model Types
+export type { CognitiveState, CognitiveStateChangePayload, IntentPredictionPayload } from './types/cognitive';
 
 // Core-specific types
 export type {
@@ -72,4 +55,24 @@ export type {
   INavigatorPlugin,
   PluginOptions
 } from './NavigatorCore';
+
+// Redux-like Store types (v3.1+)
+export type {
+  Action as StoreAction,
+  Reducer,
+  Store,
+  Dispatch,
+  Listener,
+  Unsubscribe,
+  Middleware,
+  MiddlewareAPI,
+  StoreEnhancer,
+  RootState,
+  HistoryState,
+  HistoryEntry,
+  NavigationState,
+  CognitiveState as CognitiveStoreState,
+  UIState,
+  SessionState,
+} from './store';
 

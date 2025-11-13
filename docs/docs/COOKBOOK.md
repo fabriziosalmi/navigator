@@ -364,6 +364,131 @@ Now that you've mastered the basics, try these challenges:
 
 ---
 
+### 🎓 Advanced Pattern: Using the Store (Redux-like Unidirectional Flow)
+
+> **NEW in Navigator v3.0**: In addition to EventBus subscriptions, Navigator now provides a **Redux-like Store** for state management. This pattern is recommended for production applications.
+
+#### Why Use the Store Pattern?
+
+- ✅ **Single Source of Truth**: All state lives in one place
+- ✅ **Predictable Updates**: State can only be changed via actions
+- ✅ **Time-Travel Debugging**: Full history of state changes
+- ✅ **Better Testing**: Pure functions are easier to test
+- ✅ **React-Friendly**: Mimics Redux patterns React devs know
+
+#### The Store-Based Version
+
+Replace the EventBus subscription with a Store subscription:
+
+```tsx
+import { useState, useEffect } from 'react';
+import { useNavigator } from '@navigator.menu/react';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+
+function App() {
+  const [currentCard, setCurrentCard] = useState(0);
+  const [cognitiveState, setCognitiveState] = useState('neutral');
+
+  // Initialize Navigator with KeyboardPlugin
+  const { core, isReady } = useNavigator({
+    plugins: [new KeyboardPlugin()],
+    autoStart: true
+  });
+
+  // 🎯 STORE PATTERN: Subscribe to state changes (not events)
+  useEffect(() => {
+    if (!core) return;
+
+    // This is the magic: Your UI is now a PURE FUNCTION of state
+    const unsubscribe = core.store.subscribe(() => {
+      const state = core.store.getState();
+      
+      // Update React state from Navigator state
+      setCurrentCard(state.navigation.currentCard);
+      setCognitiveState(state.cognitive.currentState);
+    });
+
+    return unsubscribe;
+  }, [core]);
+
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'system-ui' }}>
+      <h1>🎯 Navigator + Store Pattern</h1>
+      <p>Use Arrow Keys to navigate!</p>
+
+      <div style={{ 
+        marginTop: '2rem', 
+        padding: '1.5rem', 
+        background: '#f5f5f5', 
+        borderRadius: '8px' 
+      }}>
+        <p><strong>Current Card:</strong> <code>{currentCard}</code></p>
+        <p><strong>Cognitive State:</strong> <code>{cognitiveState}</code></p>
+        <p>✨ Your UI is a <em>pure function of state</em></p>
+      </div>
+    </div>
+  );
+}
+```
+
+#### What Changed?
+
+**EventBus Pattern (Events):**
+```tsx
+core.eventBus.on('keyboard:keydown', (event) => {
+  // React to individual events
+  setLastKey(event.key);
+});
+```
+
+**Store Pattern (State):**
+```tsx
+core.store.subscribe(() => {
+  const state = core.store.getState();
+  // React to complete state snapshots
+  setCurrentCard(state.navigation.currentCard);
+});
+```
+
+#### The Store State Structure
+
+```typescript
+interface NavigatorState {
+  navigation: {
+    currentCard: number;
+    currentLayer: number;
+    direction: 'left' | 'right' | 'up' | 'down' | null;
+    isAnimating: boolean;
+  };
+  cognitive: {
+    currentState: 'neutral' | 'concentrated' | 'frustrated' | 'flow';
+    confidence: number;
+    lastUpdate: number;
+  };
+  input: {
+    keyboard: { enabled: boolean; lastKey: string; ... };
+    gesture: { enabled: boolean; lastGesture: string; ... };
+  };
+  ui: {
+    theme: 'light' | 'dark';
+    focusMode: boolean;
+  };
+  // ... and more
+}
+```
+
+#### When to Use Which Pattern?
+
+| Pattern | Use When | Example |
+|---------|----------|---------|
+| **EventBus** | Reacting to specific actions | "When user presses Enter, submit form" |
+| **Store** | Rendering UI based on state | "Show current card number" |
+| **Both** | Complex apps with side effects | "Listen to events for side effects, read Store for rendering" |
+
+**Pro Tip**: Modern Navigator apps use **Store for UI rendering** and **EventBus for side effects** (analytics, logging, external API calls).
+
+---
+
 ## Recipe #2: Image Carousel with Touch Gestures
 
 **Goal**: Build a touch-controlled image carousel that demonstrates the Navigator Way—plugins capture, core orchestrates, app acts.

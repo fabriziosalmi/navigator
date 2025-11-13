@@ -21,6 +21,7 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest --run",
+    "test:ci": "vitest --run --config vitest.config.ci.ts --coverage --reporter=verbose",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit"
   },
@@ -51,6 +52,6 @@
     "vitest": "^1.6.1"
   },
   "dependencies": {
-    "nanoid": "^5.1.6"
+    "@navigator.menu/types": "workspace:*"
   }
 }

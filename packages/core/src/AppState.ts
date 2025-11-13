@@ -1,10 +1,13 @@
 /**
  * AppState.ts (Enhanced for Core & Plugin Architecture)
  * 
- * Centralized state management - single source of truth for Navigator.
- * Fully integrated with EventBus for reactive state changes.
+ * @deprecated Since v3.0. AppState is being replaced by the Redux-like Store.
+ * Use `core.store.getState()` to read state and `core.store.dispatch()` to update it.
+ * This class will be removed in v4.0.
  * 
- * Features:
+ * Migration Guide: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+ * 
+ * Legacy Features:
  * - Immutable state updates via setState()
  * - Automatic event emission on state changes
  * - State history and time-travel debugging
@@ -215,11 +218,22 @@ export class AppState {
 
   /**
    * Set state values (supports partial updates and deep paths)
+   * 
+   * @deprecated Since v3.0. Use `core.store.dispatch(action)` to update state instead.
+   * Example: `core.store.dispatch(navigate({ currentCard: 1 }))`
+   * 
    * @param pathOrUpdates - Path string or updates object
    * @param value - Value to set (if path is string)
    * @param options - { silent: boolean, merge: boolean }
    */
   setState(pathOrUpdates: string | DeepPartial<NavigatorState>, value?: any, options: SetStateOptions = {}): void {
+    if (this.eventBus['debugMode']) {
+      console.warn(
+        `[DEPRECATION] AppState.setState() is deprecated. ` +
+        `Use Store.dispatch() instead. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md`
+      );
+    }
+
     const { silent = false, merge = true } = options;
 
     let updates: DeepPartial<NavigatorState>;
@@ -255,12 +269,23 @@ export class AppState {
 
   /**
    * Watch a specific state path for changes
+   * 
+   * @deprecated Since v3.0. Use `core.store.subscribe()` to watch for state changes instead.
+   * Example: `core.store.subscribe(() => { const value = core.store.getState().path.to.value; })`
+   * 
    * @param path - State path to watch
    * @param callback - (newValue) => {}
    * @param options - Watch options (mode, debounceMs)
    * @returns Unwatch function
    */
   watch(path: string, callback: WatcherCallback, options?: WatchOptions): () => void {
+    if (this.eventBus['debugMode']) {
+      console.warn(
+        `[DEPRECATION] AppState.watch('${path}') is deprecated. ` +
+        `Use Store.subscribe() instead. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md`
+      );
+    }
+
     if (!this.watchers.has(path)) {
       this.watchers.set(path, new Set());
     }

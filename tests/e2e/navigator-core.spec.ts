@@ -174,16 +174,16 @@ test.describe('Navigator React Integration', () => {
     await page.locator('.container').focus();
     await page.waitForTimeout(100);
 
+    const eventCount = page.getByTestId('event-count');
+    
     // Perform multiple interactions
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('ArrowRight');
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(100);
     }
-
-    // Verify count is cumulative
-    const eventCount = page.getByTestId('event-count');
-    const count = await eventCount.textContent();
-    expect(parseInt(count || '0')).toBeGreaterThanOrEqual(5);
+    
+    // Wait for count to reach at least 5 (with timeout)
+    await expect(eventCount).toHaveText(/[5-9]|[1-9]\d+/, { timeout: 3000 });
   });
 });
 

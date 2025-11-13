@@ -58,11 +58,18 @@ export class DomRendererPlugin implements INavigatorPlugin {
   
   private config: DomRendererConfig;
   private container: HTMLElement | null = null;
+  private core: NavigatorCore | null = null;
   
   // State tracking
   private currentCognitiveState: CognitiveState = 'neutral';
   private unsubscribers: Array<() => void> = [];
   private lastPreloadedElement: HTMLElement | null = null;
+  
+  // Sprint 2: Navigation state tracking for unidirectional flow
+  private previousNavigationState: any = null;
+  
+  // Sprint 3: Cognitive state tracking for unidirectional flow
+  private previousCognitiveState: CognitiveState = 'neutral';
 
   constructor(config: DomRendererConfig = {}) {
     this.config = {
@@ -90,6 +97,9 @@ export class DomRendererPlugin implements INavigatorPlugin {
   // ========================================
 
   async init(core: NavigatorCore): Promise<void> {
+    // Store core reference
+    this.core = core;
+    
     // Find container element
     const target = this.config.target;
     const el = typeof target === 'string' 
@@ -102,13 +112,6 @@ export class DomRendererPlugin implements INavigatorPlugin {
     this.container = el as HTMLElement;
 
     // Subscribe to events
-    if (this.config.enableCognitiveStates) {
-      const unsubStateChange = core.eventBus.on('system_state:change', 
-        this.onCognitiveStateChange.bind(this)
-      );
-      this.unsubscribers.push(unsubStateChange);
-    }
-
     if (this.config.enableIntentPreloading) {
       const unsubPrediction = core.eventBus.on('intent:prediction', 
         this.onIntentPrediction.bind(this)
@@ -116,11 +119,19 @@ export class DomRendererPlugin implements INavigatorPlugin {
       this.unsubscribers.push(unsubPrediction);
     }
 
-    if (this.config.enableNavigation) {
-      const unsubNavigate = core.eventBus.on('intent:navigate',
-        this.onNavigate.bind(this)
-      );
-      this.unsubscribers.push(unsubNavigate);
+    // SPRINT 2 & 3: Subscribe to store for navigation and cognitive state changes (unidirectional flow)
+    if (this.config.enableNavigation || this.config.enableCognitiveStates) {
+      // NEW: Subscribe to store changes
+      const unsubStore = core.store.subscribe(this.handleStateChange);
+      this.unsubscribers.push(unsubStore);
+      
+      // Initialize previous state
+      if (this.config.enableNavigation) {
+        this.previousNavigationState = core.store.getState().navigation;
+      }
+      if (this.config.enableCognitiveStates) {
+        this.previousCognitiveState = core.store.getState().cognitive.currentState;
+      }
     }
 
     // Set initial state
@@ -186,52 +197,78 @@ export class DomRendererPlugin implements INavigatorPlugin {
   // ========================================
 
   /**
-   * Handle cognitive state changes from CognitiveModelPlugin
-   * Core v17.1 feature: CSS custom property for performance
+   * SPRINT 2 & 3: Handle store state changes (unidirectional flow)
+   * React to navigation and cognitive state updates from the store
    */
-  private onCognitiveStateChange = (event: any): void => {
-    if (!this.container) return;
-
-    const payload = event.payload || event;
-    const { to: newState, from: oldState, confidence } = payload;
-
-    if (this.config.debugMode) {
-      console.log('[DomRenderer] Cognitive state change:', {
-        from: oldState,
-        to: newState,
-        confidence: confidence?.toFixed(2),
-      });
+  private handleStateChange = (): void => {
+    if (!this.core) return;
+    
+    const currentState = this.core.store.getState();
+    
+    // NAVIGATION: Check if navigation state changed
+    if (this.config.enableNavigation) {
+      const navState = currentState.navigation;
+      
+      if (!this.previousNavigationState) {
+        this.previousNavigationState = navState;
+      } else {
+        const hasCardChanged = navState.currentCard !== this.previousNavigationState.currentCard;
+        const hasLayerChanged = navState.currentLayer !== this.previousNavigationState.currentLayer;
+        
+        if (hasCardChanged || hasLayerChanged) {
+          if (this.config.debugMode) {
+            console.log('[DomRenderer] Navigation detected!', {
+              from: {
+                card: this.previousNavigationState.currentCard,
+                layer: this.previousNavigationState.currentLayer,
+              },
+              to: {
+                card: navState.currentCard,
+                layer: navState.currentLayer,
+              },
+              direction: navState.direction,
+            });
+          }
+          
+          // Update carousel/layer DOM
+          this.updateCarouselDOM(navState);
+          
+          // Emit custom DOM event for external listeners
+          const domEvent = new CustomEvent('navigatorNavigate', {
+            detail: {
+              currentCard: navState.currentCard,
+              currentLayer: navState.currentLayer,
+              direction: navState.direction,
+            },
+            bubbles: true,
+            cancelable: false,
+          });
+          document.dispatchEvent(domEvent);
+        }
+        
+        // Save current state for next comparison
+        this.previousNavigationState = navState;
+      }
     }
+    
+    // COGNITIVE: Check if cognitive state changed
+    if (this.config.enableCognitiveStates) {
+      const cognitiveState = currentState.cognitive.currentState;
 
-    // Remove old state class
-    if (oldState) {
-      this.container.classList.remove(`state-${oldState}`);
+      if (cognitiveState !== this.previousCognitiveState) {
+        if (this.config.debugMode) {
+          console.log(
+            `[DomRenderer] Cognitive state change detected via Store: ${this.previousCognitiveState} -> ${cognitiveState}`
+          );
+        }
+
+        // Apply cognitive state changes using helper
+        this.applyCognitiveStateStyles(cognitiveState, this.previousCognitiveState, currentState.cognitive.confidence);
+
+        // Save current state for next comparison
+        this.previousCognitiveState = cognitiveState;
+      }
     }
-
-    // Add new state class
-    this.container.classList.add(`state-${newState}`);
-    this.currentCognitiveState = newState;
-
-    // Update speed multiplier via CSS custom property (v17.1)
-    this.updateSpeedMultiplier(newState);
-
-    // Update debug indicator
-    if (this.config.debugMode) {
-      this.container.setAttribute('data-cognitive-state', newState);
-    }
-
-    // Emit custom DOM event for external listeners
-    const domEvent = new CustomEvent('navigatorStateChange', {
-      detail: { 
-        from: oldState, 
-        to: newState, 
-        state: newState,
-        confidence,
-      },
-      bubbles: true,
-      cancelable: false,
-    });
-    document.dispatchEvent(domEvent);
   };
 
   /**
@@ -312,40 +349,63 @@ export class DomRendererPlugin implements INavigatorPlugin {
     document.dispatchEvent(domEvent);
   };
 
-  /**
-   * Handle navigation events
-   * v17.1 feature: Cleanup preloading state, execute final animation
-   */
-  private onNavigate = (event: any): void => {
-    if (!this.container) return;
-
-    const payload = event.payload || event;
-    const { direction, target } = payload;
-
-    if (this.config.debugMode) {
-      console.log('[DomRenderer] Navigation:', { direction, target });
-    }
-
-    // Remove preloading classes (no longer needed)
-    if (this.lastPreloadedElement) {
-      this.lastPreloadedElement.classList.remove('card--preloading');
-      this.lastPreloadedElement = null;
-    }
-
-    // Execute navigation animation
-    // (Implementation depends on your specific carousel/layer logic)
-    // For now, just emit custom event
-    const domEvent = new CustomEvent('navigatorNavigate', {
-      detail: { direction, target },
-      bubbles: true,
-      cancelable: false,
-    });
-    document.dispatchEvent(domEvent);
-  };
-
   // ========================================
   // Helper Methods
   // ========================================
+
+  /**
+   * SPRINT 2: Update carousel DOM based on navigation state
+   * This is the core DOM manipulation logic that responds to store changes
+   */
+  private updateCarouselDOM(navState: any): void {
+    if (!this.container) return;
+    
+    if (this.config.debugMode) {
+      console.log('[DomRenderer] Updating carousel DOM:', {
+        card: navState.currentCard,
+        layer: navState.currentLayer,
+        direction: navState.direction,
+      });
+    }
+    
+    // Example implementation - this would be customized based on your actual DOM structure
+    // In a real implementation, this might:
+    // 1. Find all card elements
+    // 2. Apply CSS transforms based on currentCard index
+    // 3. Add/remove active classes
+    // 4. Trigger CSS animations
+    
+    const cards = this.container.querySelectorAll(this.config.cardSelector || '.card');
+    cards.forEach((card, index) => {
+      const htmlCard = card as HTMLElement;
+      
+      if (index === navState.currentCard) {
+        htmlCard.classList.add('card--active');
+        htmlCard.setAttribute('aria-current', 'true');
+      } else {
+        htmlCard.classList.remove('card--active');
+        htmlCard.removeAttribute('aria-current');
+      }
+      
+      // Apply transform for carousel effect
+      const offset = (index - navState.currentCard) * 100;
+      htmlCard.style.transform = `translateX(${offset}%)`;
+    });
+    
+    // Handle layer changes if needed
+    const layers = this.container.querySelectorAll(this.config.layerSelector || '.layer');
+    layers.forEach((layer, index) => {
+      const htmlLayer = layer as HTMLElement;
+      
+      if (index === navState.currentLayer) {
+        htmlLayer.classList.add('layer--active');
+        htmlLayer.setAttribute('aria-hidden', 'false');
+      } else {
+        htmlLayer.classList.remove('layer--active');
+        htmlLayer.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
 
   /**
    * Update CSS custom property for animation speed
@@ -362,6 +422,43 @@ export class DomRendererPlugin implements INavigatorPlugin {
     if (this.config.debugMode) {
       console.log(`[DomRenderer] Speed multiplier: ${multiplier} (state: ${state})`);
     }
+  }
+
+  /**
+   * Apply CSS classes and other side effects for cognitive state changes
+   */
+  private applyCognitiveStateStyles(currentState: CognitiveState, previousState?: CognitiveState, confidence?: number): void {
+    if (!this.container) return;
+
+    // Remove previous state class
+    if (previousState) {
+      this.container.classList.remove(`state-${previousState}`);
+    }
+
+    // Add current state class
+    this.container.classList.add(`state-${currentState}`);
+    this.currentCognitiveState = currentState;
+
+    // Update animation speed multiplier
+    this.updateSpeedMultiplier(currentState);
+
+    // Update debug attributes
+    if (this.config.debugMode) {
+      this.container.setAttribute('data-cognitive-state', currentState);
+    }
+
+    // Emit custom DOM event for external listeners
+    const domEvent = new CustomEvent('navigatorStateChange', {
+      detail: {
+        from: previousState,
+        to: currentState,
+        state: currentState,
+        confidence: confidence ?? null,
+      },
+      bubbles: true,
+      cancelable: false,
+    });
+    document.dispatchEvent(domEvent);
   }
 
   /**

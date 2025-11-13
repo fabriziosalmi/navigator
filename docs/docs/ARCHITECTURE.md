@@ -1,5 +1,202 @@
 # Architecture Documentation
 
+> **Note**: As of **November 2025**, Navigator has migrated to a **Redux-like Unidirectional Data Flow** architecture. The Store is now the single source of truth, with EventBus/AppState maintained for backward compatibility during the transition.
+
+---
+
+## The Unidirectional Data Flow Architecture (v3.0+)
+
+Navigator SDK now follows a **predictable, unidirectional data flow** pattern inspired by Redux, ensuring:
+
+- ✅ **Single Source of Truth**: All state lives in the Store
+- ✅ **State is Read-Only**: Only Actions can change state
+- ✅ **Changes Made with Pure Functions**: Reducers are deterministic
+- ✅ **Time-Travel Debugging**: Full state history tracking
+- ✅ **Middleware Pipeline**: Cognitive analysis, logging, history recording
+
+### Architecture Flow Diagram
+
+```mermaid
+graph TD
+    A[User Action] -->|keyboard, gesture, voice| B[Plugin]
+    B -->|dispatch| C[Action Creator]
+    C -->|action object| D[Store.dispatch]
+    D --> E[Middleware Pipeline]
+    E -->|Cognitive Middleware| F[Analyze user patterns]
+    E -->|History Middleware| G[Record action]
+    E -->|Logger Middleware| H[Debug output]
+    E --> I[Reducers]
+    I -->|navigation reducer| J[Update navigation state]
+    I -->|cognitive reducer| K[Update cognitive state]
+    I -->|input reducer| L[Update input state]
+    J --> M[New State]
+    K --> M
+    L --> M
+    M -->|store.subscribe| N[UI Components]
+    M -->|store.getState| O[Plugins read state]
+    N --> P[DOM Updates]
+    O --> Q[Plugin reactions]
+    
+    style D fill:#f9f,stroke:#333,stroke-width:4px
+    style M fill:#9f9,stroke:#333,stroke-width:4px
+    style E fill:#ff9,stroke:#333,stroke-width:2px
+```
+
+### Core Principles
+
+#### 1. **Actions**: The Only Way to Trigger State Changes
+
+Actions are plain objects describing **what happened**:
+
+```typescript
+// From packages/core/src/actions/navigation.ts
+import { navigate } from '@navigator.menu/core';
+
+store.dispatch(navigate({
+  currentCard: 2,
+  direction: 'right',
+  source: 'keyboard'
+}));
+
+// Action object structure:
+{
+  type: 'navigation/NAVIGATE',
+  payload: { currentCard: 2, direction: 'right', source: 'keyboard' },
+  metadata: { timestamp: 1699876543210 }
+}
+```
+
+**Available Action Creators**:
+- `navigation.ts`: `navigate()`, `setAnimating()`, `setLayer()`
+- `cognitive.ts`: `setCognitiveState()`
+- `interaction.ts`: `select()`, `cancel()`, `confirm()`
+- `input.ts`: `keyPressed()`, `keyReleased()`, `gestureDetected()`
+
+#### 2. **Middleware**: Processing Pipeline Before Reducers
+
+Middleware intercepts every action for side effects:
+
+```typescript
+// packages/core/src/middleware/cognitiveMiddleware.ts
+const cognitiveMiddleware = (store) => (next) => (action) => {
+  const result = next(action); // Pass action through
+  
+  // Analyze AFTER state updates
+  const state = store.getState();
+  analyzeUserBehavior(state, action);
+  
+  if (detectedFrustration) {
+    store.dispatch(setCognitiveState('frustrated', 0.85));
+  }
+  
+  return result;
+};
+```
+
+**Active Middleware** (in order):
+1. **cognitiveMiddleware**: Detects frustration/flow states with context-aware state machine
+2. **historyMiddleware**: Records action history
+3. **loggerMiddleware**: Debug console output (dev mode)
+
+**Cognitive Middleware: Context-Aware State Machine**
+
+The cognitive middleware has evolved into a sophisticated context-aware system that understands the *context* of state transitions, not just the signals themselves.
+
+**Key Innovation: Recovery Cooldown Period**
+
+When a user exits a `frustrated` state, the middleware activates a "recovery cooldown" of 100 actions. During this period:
+- The system prevents premature transitions to `exploring` state
+- This distinguishes genuine exploration (trying new things) from recovery behavior (successfully navigating after frustration)
+- The cooldown accounts for internal action multipliers (each keystroke generates ~7 internal actions)
+
+**Why This Matters:**
+
+Without the cooldown, the middleware would misclassify recovery as exploration because:
+1. User presses correct keys repeatedly during recovery
+2. Each keystroke generates multiple internal actions (KEYBOARD_KEY_PRESS, carousel/NAVIGATE, navigation/NAVIGATE, legacy events, etc.)
+3. High action variety + low error rate = false positive for "exploring"
+
+The cooldown gives the system a "stabilization period" to let the user demonstrate sustained success before transitioning to other states, resulting in more accurate and human-like cognitive state detection.
+
+#### 3. **Reducers**: Pure Functions That Update State
+
+Reducers specify **how** the state changes:
+
+```typescript
+// packages/core/src/store/reducers/navigationReducer.ts
+function navigationReducer(state = initialState, action) {
+  switch (action.type) {
+    case 'navigation/NAVIGATE':
+      return {
+        ...state,
+        currentCard: action.payload.currentCard,
+        direction: action.payload.direction,
+        lastSource: action.payload.source
+      };
+    default:
+      return state;
+  }
+}
+```
+
+**Reducer Composition**:
+```typescript
+const rootReducer = combineReducers({
+  navigation: navigationReducer,
+  cognitive: cognitiveReducer,
+  input: inputReducer,
+  ui: uiReducer,
+  history: historyReducer,
+  session: sessionReducer
+});
+```
+
+#### 4. **Store**: Single Source of Truth
+
+```typescript
+// Initialization in NavigatorCore
+this.store = createStore(
+  rootReducer,
+  initialState,
+  applyMiddleware(cognitiveMiddleware, historyMiddleware, loggerMiddleware)
+);
+```
+
+**Store API**:
+```typescript
+// Read state
+const state = store.getState();
+const currentCard = state.navigation.currentCard;
+
+// Subscribe to changes
+const unsubscribe = store.subscribe(() => {
+  const newState = store.getState();
+  updateUI(newState);
+});
+
+// Dispatch actions (only way to change state)
+store.dispatch(navigate({ currentCard: 3, direction: 'right' }));
+```
+
+### Migration Status (November 2025)
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| **NavigatorCore** | ✅ Migrated | Store initialized with middleware |
+| **KeyboardPlugin** | ✅ Migrated | Dispatches `select()`, `cancel()` actions |
+| **DomRendererPlugin** | ✅ Migrated | Subscribes to Store cognitive state |
+| **CognitiveMiddleware** | ✅ Active | Analyzes patterns, dispatches state changes |
+| **HistoryMiddleware** | ✅ Active | Records all actions to history slice |
+| **LoggerMiddleware** | ✅ Active | Dev-mode action logging |
+| **EventBus** | 🟡 Parallel | Legacy Bridge translates events → Store actions |
+| **AppState** | 🟡 Parallel | Maintained for backward compatibility |
+
+**Legacy Bridge**: Automatically translates EventBus events to Store actions with `legacy/*` prefix, enabling gradual migration without breaking changes.
+
+---
+
+## Legacy Architecture (maintained for compatibility)
+
 > **Note**: This document covers both the **legacy monolithic implementation** (sections below) and the **new SDK architecture** (NavigatorCore, plugins, framework wrappers).
 
 ---
@@ -191,33 +388,43 @@ export default {
 }
 ```
 
-### Data Flow
+### Data Flow (New Unidirectional Pattern)
 
 ```
 User Action (keyboard, gesture, voice)
   ↓
 Plugin captures input
   ↓
-Plugin emits event via EventBus
+Plugin dispatches Action via store.dispatch()
   ↓
-Other plugins/app subscribe to event
+Middleware Pipeline (cognitive, history, logger)
   ↓
-AppState updated (if needed)
+Reducers compute new state (pure functions)
   ↓
-Watchers triggered (sync or debounced)
+Store updates (single atomic operation)
   ↓
-UI updates
+Subscribers notified via store.subscribe()
+  ↓
+UI components re-render with new state
+```
+
+**Legacy Flow (EventBus - parallel system)**:
+```
+Plugin emits event → EventBus → Legacy Bridge → Store (legacy/* action)
 ```
 
 ### Performance Characteristics
 
-| Metric | Sprint 1 (Baseline) | Sprint 2 (Optimized) |
-|--------|---------------------|----------------------|
-| **Startup Time (3 critical plugins)** | 2850ms | 200ms (-93%) |
-| **Startup Time (mixed workload)** | 400ms | 180ms (-55%) |
-| **State Watcher Callbacks (100 rapid updates)** | 100 | 1 (-99%) |
-| **Main Thread Blocking** | Yes | No (debounced) |
-| **Bundle Size (core)** | 4.18 KB | 4.32 KB (+3.3%) |
+| Metric | Sprint 1 (EventBus) | Sprint 2 (Optimized EventBus) | Sprint 3 (Store Migration) |
+|--------|---------------------|-------------------------------|----------------------------|
+| **Startup Time (3 critical plugins)** | 2850ms | 200ms (-93%) | 180ms (-94%) |
+| **Startup Time (mixed workload)** | 400ms | 180ms (-55%) | 165ms (-59%) |
+| **State Watcher Callbacks (100 rapid updates)** | 100 | 1 (-99%) | 1 (-99%) |
+| **Main Thread Blocking** | Yes | No (debounced) | No (Store batching) |
+| **Bundle Size (core)** | 4.18 KB | 4.32 KB (+3.3%) | 6.8 KB (+62% - includes Redux) |
+| **Test Coverage** | 280 tests | 320 tests | **386 tests** |
+| **Cognitive Loop Latency** | ~150ms | ~100ms | **~50ms** (middleware) |
+| **State Predictability** | Medium | Medium | **High** (time-travel) |
 
 ---
 

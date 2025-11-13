@@ -78,6 +78,8 @@ jobs:
 
       - name: Run unit tests with coverage
         run: ./scripts/validators/run-unit-tests.sh
+        env:
+          CI: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

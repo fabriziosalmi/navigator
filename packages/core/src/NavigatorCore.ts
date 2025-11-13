@@ -11,9 +11,15 @@
 
 import { EventBus } from './EventBus';
 import { AppState, NavigatorState } from './AppState';
-import { UserSessionHistory } from './intelligence/UserSessionHistory';
+import { UserSessionHistory, type Action } from './intelligence/UserSessionHistory';
+import { createStore } from './store/createStore';
+import { applyMiddleware } from './store/applyMiddleware';
+import { createCognitiveMiddleware } from './store/middleware/cognitiveMiddleware';
+import { loggerMiddleware } from './store/middleware/loggerMiddleware';
+import { rootReducer, type RootState } from './store/reducers';
+import type { Middleware } from './store/types';
 import type { DeepPartial } from './AppState';
-import type { Action } from '@navigator.menu/types';
+import type { Store, Action as StoreAction } from './store/types';
 
 /**
  * Core configuration options
@@ -27,6 +33,8 @@ export interface NavigatorCoreConfig {
   initialState?: DeepPartial<NavigatorState>;
   /** Maximum size of session history buffer */
   historyMaxSize?: number;
+  /** Disable logger middleware (useful for stress tests to prevent console flooding) */
+  disableLogger?: boolean;
 }
 
 /**
@@ -73,12 +81,23 @@ export class NavigatorCore {
   /** Configuration */
   public readonly config: Required<NavigatorCoreConfig>;
   
-  /** Event bus instance (read-only access) */
+  /**
+   * Event bus instance (read-only access)
+   * @deprecated Since v3.0. Use `core.store.subscribe()` to react to state changes instead.
+   * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   */
   public readonly eventBus: EventBus;
   
-  /** App state instance (read-only access) */
+  /**
+   * App state instance (read-only access)
+   * @deprecated Since v3.0. Use `core.store.getState()` to read state instead.
+   * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   */
   public readonly state: AppState;
-  
+
+  /** Redux-like Store (v3.0+ - Primary state management) */
+  public readonly store: Store<RootState, StoreAction>;
+
   /** User session history tracker */
   public readonly history: UserSessionHistory;
   
@@ -107,7 +126,8 @@ export class NavigatorCore {
       debugMode: config.debugMode || false,
       autoStart: config.autoStart || false,
       initialState: config.initialState || {},
-      historyMaxSize: config.historyMaxSize || 100
+      historyMaxSize: config.historyMaxSize || 100,
+      disableLogger: config.disableLogger || false
     };
 
     // Initialize core systems
@@ -117,7 +137,36 @@ export class NavigatorCore {
     });
 
     this.state = new AppState(this.eventBus, this.config.initialState);
+
+    // Initialize Redux-like Store with Cognitive Middleware (Sprint 3)
+    // The cognitive middleware analyzes every action and dispatches COGNITIVE_STATE_CHANGE
+    // Create middleware pipeline
+    // 1. Logger middleware (first) - logs all actions and state changes
+    // 2. Cognitive middleware (last) - analyzes user behavior patterns
+    const cognitiveMiddleware = createCognitiveMiddleware({
+      metricsWindow: 20,
+      frustratedThreshold: 3,
+      concentratedThreshold: 5,
+      exploringThreshold: 4,
+      debugMode: this.config.debugMode,
+    });
     
+    // Conditionally include logger middleware based on configuration
+    // Logger is disabled in stress tests to prevent console flooding with thousands of action logs
+    const middleware: Middleware<RootState>[] = [
+      cognitiveMiddleware,  // Tracks cognitive states (always enabled)
+    ];
+    
+    if (!this.config.disableLogger) {
+      middleware.unshift(loggerMiddleware);  // Logs actions for debugging (optional)
+    }
+    
+    this.store = createStore(
+      rootReducer,
+      undefined, // No preloaded state
+      applyMiddleware(...middleware)
+    );
+
     this.history = new UserSessionHistory(this.config.historyMaxSize);
 
     // Plugin management
@@ -136,6 +185,9 @@ export class NavigatorCore {
 
     // Setup core event listeners
     this._setupCoreListeners();
+
+    // Setup Legacy Bridge (EventBus -> Store)
+    this._setupLegacyBridge();
 
     if (this.config.debugMode) {
       console.log('🚀 NavigatorCore initialized', {
@@ -390,10 +442,10 @@ export class NavigatorCore {
    */
   recordAction(action: Action): void {
     this.history.add(action);
-    
-    // 🔍 SONDA #1: Sempre attiva per debugging
-    console.log(`[DIAGNOSTIC] Action recorded: ${action.type}, Success: ${action.success}, Duration: ${action.duration_ms}ms`);
-    
+
+    // 🔍 SONDA #1: Commented for production
+    // console.log(`[DIAGNOSTIC] Action recorded: ${action.type}, Success: ${action.success}, Duration: ${action.duration_ms}ms`);
+
     // Emit event for potential listeners (analytics, debugging)
     this.eventBus.emit('history:action:recorded', {
       action,
@@ -595,6 +647,74 @@ export class NavigatorCore {
         console.error('System Error:', event.payload);
       }
     });
+  }
+
+  /**
+   * Setup Legacy Bridge - EventBus to Store translation
+   *
+   * This is the critical migration piece. The Legacy Bridge:
+   * 1. Listens to ALL EventBus events
+   * 2. Translates them to Store actions
+   * 3. Dispatches them to the Store (shadow mode)
+   *
+   * This allows the new Store to operate in parallel with the old EventBus
+   * without breaking any existing functionality.
+   * 
+   * ---
+   * 
+   * TODO: [DEPRECATION] This bridge is a temporary compatibility layer.
+   * It will be removed in v4.0 once all plugins are migrated to dispatch Actions.
+   * 
+   * Remaining EventBus emissions to migrate:
+   *   - core:* (lifecycle events) - HIGH PRIORITY
+   *   - keyboard:combo (KeyboardPlugin) - MEDIUM PRIORITY
+   *   - intent:prediction (predictive system) - MEDIUM PRIORITY
+   *   - gesture:* events (MockGesturePlugin) - LOW PRIORITY
+   *   - All legacy JS plugins (js/plugins/*) - LOW PRIORITY
+   * 
+   * Migration Tracking: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
+   * Target Removal: v4.0.0 (Q4 2026)
+   */
+  private _setupLegacyBridge(): void {
+    // Subscribe to ALL events using wildcard
+    this.eventBus.on('*', (event) => {
+      const eventName = event.name;
+      const payload = event.payload;
+
+      // Skip internal Redux actions (they're already in the Store)
+      if (eventName.startsWith('@@redux/') || eventName.startsWith('@@store/')) {
+        return;
+      }
+
+      // Translate legacy event to Store action
+      const storeAction: StoreAction = {
+        type: `legacy/${eventName}`,
+        payload,
+        metadata: {
+          source: 'legacy_bridge',
+          timestamp: event.timestamp,
+          originalEvent: eventName,
+        },
+      };
+
+      // Dispatch to Store (shadow mode)
+      try {
+        this.store.dispatch(storeAction);
+
+        if (this.config.debugMode) {
+          console.log(
+            `[BRIDGE] Translated: ${eventName} → legacy/${eventName}`,
+            payload
+          );
+        }
+      } catch (error) {
+        console.error('[BRIDGE] Failed to dispatch action:', storeAction, error);
+      }
+    });
+
+    if (this.config.debugMode) {
+      console.log('🌉 Legacy Bridge active: EventBus → Store');
+    }
   }
 
   private _startPerformanceMonitoring(): void {

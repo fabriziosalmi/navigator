@@ -2,61 +2,65 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright configuration for Navigator E2E Tests
- * 
- * This config is used by the autonomous E2E validation script.
- * The test server is managed externally by run-e2e-tests.sh,
- * not by Playwright's webServer option.
+ *
+ * This config defines two logical Playwright projects that correspond
+ * to two different apps we run in the monorepo. Each project uses the
+ * Desktop Chrome device and overrides `use.baseURL` to the right port.
+ *
+ * The bash runner is responsible for starting the right server/port
+ * before invoking Playwright. We keep trace/video/screenshot settings
+ * so failures are well-instrumented.
  */
 export default defineConfig({
   // Test files location
   testDir: './',
-  
+
   // Playwright test timeout
   timeout: 30 * 1000,
-  
+
   // Test execution settings
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: 1, // Enable 1 retry to capture trace on failure
   workers: 1,
-  
+
   // Reporter configuration
-  reporter: process.env.CI 
-    ? [['github'], ['html']]
-    : [['list'], ['html']],
+  reporter: process.env.CI ? [['github'], ['html']] : [['list'], ['html']],
 
   // Shared settings for all tests
   use: {
-    // Base URL is set by the E2E script
+    // Default base URL (will usually be overridden per project)
     baseURL: process.env.BASE_URL || 'http://localhost:5173',
-    
-    // Collect trace on failure
+
+    // Debug artifacts
     trace: 'on-first-retry',
-    
-    // Screenshot on failure
     screenshot: 'only-on-failure',
-    
-    // Video on failure
-    video: 'retain-on-failure',
+    video: 'on-first-retry',
   },
 
-  // Test projects (browsers)
+  // Define two logical projects (each uses Desktop Chrome)
   projects: [
+    // Project for the validation app (react-test-app / temp-e2e-app)
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'ReactTestApp',
+      testMatch: /navigator-core\.spec\.ts|issue-\d+.*\.spec\.ts|keyboard-navigation\.spec\.js|adaptive-system\.spec\.js/,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:5173',
+      },
     },
-    // Add more browsers if needed:
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+
+    // Project for the cognitive-showcase demo
+    {
+      name: 'CognitiveShowcase',
+      testMatch: /cognitive-showcase\.spec\.ts|cognitive-showcase\.spec\.js/,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:5174',
+      },
+    },
   ],
 
-  // NO webServer config - managed by bash script!
-  // webServer: undefined,
+  // No webServer: servers are started by our bash runner so we can control
+  // the exact dev/prod process and logging behavior used in CI.
 });

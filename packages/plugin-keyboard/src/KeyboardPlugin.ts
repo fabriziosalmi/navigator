@@ -4,20 +4,28 @@
  * Keyboard navigation plugin for Navigator.Menu.
  * Captures keyboard input and emits both raw events and navigation intents.
  * 
+ * Sprint 2 Migration: Now dispatches navigation actions to store
+ * 
  * Events emitted:
  * - keyboard:keydown - Raw keydown events with full details
  * - keyboard:keyup - Raw keyup events
  * - keyboard:combo - Key combination events (e.g., Ctrl+d)
- * - intent:navigate_left - Left arrow intent
- * - intent:navigate_right - Right arrow intent
- * - intent:navigate_up - Up arrow intent
- * - intent:navigate_down - Down arrow intent
- * - intent:select - Enter key intent
- * - intent:cancel - Escape key intent
+ * - intent:navigate_* - Legacy events (deprecated, will be removed)
+ * 
+ * Actions dispatched:
+ * - navigation/NAVIGATE - Unidirectional navigation actions
  */
 
-import { nanoid } from 'nanoid';
 import type { NavigatorCore, INavigatorPlugin, Action } from '@navigator.menu/core';
+import { navigate, keyPress, keyRelease, select, cancel } from '@navigator.menu/core';
+
+/**
+ * Lightweight ID generator (replaces nanoid to reduce bundle size)
+ * Format: timestamp-random (e.g., "1699876543210-x7k9p")
+ */
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
 
 export interface KeyboardPluginConfig {
   enabled?: boolean;
@@ -142,24 +150,22 @@ export class KeyboardPlugin implements INavigatorPlugin {
       return;
     }
 
-    // Emit raw keydown event
-    this.core.eventBus.emit('keyboard:keydown', {
-      key,
-      code,
-      altKey: event.altKey,
-      ctrlKey: event.ctrlKey,
-      shiftKey: event.shiftKey,
-      metaKey: event.metaKey,
-      repeat: event.repeat,
-      timestamp,
-    });
+    // Dispatch raw key press to store (unidirectional flow)
+    this.core.store.dispatch(keyPress(key, timestamp));
+
+    // Emit raw keydown event for backward compatibility
+    this.core.eventBus.emit('keyboard:keydown', { key, code, timestamp });
 
     // Emit navigation intents and record action
     const intentEmitted = this._emitNavigationIntent(key, timestamp);
     
-    // Record keydown action (successful if it's a known navigation key)
+    // Record non-navigation keys (for apps that want to track all keypresses)
+    // Note: Apps can decide whether these are errors based on their context
     if (!intentEmitted) {
-      this._recordAction(`keyboard:keydown:${key}`, true, timestamp);
+      const isModifier = ['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(key);
+      if (!isModifier) {
+        this._recordAction(`keyboard:keypress:${key}`, true, timestamp);
+      }
     }
   }
 
@@ -167,16 +173,16 @@ export class KeyboardPlugin implements INavigatorPlugin {
     if (!this.core) return;
 
     const { key, code } = event;
+    const timestamp = performance.now();
 
     // Remove from pressed keys
     this.pressedKeys.delete(key);
 
-    // Emit raw keyup event
-    this.core.eventBus.emit('keyboard:keyup', {
-      key,
-      code,
-      timestamp: performance.now(),
-    });
+    // Dispatch key release to store (unidirectional flow)
+    this.core.store.dispatch(keyRelease(key, timestamp));
+
+    // Emit raw keyup event for backward compatibility
+    this.core.eventBus.emit('keyboard:keyup', { key, code, timestamp });
   }
 
   // ========================================
@@ -186,22 +192,37 @@ export class KeyboardPlugin implements INavigatorPlugin {
   private _emitNavigationIntent(key: string, timestamp: number): boolean {
     if (!this.core) return false;
 
-    const intentMap: Record<string, string> = {
-      ArrowLeft: 'intent:navigate_left',
-      ArrowRight: 'intent:navigate_right',
-      ArrowUp: 'intent:navigate_up',
-      ArrowDown: 'intent:navigate_down',
-      Enter: 'intent:select',
-      Escape: 'intent:cancel',
+    // Map keys to navigation directions
+    const navigationMap: Record<string, 'left' | 'right' | 'up' | 'down' | null> = {
+      ArrowLeft: 'left',
+      ArrowRight: 'right',
+      ArrowUp: 'up',
+      ArrowDown: 'down',
     };
 
-    const intentEvent = intentMap[key];
-    if (intentEvent) {
-      this.core.eventBus.emit(intentEvent, { key });
+    const direction = navigationMap[key];
+    
+    // Handle arrow key navigation with new unidirectional flow
+    if (direction) {
+      // Dispatch action to store (unidirectional flow)
+      this.core.store.dispatch(navigate(direction, 'keyboard'));
       
-      // Record navigation intent action
-      this._recordAction(intentEvent, true, timestamp);
+      // Record navigation action for cognitive tracking
+      this._recordAction(`navigation:${direction}`, true, timestamp);
       
+      return true;
+    }
+    
+    // Handle interaction keys (Enter, Escape)
+    if (key === 'Enter') {
+      this.core.store.dispatch(select('keyboard'));
+      this._recordAction('interaction:select', true, timestamp);
+      return true;
+    }
+    
+    if (key === 'Escape') {
+      this.core.store.dispatch(cancel('keyboard'));
+      this._recordAction('interaction:cancel', true, timestamp);
       return true;
     }
     
@@ -220,7 +241,7 @@ export class KeyboardPlugin implements INavigatorPlugin {
       : undefined;
     
     const action: Action = {
-      id: nanoid(),
+      id: generateId(),
       timestamp,
       type,
       success,
@@ -229,10 +250,10 @@ export class KeyboardPlugin implements INavigatorPlugin {
         plugin: this.name,
       },
     };
-    
-    // 🔍 SONDA #4: KeyboardPlugin
-    console.log(`[DIAGNOSTIC] KeyboardPlugin._recordAction called:`, { type, success, duration_ms });
-    
+
+    // 🔍 SONDA #4: KeyboardPlugin (commented for production)
+    // console.log(`[DIAGNOSTIC] KeyboardPlugin._recordAction called:`, { type, success, duration_ms });
+
     this.core.recordAction(action);
     
     // Reset action start time

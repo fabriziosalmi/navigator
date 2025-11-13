@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigator } from '@navigator.menu/react';
-import { CognitiveModelPlugin } from '@navigator.menu/plugin-cognitive';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 import ImageCarousel from './components/ImageCarousel';
 import CognitiveHUD from './components/CognitiveHUD';
@@ -35,7 +34,7 @@ function App() {
     autoStart: true,
     debugMode: false,
     plugins: [
-      new CognitiveModelPlugin(),
+      // CognitiveModelPlugin removed - cognitive analysis is now automatic via middleware
       new KeyboardPlugin(),
     ],
   });
@@ -43,16 +42,56 @@ function App() {
   useEffect(() => {
     if (!core) return;
 
-    // Subscribe to cognitive state changes
-    const unsubState = core.eventBus.on('system_state:change', (payload: any) => {
-      console.log('[App] Cognitive state changed:', payload);
+    // Track last processed key timestamp to avoid duplicate dispatches
+    let lastProcessedTimestamp: number | undefined = undefined;
+
+    // Subscribe to Store state changes (unidirectional flow)
+    const unsubscribe = core.store.subscribe(() => {
+      const state = core.store.getState();
       
-      // FIX: EventBus wraps the payload in a payload property
-      const newState = payload.to || payload.payload?.to;
-      setCognitiveState(newState);
+      // Update cognitive state display
+      const cognitiveSlice = state.cognitive;
+      setCognitiveState(cognitiveSlice.currentState);
+
+      // React to keyboard input changes
+      const inputSlice = state.input?.keyboard;
+      const currentKey = inputSlice?.lastKey;
+      const currentTimestamp = inputSlice?.lastTimestamp;
+
+      // Process new key press (check timestamp to avoid duplicates)
+      if (currentKey && currentTimestamp && currentTimestamp !== lastProcessedTimestamp) {
+        lastProcessedTimestamp = currentTimestamp;
+        
+        console.log('[App] Key pressed:', currentKey);
+
+        const navigationKeys = ['ArrowLeft', 'ArrowRight'];
+        const modifierKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Tab'];
+
+        if (navigationKeys.includes(currentKey)) {
+          // Valid navigation key - update carousel
+          if (currentKey === 'ArrowRight') {
+            setCurrentImageIndex((prev) => (prev + 1) % 5);
+          } else if (currentKey === 'ArrowLeft') {
+            setCurrentImageIndex((prev) => (prev - 1 + 5) % 5);
+          }
+          
+          // Dispatch semantic success action
+          core.store.dispatch({
+            type: 'carousel/NAVIGATE',
+            payload: { key: currentKey, direction: currentKey === 'ArrowRight' ? 'next' : 'prev' }
+          });
+        } else if (!modifierKeys.includes(currentKey)) {
+          // Invalid key - dispatch semantic error action
+          console.log('[App] Invalid key pressed:', currentKey);
+          core.store.dispatch({
+            type: 'carousel/INVALID_KEY',
+            payload: { key: currentKey }
+          });
+        }
+      }
     });
 
-    // Subscribe to action history
+    // Subscribe to action history for metrics display
     const unsubHistory = core.eventBus.on('history:action:recorded', (payload: any) => {
       console.log('[App] Action recorded:', payload);
       
@@ -90,42 +129,9 @@ function App() {
       });
     });
 
-    // Subscribe to keyboard events for carousel navigation
-    const unsubKeyDown = core.eventBus.on('keyboard:keydown', (payload: any) => {
-      // The payload might be wrapped, extract the key
-      const key = payload.key || payload.payload?.key;
-      console.log('[App] Key pressed:', key, 'Full payload:', payload);
-      
-      const startTime = Date.now();
-      
-      if (key === 'ArrowRight') {
-        setCurrentImageIndex((prev) => (prev + 1) % 5);
-        core.history.add({
-          type: 'intent:navigate_right',
-          success: true,
-          timestamp: startTime,
-        } as any);
-      } else if (key === 'ArrowLeft') {
-        setCurrentImageIndex((prev) => (prev - 1 + 5) % 5);
-        core.history.add({
-          type: 'intent:navigate_left',
-          success: true,
-          timestamp: startTime,
-        } as any);
-      } else if (key && !['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(key)) {
-        // Invalid key - simulate error (ignore modifier keys)
-        core.history.add({
-          type: 'intent:invalid',
-          success: false,
-          timestamp: startTime,
-        } as any);
-      }
-    });
-
     return () => {
-      unsubState();
+      unsubscribe();
       unsubHistory();
-      unsubKeyDown();
     };
   }, [core]);
 

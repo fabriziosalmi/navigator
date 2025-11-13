@@ -23,3 +23,6 @@ packages:
   
   # Documentation site (Docusaurus)
   - 'documentation'
+  
+  # E2E test temporary app (in-workspace strategy)
+  - 'temp-e2e-app'

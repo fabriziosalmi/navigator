@@ -25,13 +25,45 @@ NC='\033[0m' # No Color
 # CONFIGURATION
 # ==========================================
 
-TEMP_APP_DIR="/tmp/navigator-e2e-temp-app"  # Outside workspace to avoid pnpm workspace issues
-SERVER_URL="http://localhost:5173"
+# Accept a project name so the runner is context-aware
+# Usage: ./run-e2e-tests.sh [ReactTestApp|CognitiveShowcase]
+PROJECT_NAME="$1"
+if [ -z "$PROJECT_NAME" ]; then
+  PROJECT_NAME="ReactTestApp"
+fi
+
+# Default values (may be overridden per project)
+TEMP_APP_DIR="temp-e2e-app"  # will be overridden for CognitiveShowcase
+CREATED_TEMP_APP=false
+SERVER_PORT=""
+SERVER_URL=""
 SERVER_PID=""
 PLAYWRIGHT_CONFIG="tests/e2e/playwright.config.ts"
-SERVER_LOG="/tmp/navigator-e2e-server.log"
+SERVER_LOG=""
 TIMEOUT=120  # Increased from 60s to 120s for CI compatibility
 POLL_INTERVAL=2  # Check every 2 seconds instead of 5
+
+# Map project name to app dir and port
+if [ "$PROJECT_NAME" == "ReactTestApp" ]; then
+  TEMPLATE_DIR="packages/create-navigator-app/templates/react-ts-e2e"
+  TEMP_APP_DIR="temp-e2e-app"
+  SERVER_PORT=${SERVER_PORT:-5173}
+  SERVER_LOG="${TEMP_APP_DIR}-server.log"
+  CREATED_TEMP_APP=true
+elif [ "$PROJECT_NAME" == "CognitiveShowcase" ]; then
+  # Use existing app in monorepo
+  TEMPLATE_DIR="apps/cognitive-showcase"
+  TEMP_APP_DIR="$TEMPLATE_DIR"
+  SERVER_PORT=${SERVER_PORT:-5174}
+  SERVER_LOG="cognitive-showcase-server.log"
+  CREATED_TEMP_APP=false
+else
+  echo "Unknown project: $PROJECT_NAME"
+  echo "Supported: ReactTestApp, CognitiveShowcase"
+  exit 1
+fi
+
+SERVER_URL="http://localhost:${SERVER_PORT}"
 
 # ==========================================
 # CLEANUP FUNCTION (ALWAYS RUNS)
@@ -48,12 +80,12 @@ cleanup() {
     wait $SERVER_PID 2>/dev/null || true
   fi
   
-  # Remove temp directory
-  if [ -d "$TEMP_APP_DIR" ]; then
+  # Remove temp directory only if we created it (ReactTestApp case)
+  if [ "$CREATED_TEMP_APP" = true ] && [ -d "$TEMP_APP_DIR" ]; then
     echo "   Removing temporary app directory: $TEMP_APP_DIR"
     rm -rf "$TEMP_APP_DIR"
   fi
-  
+
   # Remove server log
   if [ -f "$SERVER_LOG" ]; then
     echo "   Removing server log: $SERVER_LOG"
@@ -80,7 +112,7 @@ echo -e "${BLUE}🛠️  STEP 1: SETUP${NC}"
 echo ""
 
 # Clean up from previous failed runs
-if [ -d "$TEMP_APP_DIR" ]; then
+if [ "$CREATED_TEMP_APP" = true ] && [ -d "$TEMP_APP_DIR" ]; then
   echo -e "${YELLOW}⚠️  Found existing temp directory from previous run${NC}"
   echo "   Removing: $TEMP_APP_DIR"
   rm -rf "$TEMP_APP_DIR"
@@ -97,8 +129,9 @@ echo -e "${BLUE}🔨 STEP 1.5: BUILDING NAVIGATOR PACKAGES${NC}"
 echo ""
 echo "   Building Navigator SDK packages for E2E test..."
 
-# Build only the packages needed for E2E tests
-if ! pnpm build --filter '@navigator.menu/core' --filter '@navigator.menu/react' --filter '@navigator.menu/plugin-keyboard' 2>&1 | grep -v "Scope:"; then
+# Build all SDK packages in the workspace
+# Note: --filter applies to pnpm, not to individual package build scripts
+if ! pnpm -r --filter './packages/**' build 2>&1 | grep -v "Scope:"; then
   echo -e "${RED}❌ Failed to build Navigator packages${NC}"
   exit 1
 fi
@@ -110,65 +143,66 @@ echo -e "${GREEN}✓ Packages built successfully${NC}"
 # ==========================================
 
 echo ""
-echo -e "${BLUE}🚀 STEP 2: CREATING FRESH TEST APP${NC}"
-echo ""
-echo "   Copying react-ts-e2e template..."
+echo -e "${BLUE}🚀 STEP 2: CREATING FRESH TEST APP (IN-WORKSPACE)${NC}"
 echo ""
 
-# Copy template directly (CLI not published yet)
-TEMPLATE_DIR="packages/create-navigator-app/templates/react-ts-e2e"
 WORKSPACE_ROOT="$(pwd)"
 
-if [ ! -d "$TEMPLATE_DIR" ]; then
-  echo -e "${RED}❌ Template not found at: $TEMPLATE_DIR${NC}"
-  exit 1
+if [ "$CREATED_TEMP_APP" = true ]; then
+  # Copy template directly (CLI not published yet)
+  if [ ! -d "$TEMPLATE_DIR" ]; then
+    echo -e "${RED}❌ Template not found at: $TEMPLATE_DIR${NC}"
+    exit 1
+  fi
+
+  # Copy template to temp directory IN the workspace
+  echo "   Copying template to workspace: ${TEMP_APP_DIR}/"
+  if ! rsync -a --exclude 'node_modules' --exclude 'dist' --exclude 'test-results' "$TEMPLATE_DIR/" "$TEMP_APP_DIR/"; then
+    echo -e "${RED}❌ Failed to copy template${NC}"
+    exit 1
+  fi
+
+  # Update package.json for in-workspace usage
+  # 1. Change name to avoid conflicts
+  # 2. Convert file:../../packages/* to workspace:* for pnpm workspace resolution
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' 's/"name": ".*"/"name": "temp-e2e-app"/' "${TEMP_APP_DIR}/package.json"
+    sed -i '' 's|"file:../../packages/core"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+    sed -i '' 's|"file:../../packages/react"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+    sed -i '' 's|"file:../../packages/plugin-keyboard"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  else
+    # Linux
+    sed -i 's/"name": ".*"/"name": "temp-e2e-app"/' "${TEMP_APP_DIR}/package.json"
+    sed -i 's|"file:../../packages/core"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+    sed -i 's|"file:../../packages/react"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+    sed -i 's|"file:../../packages/plugin-keyboard"|"workspace:*"|g' "${TEMP_APP_DIR}/package.json"
+  fi
+
+  echo -e "${GREEN}✓ Test app created in workspace${NC}"
 fi
-
-if ! cp -r "$TEMPLATE_DIR" "$TEMP_APP_DIR"; then
-  echo -e "${RED}❌ Failed to copy template${NC}"
-  exit 1
-fi
-
-# Fix package.json paths to use absolute paths
-cd "$TEMP_APP_DIR"
-
-# Detect OS for sed compatibility
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  # macOS
-  sed -i '' "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
-  sed -i '' "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
-  sed -i '' "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
-else
-  # Linux
-  sed -i "s|file:../../packages/core|file:$WORKSPACE_ROOT/packages/core|g" package.json
-  sed -i "s|file:../../packages/react|file:$WORKSPACE_ROOT/packages/react|g" package.json
-  sed -i "s|file:../../packages/plugin-keyboard|file:$WORKSPACE_ROOT/packages/plugin-keyboard|g" package.json
-fi
-
-cd "$WORKSPACE_ROOT"
-
-echo ""
-echo -e "${GREEN}✓ Test app created successfully${NC}"
 
 # ==========================================
 # INSTALL DEPENDENCIES
 # ==========================================
 
 echo ""
-echo -e "${BLUE}📦 STEP 3: INSTALLING DEPENDENCIES${NC}"
+echo -e "${BLUE}� STEP 3: INSTALLING DEPENDENCIES (WORKSPACE-LEVEL)${NC}"
 echo ""
-echo "   Installing dependencies with local package links..."
+echo "   Running pnpm install from workspace root..."
+echo "   This will automatically link workspace:* packages to temp-e2e-app (if created)"
 echo ""
 
-# Install dependencies in the temp app directory
-# file: protocol will link to local packages
-if ! pnpm install --dir="$TEMP_APP_DIR" --no-frozen-lockfile; then
+# Install from workspace root - pnpm will see temp-e2e-app and resolve workspace:* deps
+# Use --no-frozen-lockfile to allow lockfile updates for the temporary app
+# This is safe for E2E tests as we're adding a temporary workspace package
+if ! pnpm install --no-frozen-lockfile; then
   echo -e "${RED}❌ Failed to install dependencies${NC}"
   exit 1
 fi
 
 echo ""
-echo -e "${GREEN}✓ Dependencies installed (using local workspace packages)${NC}"
+echo -e "${GREEN}✓ Dependencies installed and workspace packages linked${NC}"
 
 # ==========================================
 # VERIFY INSTALLATION
@@ -178,22 +212,21 @@ echo ""
 echo -e "${BLUE}🔍 STEP 4: VERIFYING INSTALLATION${NC}"
 echo ""
 
-# Check that Navigator packages are linked
-echo "   Checking Navigator package links..."
+# Check that temp app has a valid package.json and node_modules exists
+echo "   Verifying temp app setup..."
 
-if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/core" ]; then
-  echo -e "${RED}❌ @navigator.menu/core not found${NC}"
+if [ "$CREATED_TEMP_APP" = true ] && [ ! -f "${TEMP_APP_DIR}/package.json" ]; then
+  echo -e "${RED}❌ package.json not found in temp app${NC}"
   exit 1
 fi
 
-if [ ! -d "$TEMP_APP_DIR/node_modules/@navigator.menu/react" ]; then
-  echo -e "${RED}❌ @navigator.menu/react not found${NC}"
-  exit 1
+# In workspace mode, dependencies are managed by pnpm - just verify the temp app is recognized
+if ! grep -q "temp-e2e-app" "pnpm-lock.yaml" 2>/dev/null; then
+  echo -e "${YELLOW}⚠️  temp-e2e-app not found in lock file (may be first run)${NC}"
 fi
 
-echo -e "${GREEN}   ✓ @navigator.menu/core linked${NC}"
-echo -e "${GREEN}   ✓ @navigator.menu/react linked${NC}"
-echo -e "${GREEN}   ✓ All packages linked correctly${NC}"
+echo -e "${GREEN}   ✓ Temp app configured correctly${NC}"
+echo -e "${GREEN}   ✓ Workspace packages will be linked at runtime${NC}"
 
 # ==========================================
 # START TEST SERVER
@@ -202,22 +235,26 @@ echo -e "${GREEN}   ✓ All packages linked correctly${NC}"
 echo ""
 echo -e "${BLUE}🌐 STEP 5: STARTING TEST SERVER${NC}"
 echo ""
-echo "   Starting Vite dev server on $SERVER_URL..."
+echo "   Starting Vite dev server for project ${PROJECT_NAME} on $SERVER_URL..."
 echo "   [$(date +%H:%M:%S)] Initializing server..."
 
-# Check if port is already in use
-if lsof -i :5173 > /dev/null 2>&1; then
-  echo -e "${YELLOW}⚠️  Port 5173 already in use!${NC}"
-  echo "   Attempting to kill existing process..."
-  kill $(lsof -t -i :5173) 2>/dev/null || true
-  sleep 2
+# Ensure port is free and start server at explicit port
+echo "   [$(date +%H:%M:%S)] Verifying port ${SERVER_PORT} is free..."
+if lsof -i :${SERVER_PORT} > /dev/null 2>&1; then
+  echo "   ⚠️ Port ${SERVER_PORT} is in use. Attempting to kill existing process..."
+  kill $(lsof -t -i:${SERVER_PORT}) 2>/dev/null || true
+  sleep 1
 fi
 
-# Start server in background and capture logs
-WORKSPACE_ROOT_ABS="$(pwd)"
-echo "   [$(date +%H:%M:%S)] Starting Vite process..."
-(cd "$TEMP_APP_DIR" && npx vite) > "$SERVER_LOG" 2>&1 &
-SERVER_PID=$!
+echo "   [$(date +%H:%M:%S)] Starting dev server on port ${SERVER_PORT}..."
+if [ "$PROJECT_NAME" == "ReactTestApp" ]; then
+  (cd "$TEMP_APP_DIR" && pnpm dev --port "${SERVER_PORT}" --host) > "$SERVER_LOG" 2>&1 &
+  SERVER_PID=$!
+else
+  # CognitiveShowcase app may have its own start script - start from its folder
+  (cd "$TEMP_APP_DIR" && pnpm dev --port "${SERVER_PORT}" --host) > "$SERVER_LOG" 2>&1 &
+  SERVER_PID=$!
+fi
 
 echo -e "${GREEN}   ✓ Server started (PID: $SERVER_PID)${NC}"
 echo "   Server logs: $SERVER_LOG"
@@ -279,11 +316,11 @@ echo ""
 echo -e "${BLUE}🎬 STEP 6: RUNNING E2E TESTS${NC}"
 echo ""
 
-# Set BASE_URL environment variable for Playwright
+# Run Playwright tests for the specific project
 export BASE_URL="$SERVER_URL"
 
-# Run Playwright tests using centralized config
-if pnpm playwright test --config="$PLAYWRIGHT_CONFIG"; then
+echo "   Running Playwright project: $PROJECT_NAME"
+if pnpm playwright test --config="$WORKSPACE_ROOT/$PLAYWRIGHT_CONFIG" --project="$PROJECT_NAME"; then
   echo ""
   echo -e "${GREEN}✅ ALL E2E TESTS PASSED!${NC}"
   EXIT_CODE=0
