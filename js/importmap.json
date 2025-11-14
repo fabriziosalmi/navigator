@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "js-yaml": "https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/+esm",
+    "ajv": "https://cdn.jsdelivr.net/npm/ajv@8.12.0/+esm"
+  }
+}
