@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React integration for Navigator.Menu - BYOS (Bring Your Own State) v0.1",
   "type": "module",
   "main": "./dist/index.cjs",

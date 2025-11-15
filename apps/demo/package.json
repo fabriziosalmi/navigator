@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/demo",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Navigator demo application showcasing SDK features",
   "private": true,
   "type": "module",

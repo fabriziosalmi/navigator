@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/types",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "TypeScript type definitions for Navigator SDK - auto-generated from JSDoc",
   "type": "module",
   "main": "./dist/index.js",

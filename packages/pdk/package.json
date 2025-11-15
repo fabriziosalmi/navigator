@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/pdk",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Plugin Development Kit for Navigator - utilities, mocks, and types for building plugins",
   "type": "module",
   "exports": {

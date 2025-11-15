@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/plugin-keyboard",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Keyboard navigation plugin for Navigator.Menu",
   "type": "module",
   "main": "./dist/index.cjs",

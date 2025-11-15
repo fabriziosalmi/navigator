@@ -1,5 +1,21 @@
 # @navigator.menu/react
 
+## 1.0.1
+
+### Patch Changes
+
+- Bug fixes, CI/CD improvements, and dependency updates:
+  - fix(react): Resolve TypeScript type resolution for NavigatorCore DTS build
+  - fix: Add default exports for TypeScript definitions in package.json
+  - fix: Build packages before running tests in deployment workflow
+  - ci: Upgrade ESLint from 8.x to 9.x for Node.js v25 compatibility
+  - ci: Disable deployment workflow temporarily (legacy demo syntax issues)
+  - feat: Add .nojekyll file to prevent Jekyll processing on GitHub Pages
+  - refactor: Remove outdated architecture and plugin documentation
+
+- Updated dependencies
+  - @navigator.menu/core@3.0.1
+
 ## 1.0.0
 
 ### Major Changes
