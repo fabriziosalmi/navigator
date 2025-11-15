@@ -1,10 +1,10 @@
-name: TEST Release Workflow
+name: Release Workflow
 
 on:
-  # Triggera il workflow quando fai un push sulla feature branch (DRY RUN)
+  # Trigger the workflow when pushing to main branch
   push:
     branches:
-      - feat/automated-releases
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   release:
-    name: Release Packages (DRY RUN)
+    name: Release Packages
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -61,17 +61,16 @@ jobs:
       - name: Run Tests
         run: pnpm -r test
 
-      - name: Create Release PR or Publish (DRY RUN)
+      - name: Create Release PR or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          # DRY RUN: usa 'version' invece di 'publish'
-          # Questo creerà solo la PR di versioning senza pubblicare
           version: pnpm run version:ci
+          publish: pnpm release
           commit: 'chore: version packages'
           title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN non necessario per il dry run
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Bypass husky hooks in CI
           HUSKY: 0
