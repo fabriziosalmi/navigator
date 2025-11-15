@@ -4,8 +4,8 @@
  * Supports plugin-based architecture with schema validation
  */
 
-import yaml from 'js-yaml';
-import Ajv from 'ajv';
+import yaml from 'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/+esm';
+import Ajv from 'https://cdn.jsdelivr.net/npm/ajv@8.12.0/+esm';
 import { logger, LogLevel } from './Logger.js';
 
 export class ConfigLoader {
