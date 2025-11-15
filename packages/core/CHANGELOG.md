@@ -1,5 +1,11 @@
 # @navigator.menu/core
 
+## 3.0.2
+
+### Patch Changes
+
+- 8d03dc7: Test release workflow validation - This changeset will be used to verify the automated release workflow functions correctly in dry run mode.
+
 ## 3.0.1
 
 ### Patch Changes

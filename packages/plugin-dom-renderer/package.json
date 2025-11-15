@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/plugin-dom-renderer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "DOM rendering and UI adaptation plugin for Navigator.menu",
   "type": "module",
   "main": "./dist/index.cjs",
