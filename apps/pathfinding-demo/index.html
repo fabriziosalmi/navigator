@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigator</title>
+
+    <!-- Content Security Policy - Strict Security -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none';
+        script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
+        style-src 'self' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' https://images.unsplash.com data: blob:;
+        media-src 'self' https://www.w3schools.com blob:;
+        connect-src 'self' https://cdn.jsdelivr.net;
+        worker-src 'self' blob:;
+        manifest-src 'self';
+        base-uri 'self';
+        form-action 'none';
+        object-src 'none';
+        upgrade-insecure-requests;
+    ">
+    
+    <!-- Modular CSS Architecture -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layers.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/categories.css">
+    <link rel="stylesheet" href="css/lod.css">
+    <link rel="stylesheet" href="css/hud.css">
+    <link rel="stylesheet" href="css/adaptive.css">
+    <link rel="stylesheet" href="css/history.css">
+    <link rel="stylesheet" href="css/gestures.css">
+    <link rel="stylesheet" href="css/start-screen.css">
+    <link rel="stylesheet" href="css/effects.css">
+    <link rel="stylesheet" href="css/interface-hud.css">
+    <link rel="stylesheet" href="css/unified-hud.css">
+    <link rel="stylesheet" href="css/carousel-3d.css">
+    <link rel="stylesheet" href="css/dual-hud-layout.css">
+    <link rel="stylesheet" href="css/performance-optimizations.css">
+    <link rel="stylesheet" href="css/ux-refinements.css">
+    <link rel="stylesheet" href="css/viewport-cleanup.css">
+    <link rel="stylesheet" href="css/card-blur-overlay.css">
+    <link rel="stylesheet" href="css/interface-status-compact.css">
+    <link rel="stylesheet" href="css/monochrome-minimal.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/onboarding-wizard.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/cognitive-states.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen" role="dialog" aria-labelledby="start-title">
+        <div class="start-box">
+            <h1 id="start-title">🌌 Navigator</h1>
+            <p>Multi-layer gesture-controlled interface</p>
+            <p>Navigate through cards with hand gestures</p>
+            <button id="start-btn" aria-label="Start the Navigator experience">🚀 Start Experience</button>
+            <div class="permissions-info" role="note">
+                📹 Camera permission will be requested<br>
+                🔊 Audio will be enabled<br>
+                🖐️ Use hand gestures to navigate
+            </div>
+        </div>
+    </div>
+    <!-- Layer Tabs - Hidden (functionality preserved in HUD) -->
+    <div id="layer-tabs" class="hidden-element">
+        <div class="layer-tab active" data-layer="video">
+            <div class="icon">🎬</div>
+            <div class="label">Videos</div>
+        </div>
+        <div class="layer-tab" data-layer="news">
+            <div class="icon">📰</div>
+            <div class="label">News</div>
+        </div>
+        <div class="layer-tab" data-layer="images">
+            <div class="icon">🖼️</div>
+            <div class="label">Images</div>
+        </div>
+        <div class="layer-tab" data-layer="games">
+            <div class="icon">🎮</div>
+            <div class="label">Games</div>
+        </div>
+        <div class="layer-tab" data-layer="apps">
+            <div class="icon">📱</div>
+            <div class="label">Apps</div>
+        </div>
+        <div class="layer-tab" data-layer="settings">
+            <div class="icon">⚙️</div>
+            <div class="label">Settings</div>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         CENTRAL CONTENT AREA - Fullwidth Viewport
+         Cards matrix with 3D carousel
+         =================================================== -->
+    <div id="cards-viewport">
+        <div id="cards-container">
+            <!-- Cards will be rendered here -->
+        </div>
+    </div>
+
+    <!-- ===================================================
+         TOP HUD BAR - Fullwidth
+         Left: History | Right: Gesture Status
+         =================================================== -->
+    <div class="top-hud-bar">
+        <!-- Left Panel: Navigation History -->
+        <div class="left-panel">
+            <div class="hud-panel compact-panel">
+                <span class="history-title">Recent</span>
+                <div class="history-icons" id="hud-history">
+                    <!-- Populated dynamically with last 5 navigation actions -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel: Gesture System Status -->
+        <div class="right-panel">
+            <div class="hud-panel compact-panel">
+                <div class="gesture-status-title">Gesture System</div>
+                <div class="gesture-status-content">
+                    <div class="gesture-stat">
+                        <span class="stat-label">Hand</span>
+                        <span class="status-dot inactive" id="hand-status"></span>
+                        <span class="stat-value" id="hand-state">Searching</span>
+                    </div>
+                    <div class="gesture-stat">
+                        <span class="stat-label">Current</span>
+                        <span class="stat-value" id="gesture-type">None</span>
+                    </div>
+                    <div class="gesture-stat">
+                        <span class="stat-label">Grid Lock</span>
+                        <span class="stat-value" id="grid-lock">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         CENTRAL CONTENT AREA - Fullwidth Viewport
+         Cards matrix with 3D carousel
+         =================================================== -->
+    <div id="cards-viewport" role="main" aria-label="Content cards">
+        <div id="cards-container">
+            <!-- Cards will be rendered here -->
+        </div>
+    </div>
+
+    <!-- ===================================================
+         BOTTOM HUD BAR - Fullwidth
+         Organized in 5 columns: Input Methods | Position | Navigation | Gesture Status | Adaptive Progress
+         =================================================== -->
+    <div class="bottom-hud-bar" role="complementary" aria-label="Navigation HUD">
+        <!-- Gesture LED Indicator (floating) -->
+        <div class="gesture-led" id="gesture-led" aria-hidden="true"></div>
+        
+        <!-- Column 1: Input Methods & Interface Status -->
+        <div class="hud-panel compact-panel input-methods-panel">
+            <div class="panel-title">INPUT METHODS</div>
+            <div id="interface-status-container">
+                <!-- InterfaceStatusHUD will mount here -->
+            </div>
+        </div>
+        
+        <!-- Column 2: Layer & Position Info -->
+        <div class="hud-panel compact-panel position-info" role="status" aria-live="polite">
+            <div class="panel-title">POSITION</div>
+            <div class="layer-display">
+                <span class="layer-name" id="hud-layer-name">Videos</span>
+                <span class="layer-meta" id="hud-layer-meta">Layer 1/6</span>
+            </div>
+            <div class="card-position" aria-label="Current position">
+                <span class="current-card" id="hud-current-card">1</span>
+                <span class="separator">/</span>
+                <span class="total-cards" id="hud-total-cards">4</span>
+            </div>
+        </div>
+
+        <!-- Column 3: Central Navigation Controls -->
+        <div class="hud-panel nav-controls" role="toolbar" aria-label="Navigation controls">
+            <button class="hud-nav" id="prev-btn" data-action="prev" 
+                    aria-label="Navigate to previous card" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="layer-up" data-action="layer-up" 
+                    aria-label="Navigate to upper layer" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M12 19V5m0 0l-7 7m7-7l7 7"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="layer-down" data-action="layer-down" 
+                    aria-label="Navigate to lower layer" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M12 5v14m0 0l-7-7m7 7l7-7"/>
+                </svg>
+            </button>
+            <button class="hud-nav" id="next-btn" data-action="next" 
+                    aria-label="Navigate to next card" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Column 4: Gesture System Status -->
+        <div class="hud-panel compact-panel gesture-status-panel" role="status" aria-live="polite">
+            <div class="panel-title">GESTURE SYSTEM</div>
+            <div class="gesture-status-content">
+                <div class="gesture-stat">
+                    <span class="stat-label">Hand</span>
+                    <span class="status-dot inactive" id="hand-status" aria-hidden="true"></span>
+                    <span class="stat-value" id="hand-state">Searching</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Current</span>
+                    <span class="stat-value" id="gesture-type">None</span>
+                </div>
+                <div class="gesture-stat">
+                    <span class="stat-label">Grid Lock</span>
+                    <span class="stat-value" id="grid-lock">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 5: Adaptive Level Progress -->
+        <div class="hud-panel compact-panel adaptive-display" id="adaptive-hud-quantum">
+            <!-- Populated by AdaptiveNavigationHUD -->
+        </div>
+    </div>
+
+    <!-- Gesture Info - Hidden (integrated in HUD) -->
+    <div id="gesture-info" class="hidden-element">
+        <h3>🖐️ Gestures</h3>
+        <p><span class="status-dot inactive" id="hand-status"></span>Hand: <strong id="hand-state">Not detected</strong></p>
+        <p>Gesture: <strong id="gesture-type">None</strong></p>
+        <p>Grid Lock: <strong id="grid-lock">Active</strong></p>
+    </div>
+
+    <!-- GESTURE INDICATOR - Hidden (will integrate in HUD) -->
+    <div id="gesture-indicator" class="hidden-element">
+        <div class="gesture-hint" id="point-hint" data-gesture="point" title="Point to focus">
+            <div class="gesture-icon">👆</div>
+            <div class="gesture-label">Point<br><span class="gesture-context">2s = Focus</span></div>
+        </div>
+        <div class="gesture-hint" id="pinch-hint" data-gesture="pinch" title="Pinch to zoom/grab">
+            <div class="gesture-icon">🤏</div>
+            <div class="gesture-label">Pinch<br><span class="gesture-context">Zoom/Grab</span></div>
+        </div>
+        <div class="gesture-hint" id="fist-hint" data-gesture="fist" title="Fist to collapse">
+            <div class="gesture-icon">✊</div>
+            <div class="gesture-label">Fist<br><span class="gesture-context">Collapse</span></div>
+        </div>
+        <div class="gesture-hint" id="open-hint" data-gesture="open" title="Open hand to explode">
+            <div class="gesture-icon">🖐️</div>
+            <div class="gesture-label">Open<br><span class="gesture-context">Navigate/Reset</span></div>
+        </div>
+    </div>
+
+    <!-- Debug History Panel -->
+    <div id="debug-history">
+        <h3>🔍 Debug History</h3>
+        <div id="debug-log"></div>
+    </div>
+
+    <!-- Current Indicator -->
+    <div id="current-indicator">
+        <div id="current-layer-name">Videos</div>
+        <div class="small-font opacity-70">
+            Card <span id="current-card">1</span> / <span id="total-cards">4</span>
+        </div>
+    </div>
+
+    <!-- Confirmation Overlay -->
+    <div id="confirmation-overlay">
+        <div class="confirmation-box">
+            <h2 id="confirmation-title">Confirm Action</h2>
+            <p id="confirmation-message">Are you sure?</p>
+            <div class="confirmation-buttons">
+                <button class="confirm-btn yes" id="confirm-yes">✓ YES</button>
+                <button class="confirm-btn no" id="confirm-no">✗ NO</button>
+            </div>
+            <div class="gesture-instructions">
+                Use gestures:<br>
+                <strong>👍 Thumbs Up (1 sec) = YES</strong><br>
+                <strong>☝️ Shake Index (3x) = NO</strong><br>
+                or press <strong>Enter/Y</strong> for YES, <strong>Escape/N</strong> for NO
+            </div>
+            <div id="gesture-progress">
+                <div id="thumbs-up-progress" class="hidden-element">
+                    <div>👍 Hold thumbs up...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="thumbs-progress-fill"></div>
+                    </div>
+                </div>
+                <div id="shake-progress" class="hidden-element">
+                    <div class="shake-counter">☝️ Shakes: <span id="shake-count">0</span> / 3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <video id="webcam" autoplay playsinline></video>
+
+    <!-- MediaPipe Scripts with Subresource Integrity (SRI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"
+            integrity="sha384-q1KhAZhJcJXr3zfC3Tz07pBqQSabwFIZhXlmlUAB8s0zk4ETWERkIKGBCFQ5Jc3e"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+            integrity="sha384-W/7NVG2tfN12ld8faSFVOZ/W4UHFHze98GqEUPTl8EjY9QDwCKQIzoCHp8/IlIIr"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"
+            integrity="sha384-oHwoZ9HyKv5ark5VOH+XWdbNfmhYtptAOBuV8plz6mAfXvTA6d8fULuYllWouEK2"
+            crossorigin="anonymous"></script>
+
+    <!-- Main initialization module -->
+    <script type="module" src="./js/main-init.js"></script>
+</body>
+</html>
