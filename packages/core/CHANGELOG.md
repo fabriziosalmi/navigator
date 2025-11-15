@@ -1,5 +1,11 @@
 # @navigator.menu/core
 
+## 3.0.3
+
+### Patch Changes
+
+- 92e8c7f: Test automated release workflow with npm token
+
 ## 3.0.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @navigator.menu/plugin-dom-renderer
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [92e8c7f]
+  - @navigator.menu/core@3.0.3
+
 ## 2.0.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/plugin-mock-gesture",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Mock gesture plugin for demos and testing - auto-emits swipe events",
   "type": "module",
   "main": "./dist/index.cjs",
