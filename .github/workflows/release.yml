@@ -73,3 +73,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # NPM_TOKEN non necessario per il dry run
+          # Bypass husky hooks in CI
+          HUSKY: 0
