@@ -1,7 +1,5 @@
 # 🛡️ Ecosystem Validation System
 
-> **"Deve diventare il comando standard da eseguire prima di ogni git push, garantendo che nessun commit possa mai compromettere la stabilità o la qualità dell'ecosistema Navigator."**
-
 The Navigator ecosystem uses a **comprehensive, orchestrated validation system** that acts as a pre-push quality gate, ensuring that every commit maintains the highest standards of stability, quality, and performance.
 
 ---
