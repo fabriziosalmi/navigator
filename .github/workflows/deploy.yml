@@ -4,6 +4,7 @@ name: CD - Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:  # Allow manual triggering
 
 # Permessi necessari per push e deploy
 permissions:
@@ -21,6 +22,7 @@ jobs:
   deploy:
     name: Build and Deploy to GitHub Pages
     runs-on: ubuntu-latest
+    if: false  # Disabled temporarily - root demo has syntax issues
 
     steps:
       # 1. Checkout del codice
