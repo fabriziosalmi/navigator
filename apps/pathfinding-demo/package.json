@@ -1,0 +1,25 @@
+{
+  "name": "@navigator.menu/pathfinding-demo",
+  "version": "1.0.0",
+  "description": "Navigator Pathfinding & Gesture Control Demo - Multi-layer gesture-controlled interface with MediaPipe hand tracking",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5175",
+    "build": "vite build",
+    "preview": "vite preview",
+    "vercel-build": "cd ../.. && pnpm build && cd apps/pathfinding-demo && vite build"
+  },
+  "keywords": [
+    "navigator",
+    "gesture-control",
+    "mediapipe",
+    "hand-tracking",
+    "pathfinding",
+    "adaptive-ui"
+  ],
+  "author": "Fabrizio Salmi",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^6.4.1"
+  }
+}

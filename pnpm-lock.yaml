@@ -132,6 +132,12 @@ importers:
         specifier: ^4.1.17
         version: 4.1.17
 
+  apps/pathfinding-demo:
+    devDependencies:
+      vite:
+        specifier: ^6.4.1
+        version: 6.4.1(@types/node@20.19.24)(terser@5.44.1)
+
   apps/react-test-app:
     dependencies:
       '@navigator.menu/core':

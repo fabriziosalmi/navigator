@@ -113,13 +113,13 @@ export class CarouselMomentum {
         const isFastSwipe = Math.abs(avgVelocity) >= this.config.velocityThreshold;
         const isQuickSwipe = totalTime <= this.config.swipeTimeout;
         
-        // console.log('🎡 Swipe detected:', {
+        /* console.log('🎡 Swipe detected:', {
             distance: totalDistance.toFixed(0),
             velocity: avgVelocity.toFixed(3),
             time: totalTime,
             isLong: isLongSwipe,
             isFast: isFastSwipe
-        });
+        }); */
         
         if (isHorizontal && (isLongSwipe || (isFastSwipe && isQuickSwipe))) {
             // Activate momentum!
