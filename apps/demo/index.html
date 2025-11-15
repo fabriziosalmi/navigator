@@ -19,19 +19,65 @@
 </head>
 <body>
   <div id="app">
-    <div class="navigator-container">
-      <h1>Navigator SDK Demo</h1>
-      <p>Showcasing @navigator.menu/pdk v2.0.0 features</p>
+    <div class="demo-layout">
+      <!-- Main Content -->
+      <main class="demo-main">
+        <header class="demo-header">
+          <h1>📦 Navigator PDK Demo</h1>
+          <p class="subtitle">Interactive showcase of the Plugin Development Kit v2.0.0</p>
+        </header>
+        
+        <section class="intro-section">
+          <div class="intro-card">
+            <h2>🚀 What is Navigator PDK?</h2>
+            <p>The Plugin Development Kit provides everything you need to extend Navigator with custom plugins:</p>
+            <ul>
+              <li><strong>BasePlugin</strong> - Abstract class with lifecycle hooks</li>
+              <li><strong>NipValidator</strong> - Event validation per NIP v1.0 spec</li>
+              <li><strong>Utilities</strong> - debounce, throttle, math helpers</li>
+              <li><strong>Testing Mocks</strong> - Unit test your plugins easily</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="cards-section">
+          <h2>🎯 Try the Features</h2>
+          <p class="section-desc">Click "Run Demo" and open DevTools Console (F12) to see each feature in action</p>
+          <div class="cards-container" id="cardsContainer">
+            <!-- Cards will be dynamically added here -->
+          </div>
+        </section>
+      </main>
       
-      <div class="cards-container" id="cardsContainer">
-        <!-- Cards will be dynamically added here -->
-      </div>
-      
-      <div style="margin-top: 3rem; padding: 1.5rem; background: rgba(0, 212, 255, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.2);">
-        <p style="margin: 0; font-size: 1rem; opacity: 1;">
-          💡 <strong>Click "Run Demo"</strong> on any card and check the Console (F12) to see PDK features in action!
-        </p>
-      </div>
+      <!-- Sidebar -->
+      <aside class="demo-sidebar">
+        <div class="sidebar-card">
+          <h3>💡 How to Use</h3>
+          <ol>
+            <li>Open DevTools Console (F12)</li>
+            <li>Click any "Run Demo" button</li>
+            <li>Watch the console output</li>
+            <li>Click "📖 Docs" for details</li>
+          </ol>
+        </div>
+        
+        <div class="sidebar-card">
+          <h3>📚 Resources</h3>
+          <ul class="resource-links">
+            <li><a href="https://github.com/fabriziosalmi/navigator/tree/main/packages/pdk" target="_blank">📦 PDK Package</a></li>
+            <li><a href="https://github.com/fabriziosalmi/navigator/blob/main/docs/NIP.md" target="_blank">📋 NIP Spec</a></li>
+            <li><a href="https://github.com/fabriziosalmi/navigator" target="_blank">🔗 GitHub Repo</a></li>
+          </ul>
+        </div>
+        
+        <div class="sidebar-card console-status">
+          <h3>🖥️ Console Status</h3>
+          <p id="consoleStatus" class="status-indicator">
+            <span class="status-dot"></span>
+            Waiting for demo...
+          </p>
+        </div>
+      </aside>
     </div>
   </div>
   
