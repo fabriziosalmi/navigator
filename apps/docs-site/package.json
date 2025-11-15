@@ -1,0 +1,21 @@
+{
+  "name": "@navigator/docs-site",
+  "version": "1.0.0",
+  "description": "Navigator SDK Documentation",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "keywords": [
+    "navigator",
+    "documentation",
+    "sdk"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  }
+}

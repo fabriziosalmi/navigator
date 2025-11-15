@@ -52,10 +52,10 @@ if [ "$PROJECT_NAME" == "ReactTestApp" ]; then
   CREATED_TEMP_APP=true
 elif [ "$PROJECT_NAME" == "CognitiveShowcase" ]; then
   # Use existing app in monorepo
-  TEMPLATE_DIR="apps/cognitive-showcase"
+  TEMPLATE_DIR="apps/showcase"
   TEMP_APP_DIR="$TEMPLATE_DIR"
   SERVER_PORT=${SERVER_PORT:-5174}
-  SERVER_LOG="cognitive-showcase-server.log"
+  SERVER_LOG="showcase-server.log"
   CREATED_TEMP_APP=false
 else
   echo "Unknown project: $PROJECT_NAME"
