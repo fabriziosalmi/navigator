@@ -12,6 +12,8 @@ interface CognitiveMetrics {
   averageSpeed: number;
   totalActions: number;
   successRate: number;
+  errorCount: number;
+  successCount: number;
 }
 
 interface Action {
@@ -28,6 +30,8 @@ function App() {
     averageSpeed: 0,
     totalActions: 0,
     successRate: 100,
+    errorCount: 0,
+    successCount: 0,
   });
   const [lastAction, setLastAction] = useState<Action | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -130,6 +134,8 @@ function App() {
         averageSpeed: Math.round(averageSpeed),
         totalActions,
         successRate: Math.round(successRate),
+        errorCount: failedActions,
+        successCount: successfulActions,
       });
     });
 
@@ -142,12 +148,23 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">
-          <span className="gradient-text">Navigator</span>
-          <span className="subtitle">Cognitive Showcase</span>
-        </h1>
-        <div className="status-badge" data-status={core ? 'running' : 'initializing'}>
-          {core ? 'running' : 'initializing'}
+        <div className="header-left">
+          <h1 className="app-title">
+            <span className="gradient-text">Navigator</span>
+            <span className="subtitle">Cognitive Showcase</span>
+          </h1>
+          <div className="status-badge" data-status={core ? 'running' : 'initializing'}>
+            {core ? 'running' : 'initializing'}
+          </div>
+        </div>
+        
+        {/* Onboarding Wizard in Header */}
+        <div className="header-right">
+          <OnboardingWizard
+            metrics={metrics}
+            cognitiveState={cognitiveState}
+            onComplete={() => setOnboardingComplete(true)}
+          />
         </div>
       </header>
 
@@ -190,13 +207,6 @@ function App() {
           Press random keys to trigger frustration state.
         </p>
       </footer>
-
-      {/* Onboarding Wizard */}
-      <OnboardingWizard
-        metrics={metrics}
-        cognitiveState={cognitiveState}
-        onComplete={() => setOnboardingComplete(true)}
-      />
     </div>
   );
 }

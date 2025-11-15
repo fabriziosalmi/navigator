@@ -20,6 +20,8 @@ interface OnboardingWizardProps {
   metrics: {
     totalActions: number;
     errorRate: number;
+    errorCount: number;
+    successCount: number;
   };
   cognitiveState: string;
   onComplete: () => void;
@@ -78,8 +80,8 @@ function OnboardingWizard({ metrics, cognitiveState, onComplete }: OnboardingWiz
 
     const onboardingMetrics: OnboardingMetrics = {
       totalActions: metrics.totalActions,
-      successfulActions: Math.round(metrics.totalActions * (1 - metrics.errorRate / 100)),
-      errorActions: Math.round(metrics.totalActions * (metrics.errorRate / 100)),
+      successfulActions: metrics.successCount,
+      errorActions: metrics.errorCount,
       frustrationDetected: cognitiveState === 'frustrated',
     };
 
@@ -119,8 +121,8 @@ function OnboardingWizard({ metrics, cognitiveState, onComplete }: OnboardingWiz
 
   if (dismissed) {
     return (
-      <button className="onboarding-reset-button" onClick={handleReset}>
-        🎯 Restart Tutorial
+      <button className="onboarding-reset-button" onClick={handleReset} title="Restart tutorial">
+        🎯 Tutorial
       </button>
     );
   }
@@ -128,10 +130,10 @@ function OnboardingWizard({ metrics, cognitiveState, onComplete }: OnboardingWiz
   if (completed) {
     return (
       <div className="onboarding-complete">
-        <div className="complete-icon">✨</div>
-        <div className="complete-message">Tutorial Complete!</div>
+        <span className="complete-icon">✨</span>
+        <span className="complete-message">Complete!</span>
         <button className="dismiss-button" onClick={handleDismiss}>
-          Got it!
+          Dismiss
         </button>
       </div>
     );
@@ -142,8 +144,8 @@ function OnboardingWizard({ metrics, cognitiveState, onComplete }: OnboardingWiz
   // Calculate progress for current step
   const onboardingMetrics: OnboardingMetrics = {
     totalActions: metrics.totalActions,
-    successfulActions: Math.round(metrics.totalActions * (1 - metrics.errorRate / 100)),
-    errorActions: Math.round(metrics.totalActions * (metrics.errorRate / 100)),
+    successfulActions: metrics.successCount,
+    errorActions: metrics.errorCount,
     frustrationDetected: cognitiveState === 'frustrated',
   };
 
@@ -178,52 +180,40 @@ function OnboardingWizard({ metrics, cognitiveState, onComplete }: OnboardingWiz
           ))}
         </div>
 
-        <div className="step-icon">{step.icon}</div>
-        <h3 className="step-title">{step.title}</h3>
-        <p className="step-message">{step.message}</p>
-
-        {/* Progress bar for current step */}
-        <div className="step-progress-bar">
-          <div 
-            className="step-progress-fill" 
-            style={{ width: `${stepProgress}%` }}
-          />
-        </div>
-        {!isStepComplete && (
-          <div className="step-hint">
-            {currentStep === 0 && `${onboardingMetrics.successfulActions}/3 navigations`}
-            {currentStep === 1 && `${onboardingMetrics.errorActions}/5 errors`}
-            {currentStep === 2 && !onboardingMetrics.frustrationDetected && `${onboardingMetrics.errorActions}/8 errors (or trigger frustrated state)`}
-            {currentStep === 2 && onboardingMetrics.frustrationDetected && 'Frustration detected! ✓'}
-            {currentStep === 3 && `${onboardingMetrics.totalActions}/15 total actions`}
+        <div className="step-content">
+          <div>
+            <span className="step-icon">{step.icon}</span>
+            <span className="step-title">{step.title}</span>
           </div>
-        )}
+          <p className="step-message">{step.message}</p>
 
-        <div className="step-footer">
-          <span className="step-counter">
-            Step {currentStep + 1} of {ONBOARDING_STEPS.length}
-          </span>
-          <button className="skip-button" onClick={handleDismiss}>
-            Skip Tutorial
-          </button>
+          {/* Progress bar for current step */}
+          <div className="step-progress-bar">
+            <div 
+              className="step-progress-fill" 
+              style={{ width: `${stepProgress}%` }}
+            />
+          </div>
+          {!isStepComplete && (
+            <div className="step-hint">
+              {currentStep === 0 && `${onboardingMetrics.successfulActions}/3 navigations`}
+              {currentStep === 1 && `${onboardingMetrics.errorActions}/5 errors`}
+              {currentStep === 2 && !onboardingMetrics.frustrationDetected && `${onboardingMetrics.errorActions}/8 errors`}
+              {currentStep === 2 && onboardingMetrics.frustrationDetected && 'Frustration detected! ✓'}
+              {currentStep === 3 && `${onboardingMetrics.totalActions}/15 actions`}
+            </div>
+          )}
+
+          <div className="step-footer">
+            <span className="step-counter">
+              {currentStep + 1}/{ONBOARDING_STEPS.length}
+            </span>
+            <button className="skip-button" onClick={handleDismiss}>
+              Skip
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Animated arrow pointing to action panel */}
-      {currentStep === 0 && (
-        <div className="tutorial-arrow arrow-left">
-          <span className="arrow-label">Try it here!</span>
-          <span className="arrow-icon">←</span>
-        </div>
-      )}
-
-      {/* Animated arrow pointing to HUD */}
-      {currentStep === 2 && (
-        <div className="tutorial-arrow arrow-right">
-          <span className="arrow-icon">→</span>
-          <span className="arrow-label">Watch this!</span>
-        </div>
-      )}
     </div>
   );
 }
