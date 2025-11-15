@@ -3,6 +3,7 @@
  * Showcasing @navigator.menu/pdk features
  */
 
+import '../css/main.css';
 import { BasePlugin, NipValidator, debounce, clamp } from '@navigator.menu/pdk';
 import { CoreMock } from '@navigator.menu/pdk/testing';
 

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build",
+  "buildCommand": "cd ../.. && pnpm --filter @navigator.menu/pdk --filter @navigator.menu/types build && cd apps/pdk-demo && pnpm build",
   "outputDirectory": "dist",
   "installCommand": "cd ../.. && pnpm install",
   "framework": "vite",
