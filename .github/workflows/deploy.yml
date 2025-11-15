@@ -68,15 +68,19 @@ jobs:
         run: pnpm run lint
         continue-on-error: true  # Temporarily allow failures (ESLint 8.x + AJV issue)
 
-      # 6. Run Tests - Quality Gate
+      # 6. Build packages (required before tests)
+      - name: Build packages
+        run: pnpm run build
+
+      # 7. Run Tests - Quality Gate
       - name: Run tests
         run: pnpm test
         env:
           CI: true
 
-      # 7. Production Build
+      # 8. Production Build (already done in step 6)
       - name: Build production bundle
-        run: pnpm run build
+        run: echo "Build already completed in Build packages step"
         env:
           NODE_ENV: production
 
