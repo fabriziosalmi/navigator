@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)](https://www.typescriptlang.org/)
 
-**[🚀 Cognitive Demo](https://navigator-cognitive-showcase.vercel.app)** | **[📦 SDK Demo](https://navigator-pdk-demo.vercel.app)** | **[📚 Full Documentation](https://fabriziosalmi.github.io/navigator/docs/)** | **[🧑‍🍳 Cookbook Recipes](./docs/docs/COOKBOOK.md)**
+**[🚀 Live Showcase](https://navigator-showcase.vercel.app)** | **[📦 SDK Demo](https://navigator-pdk-demo.vercel.app)** | **[📚 Documentation](https://navigator-docs.vercel.app)** | **[🧑‍🍳 Cookbook](https://navigator-docs.vercel.app/cookbook)**
 
 Navigator is a **decoupled, plugin-based SDK** for building next-generation web interfaces. It's a context-aware perception platform that understands user intent, predicts actions, and adapts the UI in real-time.
 
@@ -88,7 +88,7 @@ npm run dev
 
 > **Why this matters:** With a single source of truth (the Store), you get time-travel debugging, predictable updates, and effortless testing. Change `KeyboardPlugin` to `GesturePlugin` later, and your app code **doesn't change at all**.
 
-> For more examples, including **Gesture Control, Voice Commands, and Three.js integration**, check out our **[Cookbook Recipes](./docs/docs/COOKBOOK.md)**.
+> For more examples, including **Gesture Control, Voice Commands, and Three.js integration**, check out our **[Cookbook Recipes](./apps/docs-site/cookbook.md)**.
 
 ---
 
@@ -200,7 +200,7 @@ Navigator is built on a **philosophy**, not just a pattern:
 3. **💫 The Core is the Decoupled Heart**
    All communication flows through the Event Bus. Plugins and your app never directly talk.
 
-**[Learn more in our documentation →](./docs/docs/ARCHITECTURE.md)**
+**[Learn more in our documentation →](./apps/docs-site/architecture.md)**
 
 ---
 
@@ -281,10 +281,10 @@ Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Condu
 
 ## 📚 Documentation
 
-- **[Getting Started Guide](./docs/docs/GETTING_STARTED.md)** - Installation and first steps
-- **[Cookbook](./docs/docs/COOKBOOK.md)** - Complete working examples
-- **[Architecture Deep-Dive](./docs/docs/ARCHITECTURE.md)** - Understand the design philosophy
-- **[Plugin Development](./docs/docs/PLUGIN_ARCHITECTURE.md)** - Build your own plugins
+- **[Getting Started Guide](./apps/docs-site/getting-started.md)** - Installation and first steps
+- **[Cookbook](./apps/docs-site/cookbook.md)** - Complete working examples
+- **[Architecture Deep-Dive](./apps/docs-site/architecture.md)** - Understand the design philosophy
+- **[Plugin Development](./apps/docs-site/plugin-architecture.md)** - Build your own plugins
 - **[API Reference](./documentation/docs/core-concepts.md)** - Complete API documentation
 
 ---

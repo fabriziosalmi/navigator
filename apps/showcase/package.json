@@ -1,0 +1,28 @@
+{
+  "name": "@navigator/showcase",
+  "version": "1.0.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "vercel-build": "cd ../.. && pnpm build && cd apps/cognitive-showcase && tsc && vite build",
+    "preview": "vite preview",
+    "test:record": "playwright test --project=record-demo"
+  },
+  "dependencies": {
+    "@navigator.menu/core": "workspace:*",
+    "@navigator.menu/plugin-keyboard": "workspace:*",
+    "@navigator.menu/react": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
+  }
+}
