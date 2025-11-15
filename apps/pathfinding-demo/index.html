@@ -48,19 +48,43 @@
     <link rel="stylesheet" href="css/onboarding-wizard.css">
     <link rel="stylesheet" href="css/accessibility.css">
     <link rel="stylesheet" href="css/cognitive-states.css">
+    <link rel="stylesheet" href="css/interactive-elements.css">
 </head>
 <body>
     <!-- Start Screen -->
     <div id="start-screen" role="dialog" aria-labelledby="start-title">
         <div class="start-box">
             <h1 id="start-title">🌌 Navigator</h1>
-            <p>Multi-layer gesture-controlled interface</p>
-            <p>Navigate through cards with hand gestures</p>
-            <button id="start-btn" aria-label="Start the Navigator experience">🚀 Start Experience</button>
+            <p>Next-Generation Gesture Interface</p>
+            <p>Experience the future of hands-free navigation</p>
+            
+            <div class="feature-highlights">
+                <div class="feature-item">
+                    <div class="feature-icon">🖐️</div>
+                    <div class="feature-title">Hand Gestures</div>
+                    <div class="feature-desc">Control with natural hand movements</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Smart Navigation</div>
+                    <div class="feature-desc">6-layer adaptive system</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Real-time</div>
+                    <div class="feature-desc">Instant response & feedback</div>
+                </div>
+            </div>
+            
+            <button id="start-btn" aria-label="Start the Navigator experience">
+                <span style="position: relative; z-index: 1;">🚀 Launch Experience</span>
+            </button>
+            
             <div class="permissions-info" role="note">
-                📹 Camera permission will be requested<br>
-                🔊 Audio will be enabled<br>
-                🖐️ Use hand gestures to navigate
+                <strong>What to expect:</strong><br>
+                📹 Camera access for gesture detection<br>
+                🔊 Audio feedback for interactions<br>
+                🖐️ Hand tracking powered by MediaPipe
             </div>
         </div>
     </div>
@@ -306,6 +330,105 @@
     </div>
 
     <video id="webcam" autoplay playsinline></video>
+
+    <!-- Help Button -->
+    <button class="help-button" id="help-btn" aria-label="Open help guide"></button>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal">
+        <div class="help-content">
+            <button class="help-close" id="help-close" aria-label="Close help">×</button>
+            <h2>📚 Navigator Guide</h2>
+            
+            <div class="help-section">
+                <h3>🖐️ Hand Gestures</h3>
+                <div class="help-grid">
+                    <div class="help-item">
+                        <div class="help-item-icon">👈 👉</div>
+                        <div class="help-item-title">Swipe Left/Right</div>
+                        <div class="help-item-desc">Navigate between cards in the same layer</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">👆 👇</div>
+                        <div class="help-item-title">Swipe Up/Down</div>
+                        <div class="help-item-desc">Switch between different layers</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">👆</div>
+                        <div class="help-item-title">Point & Hold</div>
+                        <div class="help-item-desc">Hold 2 seconds to focus on a card</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">🤏</div>
+                        <div class="help-item-title">Pinch</div>
+                        <div class="help-item-desc">Zoom or grab content</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <div class="help-grid">
+                    <div class="help-item">
+                        <div class="help-item-icon">← →</div>
+                        <div class="help-item-title">Arrow Left/Right</div>
+                        <div class="help-item-desc">Navigate between cards</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">↑ ↓</div>
+                        <div class="help-item-title">Arrow Up/Down</div>
+                        <div class="help-item-desc">Switch layers</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">Space</div>
+                        <div class="help-item-title">Space</div>
+                        <div class="help-item-desc">Select/Activate current card</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">Esc</div>
+                        <div class="help-item-title">Escape</div>
+                        <div class="help-item-desc">Exit focus mode</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h3>🎯 Layers</h3>
+                <div class="help-grid">
+                    <div class="help-item">
+                        <div class="help-item-icon">🎬</div>
+                        <div class="help-item-title">Videos</div>
+                        <div class="help-item-desc">Layer 1 - Video content</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">📰</div>
+                        <div class="help-item-title">News</div>
+                        <div class="help-item-desc">Layer 2 - News articles</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">🖼️</div>
+                        <div class="help-item-title">Images</div>
+                        <div class="help-item-desc">Layer 3 - Image gallery</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">🎮</div>
+                        <div class="help-item-title">Games</div>
+                        <div class="help-item-desc">Layer 4 - Interactive games</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">📱</div>
+                        <div class="help-item-title">Apps</div>
+                        <div class="help-item-desc">Layer 5 - Applications</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-item-icon">⚙️</div>
+                        <div class="help-item-title">Settings</div>
+                        <div class="help-item-desc">Layer 6 - Configuration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- MediaPipe Scripts with Subresource Integrity (SRI) -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"

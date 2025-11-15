@@ -1188,6 +1188,37 @@ async function startExperience() {
 // Start button
 document.getElementById('start-btn').addEventListener('click', startExperience);
 
+// Help button and modal
+const helpBtn = document.getElementById('help-btn');
+const helpModal = document.getElementById('help-modal');
+const helpClose = document.getElementById('help-close');
+
+if (helpBtn && helpModal && helpClose) {
+    helpBtn.addEventListener('click', () => {
+        helpModal.classList.add('visible');
+        addDebugEntry('📚 Help modal opened', 'info');
+    });
+
+    helpClose.addEventListener('click', () => {
+        helpModal.classList.remove('visible');
+        addDebugEntry('📚 Help modal closed', 'info');
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
+            helpModal.classList.remove('visible');
+        }
+    });
+
+    // Close on overlay click
+    helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) {
+            helpModal.classList.remove('visible');
+        }
+    });
+}
+
 // Initial debug entry
 addDebugEntry('💫 Aetherium Navigator loaded', 'info');
 

@@ -1,7 +1,170 @@
 /* ==============================================
-   INTERFACE STATUS COMPACT - Bottom HUD Version
-   Smaller, denser version matching bottom HUD style
+   COMPACT HUD PANELS - MODERN DESIGN
+   Clean, organized info displays
    ============================================== */
+
+.hud-panel {
+    background: rgba(10, 15, 25, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hud-panel:hover {
+    border-color: rgba(0, 255, 255, 0.4);
+    box-shadow: 
+        0 6px 30px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(0, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.hud-panel.compact-panel {
+    padding: 12px 18px;
+}
+
+.panel-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(0, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: linear-gradient(180deg, #00ffff, #00ff88);
+    border-radius: 2px;
+}
+
+/* Position Info Panel */
+.position-info {
+    min-width: 150px;
+}
+
+.layer-display {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.layer-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.layer-meta {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+
+.card-position {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.current-card {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: rgba(0, 255, 255, 0.95);
+    line-height: 1;
+}
+
+.separator {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 300;
+}
+
+.total-cards {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Gesture Status Panel */
+.gesture-status-panel {
+    min-width: 220px;
+}
+
+.gesture-status-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gesture-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.6);
+    min-width: 65px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    color: rgba(0, 255, 255, 0.95);
+    font-weight: 700;
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.status-dot.active {
+    background: #00ff88;
+    box-shadow: 
+        0 0 15px rgba(0, 255, 136, 0.8),
+        0 0 30px rgba(0, 255, 136, 0.4);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-dot.inactive {
+    background: rgba(255, 100, 100, 0.6);
+    box-shadow: 0 0 8px rgba(255, 100, 100, 0.4);
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.3);
+    }
+}
 
 .interface-status-compact {
     min-width: auto !important;

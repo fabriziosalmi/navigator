@@ -1,6 +1,6 @@
 /* ==============================================
    DUAL HUD LAYOUT SYSTEM
-   Performance-optimized fullwidth content area
+   Clean, simplified single HUD at bottom
    ============================================== */
 
 /* ==============================================
@@ -8,22 +8,19 @@
    ============================================== */
 
 :root {
-    /* HUD Layout */
-    --hud-top-height: 70px;
-    --hud-bottom-height: 90px;
+    /* HUD Layout - Single bottom HUD only */
+    --hud-bottom-height: 100px;
     
     /* Z-Index Layers - STRICT HIERARCHY
        1-50:    Cards and viewport content
        100-300: Overlays (confirmation, effects)
        1100:    Bottom HUD bar
-       1200:    Top HUD bar
        1300:    Critical overlays (start screen)
        10000:   Notifications (voice, adaptive level)
     */
     --z-viewport: 1;
     --z-cards: 50;
     --z-hud-bottom: 1100;
-    --z-hud-top: 1200;
     --z-overlay: 1300;
     
     /* Performance Variables */
@@ -32,17 +29,12 @@
 }
 
 /* ==============================================
-   TOP HUD BAR - FULLWIDTH
-   History (left) + Gesture Status (right)
+   TOP HUD BAR - HIDDEN (cleaned up UI)
    ============================================== */
 
 .top-hud-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: var(--hud-top-height);
+    display: none; /* Removed top HUD for cleaner interface */
+}
     
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -85,8 +77,8 @@
 }
 
 /* ==============================================
-   BOTTOM HUD BAR - FULLWIDTH
-   Quantum HUD + Navigation Controls + Adaptive Progress
+   BOTTOM HUD BAR - SINGLE UNIFIED HUD
+   Clean layout: History | Position | Controls | Status | Adaptive
    ============================================== */
 
 .bottom-hud-bar {
@@ -97,10 +89,11 @@
     width: 100%;
     height: var(--hud-bottom-height);
     
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 250px 180px 1fr 250px 200px;
     align-items: center;
-    padding: 0 20px;
+    justify-items: center;
+    padding: 0 30px;
     gap: 20px;
     
     z-index: var(--z-hud-bottom);
@@ -109,40 +102,64 @@
     /* Performance Optimizations */
     transform: var(--gpu-transform);
     contain: var(--contain-policy);
-    will-change: transform;
     
-    /* Visual */
+    /* Visual - More pronounced gradient */
     background: linear-gradient(
         to top,
-        rgba(5, 5, 15, 0.95) 0%,
-        rgba(5, 5, 15, 0.85) 70%,
-        transparent 100%
+        rgba(0, 5, 15, 0.98) 0%,
+        rgba(5, 10, 20, 0.95) 50%,
+        rgba(10, 15, 25, 0.85) 100%
     );
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
     box-shadow: 
-        0 -4px 20px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(0, 255, 255, 0.1);
+        0 -8px 32px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(0, 255, 255, 0.15);
 }
 
 .bottom-hud-bar > * {
     pointer-events: auto;
 }
 
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .bottom-hud-bar {
+        grid-template-columns: 200px 150px 1fr 220px 180px;
+        padding: 0 20px;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .bottom-hud-bar {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 10px;
+        height: auto;
+        padding: 15px 20px;
+    }
+    
+    /* Hide less critical panels on smaller screens */
+    .input-methods-panel,
+    .adaptive-display {
+        display: none;
+    }
+}
+
 /* ==============================================
    CENTRAL CONTENT AREA - FULLWIDTH VIEWPORT
-   Cards viewport occupies full space between HUDs
+   Cards viewport occupies full space
    ============================================== */
 
 #cards-viewport {
     position: fixed;
-    top: var(--hud-top-height);
+    top: 0;
     left: 0;
     right: 0;
     bottom: var(--hud-bottom-height);
     width: 100%;
-    height: calc(100vh - var(--hud-top-height) - var(--hud-bottom-height));
+    height: calc(100vh - var(--hud-bottom-height));
     
     margin: 0;
     padding: 0;

@@ -1,0 +1,375 @@
+/* ==============================================
+   INTERACTIVE ELEMENTS - ENHANCED UX
+   Tooltips, help buttons, feedback animations
+   ============================================== */
+
+/* Help Button - Floating assistance */
+.help-button {
+    position: fixed;
+    bottom: 120px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.3));
+    border: 2px solid rgba(0, 255, 255, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.2);
+}
+
+.help-button::before {
+    content: '?';
+    font-size: 28px;
+    font-weight: 800;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.help-button:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 
+        0 6px 30px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.4);
+    border-color: rgba(0, 255, 255, 0.8);
+}
+
+.help-button:active {
+    transform: scale(1.05) rotate(10deg);
+}
+
+/* Help Modal */
+.help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.help-modal.visible {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.help-content {
+    background: linear-gradient(135deg, rgba(15, 15, 25, 0.95), rgba(25, 25, 40, 0.95));
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 40px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.help-content h2 {
+    font-size: 2rem;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #00ffff, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.help-section {
+    margin-bottom: 30px;
+}
+
+.help-section h3 {
+    font-size: 1.3rem;
+    color: rgba(0, 255, 255, 0.9);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.help-section h3::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, #00ffff, #00ff88);
+    border-radius: 2px;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.help-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.help-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.help-item-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.help-item-title {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.help-item-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+}
+
+.help-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 2px solid rgba(255, 0, 0, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #ff4444;
+    font-size: 24px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.help-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.6);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Tooltip System */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.95);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip.visible {
+    opacity: 1;
+}
+
+.tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.95);
+}
+
+/* Enhanced Navigation Controls */
+.nav-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-nav {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.hud-nav::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(0, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.hud-nav:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+.hud-nav:hover {
+    border-color: rgba(0, 255, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.hud-nav:active {
+    transform: scale(0.95);
+}
+
+.hud-nav svg {
+    width: 24px;
+    height: 24px;
+    stroke: rgba(0, 255, 255, 0.9);
+    position: relative;
+    z-index: 1;
+    transition: stroke 0.3s ease;
+}
+
+.hud-nav:hover svg {
+    stroke: #00ffff;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+}
+
+/* Loading State */
+.loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(0, 255, 255, 0.1);
+    border-top-color: #00ffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Gesture LED Indicator - Enhanced */
+.gesture-led {
+    position: fixed;
+    top: 50%;
+    left: 30px;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(0, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.gesture-led.active {
+    opacity: 1;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.5),
+        inset 0 0 20px rgba(0, 255, 255, 0.2);
+    animation: ledPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ledPulse {
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+    50% {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+    }
+}
+
+.gesture-led::before {
+    content: attr(data-gesture);
+    font-size: 2rem;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .help-button {
+        bottom: 110px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+    }
+    
+    .help-button::before {
+        font-size: 24px;
+    }
+    
+    .help-content {
+        padding: 30px 20px;
+        max-width: 95%;
+    }
+    
+    .help-grid {
+        grid-template-columns: 1fr;
+    }
+}
