@@ -28,7 +28,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { NavigatorCore, NavigatorCoreConfig, INavigatorPlugin } from '@navigator.menu/core';
+
+// Type-only imports to avoid bundling issues
+import type { 
+  NavigatorCore as NavigatorCoreType, 
+  NavigatorCoreConfig, 
+  INavigatorPlugin 
+} from '@navigator.menu/core';
 
 export interface UseNavigatorOptions extends NavigatorCoreConfig {
   /** Whether to automatically start the core after initialization (default: true) */
@@ -39,11 +45,11 @@ export interface UseNavigatorOptions extends NavigatorCoreConfig {
 
 export interface UseNavigatorReturn {
   /** The NavigatorCore instance (null until initialized) */
-  core: NavigatorCore | null;
+  core: NavigatorCoreType | null;
 }
 
 export function useNavigator(config?: UseNavigatorOptions): UseNavigatorReturn {
-  const [core, setCore] = useState<NavigatorCore | null>(null);
+  const [core, setCore] = useState<NavigatorCoreType | null>(null);
   const { autoStart = true, plugins = [], ...coreConfig } = config || {};
 
   useEffect(() => {
