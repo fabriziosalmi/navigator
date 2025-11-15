@@ -106,18 +106,37 @@ function App() {
       // The payload structure is { action: {...}, historySize: number }
       const actionData = payload.action || payload;
       
+      // Determine if this is a valid action or an error
+      // Valid actions: navigation, interaction, combos
+      // Invalid actions: random keypresses like X, Y, Z, A, S, D, etc.
+      const isValidAction = 
+        actionData.type?.startsWith('navigation:') ||
+        actionData.type?.startsWith('interaction:') ||
+        actionData.type?.startsWith('keyboard:combo:') ||
+        actionData.type === 'unknown';
+      
       setLastAction({
         type: actionData.type || 'unknown',
-        success: actionData.success ?? true,
+        success: isValidAction,
         timestamp: actionData.timestamp || Date.now(),
         duration: actionData.duration || 0,
       });
 
-      // Update metrics
+      // Update metrics - count invalid keypresses as errors
       const history = core.history.getAll();
       const totalActions = history.length;
-      const successfulActions = history.filter((a: any) => a.success).length;
-      const failedActions = totalActions - successfulActions;
+      
+      // Count successful actions (navigation, interaction)
+      const successfulActions = history.filter((a: any) => {
+        return a.type?.startsWith('navigation:') ||
+               a.type?.startsWith('interaction:') ||
+               a.type?.startsWith('keyboard:combo:');
+      }).length;
+      
+      // Count error actions (invalid keypresses)
+      const failedActions = history.filter((a: any) => {
+        return a.type?.startsWith('keyboard:keypress:');
+      }).length;
       
       const errorRate = totalActions > 0 ? (failedActions / totalActions) * 100 : 0;
       const successRate = totalActions > 0 ? (successfulActions / totalActions) * 100 : 100;
