@@ -53,10 +53,10 @@ export interface LoggerMiddlewareOptions {
  * Default logger options
  */
 const defaultOptions: LoggerMiddlewareOptions = {
-  collapsed: false,
-  logger: console,
-  predicate: () => true,
-  diff: false,
+    collapsed: false,
+    logger: console,
+    predicate: () => true,
+    diff: false
 };
 
 /**
@@ -66,65 +66,65 @@ const defaultOptions: LoggerMiddlewareOptions = {
  * @returns Configured logger middleware
  */
 export function createLoggerMiddleware(
-  options: LoggerMiddlewareOptions = {}
+    options: LoggerMiddlewareOptions = {}
 ): Middleware {
-  const opts = { ...defaultOptions, ...options };
-  const logger = opts.logger!;
+    const opts = { ...defaultOptions, ...options };
+    const logger = opts.logger!;
 
-  return (store) => (next) => (action) => {
+    return (store) => (next) => (action) => {
     // Check if we should log this action
-    if (!opts.predicate!(store.getState(), action)) {
-      return next(action);
-    }
+        if (!opts.predicate!(store.getState(), action)) {
+            return next(action);
+        }
 
-    // Capture state before action
-    const prevState = store.getState();
+        // Capture state before action
+        const prevState = store.getState();
 
-    // Start console group (collapsed or expanded)
-    const groupMethod = opts.collapsed ? logger.groupCollapsed : logger.group;
-    groupMethod.call(logger, `Action: ${action.type}`);
+        // Start console group (collapsed or expanded)
+        const groupMethod = opts.collapsed ? logger.groupCollapsed : logger.group;
+        groupMethod.call(logger, `Action: ${action.type}`);
 
-    // Log previous state
-    logger.log(
-      '%c Previous State',
-      'color: #9E9E9E; font-weight: bold;',
-      prevState
-    );
+        // Log previous state
+        logger.log(
+            '%c Previous State',
+            'color: #9E9E9E; font-weight: bold;',
+            prevState
+        );
 
-    // Log the action
-    logger.log(
-      '%c Action',
-      'color: #03A9F4; font-weight: bold;',
-      action
-    );
+        // Log the action
+        logger.log(
+            '%c Action',
+            'color: #03A9F4; font-weight: bold;',
+            action
+        );
 
-    // Execute the action
-    const result = next(action);
+        // Execute the action
+        const result = next(action);
 
-    // Capture state after action
-    const nextState = store.getState();
+        // Capture state after action
+        const nextState = store.getState();
 
-    // Log next state
-    logger.log(
-      '%c Next State',
-      'color: #4CAF50; font-weight: bold;',
-      nextState
-    );
+        // Log next state
+        logger.log(
+            '%c Next State',
+            'color: #4CAF50; font-weight: bold;',
+            nextState
+        );
 
-    // Optional: Log state diff
-    if (opts.diff) {
-      logger.log(
-        '%c Diff',
-        'color: #E040FB; font-weight: bold;',
-        getStateDiff(prevState, nextState)
-      );
-    }
+        // Optional: Log state diff
+        if (opts.diff) {
+            logger.log(
+                '%c Diff',
+                'color: #E040FB; font-weight: bold;',
+                getStateDiff(prevState, nextState)
+            );
+        }
 
-    // End console group
-    logger.groupEnd();
+        // End console group
+        logger.groupEnd();
 
-    return result;
-  };
+        return result;
+    };
 }
 
 /**
@@ -132,15 +132,15 @@ export function createLoggerMiddleware(
  * Uses default options and only logs in development
  */
 export const loggerMiddleware: Middleware = createLoggerMiddleware({
-  collapsed: false,
-  predicate: () => {
+    collapsed: false,
+    predicate: () => {
     // Only log in development (when process.env.NODE_ENV is not production)
     // In browser environments without process, default to true
-    if (typeof process !== 'undefined' && process.env) {
-      return process.env.NODE_ENV !== 'production';
+        if (typeof process !== 'undefined' && process.env) {
+            return process.env.NODE_ENV !== 'production';
+        }
+        return true;
     }
-    return true;
-  },
 });
 
 /**
@@ -152,38 +152,38 @@ export const loggerMiddleware: Middleware = createLoggerMiddleware({
  * @returns Object with added, updated, and deleted keys
  */
 function getStateDiff(prev: any, next: any): any {
-  if (typeof prev !== 'object' || typeof next !== 'object') {
-    return { prev, next };
-  }
-
-  const diff: any = {};
-  const allKeys = new Set([
-    ...Object.keys(prev || {}),
-    ...Object.keys(next || {}),
-  ]);
-
-  allKeys.forEach((key) => {
-    const prevValue = prev?.[key];
-    const nextValue = next?.[key];
-
-    if (prevValue === nextValue) {
-      // No change
-      return;
+    if (typeof prev !== 'object' || typeof next !== 'object') {
+        return { prev, next };
     }
 
-    if (!(key in prev)) {
-      // Added
-      diff[key] = { type: 'added', value: nextValue };
-    } else if (!(key in next)) {
-      // Deleted
-      diff[key] = { type: 'deleted', value: prevValue };
-    } else {
-      // Updated
-      diff[key] = { type: 'updated', prev: prevValue, next: nextValue };
-    }
-  });
+    const diff: any = {};
+    const allKeys = new Set([
+        ...Object.keys(prev || {}),
+        ...Object.keys(next || {})
+    ]);
 
-  return diff;
+    allKeys.forEach((key) => {
+        const prevValue = prev?.[key];
+        const nextValue = next?.[key];
+
+        if (prevValue === nextValue) {
+            // No change
+            return;
+        }
+
+        if (!(key in prev)) {
+            // Added
+            diff[key] = { type: 'added', value: nextValue };
+        } else if (!(key in next)) {
+            // Deleted
+            diff[key] = { type: 'deleted', value: prevValue };
+        } else {
+            // Updated
+            diff[key] = { type: 'updated', prev: prevValue, next: nextValue };
+        }
+    });
+
+    return diff;
 }
 
 /**

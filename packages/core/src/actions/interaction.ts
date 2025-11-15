@@ -125,19 +125,19 @@ export type InteractionAction = SelectAction | CancelAction | ConfirmAction;
  * ```
  */
 export function select(
-  source: SelectPayload['source'],
-  target?: string
+    source: SelectPayload['source'],
+    target?: string
 ): SelectAction {
-  return {
-    type: SELECT,
-    payload: {
-      target,
-      source,
-      metadata: {
-        timestamp: Date.now(),
-      },
-    },
-  };
+    return {
+        type: SELECT,
+        payload: {
+            target,
+            source,
+            metadata: {
+                timestamp: Date.now()
+            }
+        }
+    };
 }
 
 /**
@@ -154,19 +154,19 @@ export function select(
  * ```
  */
 export function cancel(
-  source: CancelPayload['source'],
-  context?: string
+    source: CancelPayload['source'],
+    context?: string
 ): CancelAction {
-  return {
-    type: CANCEL,
-    payload: {
-      context,
-      source,
-      metadata: {
-        timestamp: Date.now(),
-      },
-    },
-  };
+    return {
+        type: CANCEL,
+        payload: {
+            context,
+            source,
+            metadata: {
+                timestamp: Date.now()
+            }
+        }
+    };
 }
 
 /**
@@ -182,17 +182,17 @@ export function cancel(
  * ```
  */
 export function confirm(
-  source: ConfirmPayload['source'],
-  action: string
+    source: ConfirmPayload['source'],
+    action: string
 ): ConfirmAction {
-  return {
-    type: CONFIRM,
-    payload: {
-      action,
-      source,
-      metadata: {
-        timestamp: Date.now(),
-      },
-    },
-  };
+    return {
+        type: CONFIRM,
+        payload: {
+            action,
+            source,
+            metadata: {
+                timestamp: Date.now()
+            }
+        }
+    };
 }

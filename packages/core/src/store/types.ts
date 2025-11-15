@@ -121,9 +121,9 @@ export type ActionCreator<T = any> = (...args: any[]) => Action<T>;
  * Type guard for actions
  */
 export function isAction(obj: any): obj is Action {
-  return (
-    typeof obj === 'object' &&
+    return (
+        typeof obj === 'object' &&
     obj !== null &&
     typeof obj.type === 'string'
-  );
+    );
 }

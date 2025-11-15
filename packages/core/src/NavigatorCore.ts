@@ -78,352 +78,352 @@ type PluginState = 'registered' | 'initialized' | 'started' | 'stopped' | 'destr
  * NavigatorCore - The central orchestrator
  */
 export class NavigatorCore {
-  /** Configuration */
-  public readonly config: Required<NavigatorCoreConfig>;
+    /** Configuration */
+    public readonly config: Required<NavigatorCoreConfig>;
   
-  /**
+    /**
    * Event bus instance (read-only access)
    * @deprecated Since v3.0. Use `core.store.subscribe()` to react to state changes instead.
    * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
    */
-  public readonly eventBus: EventBus;
+    public readonly eventBus: EventBus;
   
-  /**
+    /**
    * App state instance (read-only access)
    * @deprecated Since v3.0. Use `core.store.getState()` to read state instead.
    * This will be removed in v4.0. See: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
    */
-  public readonly state: AppState;
+    public readonly state: AppState;
 
-  /** Redux-like Store (v3.0+ - Primary state management) */
-  public readonly store: Store<RootState, StoreAction>;
+    /** Redux-like Store (v3.0+ - Primary state management) */
+    public readonly store: Store<RootState, StoreAction>;
 
-  /** User session history tracker */
-  public readonly history: UserSessionHistory;
+    /** User session history tracker */
+    public readonly history: UserSessionHistory;
   
-  /** Initialization status */
-  public isInitialized: boolean;
+    /** Initialization status */
+    public isInitialized: boolean;
   
-  /** Running status */
-  public isRunning: boolean;
+    /** Running status */
+    public isRunning: boolean;
 
-  /** Registered plugins */
-  private plugins: Map<string, INavigatorPlugin>;
+    /** Registered plugins */
+    private plugins: Map<string, INavigatorPlugin>;
   
-  /** Plugin load order */
-  private pluginOrder: string[];
+    /** Plugin load order */
+    private pluginOrder: string[];
   
-  /** Plugin state tracking */
-  private pluginStates: Map<string, PluginState>;
+    /** Plugin state tracking */
+    private pluginStates: Map<string, PluginState>;
   
-  /** Performance tracking */
-  private startTime: number | null;
-  private frameCount: number;
-  private lastFpsUpdate: number;
+    /** Performance tracking */
+    private startTime: number | null;
+    private frameCount: number;
+    private lastFpsUpdate: number;
 
-  constructor(config: NavigatorCoreConfig = {}) {
-    this.config = {
-      debugMode: config.debugMode || false,
-      autoStart: config.autoStart || false,
-      initialState: config.initialState || {},
-      historyMaxSize: config.historyMaxSize || 100,
-      disableLogger: config.disableLogger || false
-    };
+    constructor(config: NavigatorCoreConfig = {}) {
+        this.config = {
+            debugMode: config.debugMode || false,
+            autoStart: config.autoStart || false,
+            initialState: config.initialState || {},
+            historyMaxSize: config.historyMaxSize || 100,
+            disableLogger: config.disableLogger || false
+        };
 
-    // Initialize core systems
-    this.eventBus = new EventBus({
-      debugMode: this.config.debugMode,
-      maxHistorySize: 200
-    });
+        // Initialize core systems
+        this.eventBus = new EventBus({
+            debugMode: this.config.debugMode,
+            maxHistorySize: 200
+        });
 
-    this.state = new AppState(this.eventBus, this.config.initialState);
+        this.state = new AppState(this.eventBus, this.config.initialState);
 
-    // Initialize Redux-like Store with Cognitive Middleware (Sprint 3)
-    // The cognitive middleware analyzes every action and dispatches COGNITIVE_STATE_CHANGE
-    // Create middleware pipeline
-    // 1. Logger middleware (first) - logs all actions and state changes
-    // 2. Cognitive middleware (last) - analyzes user behavior patterns
-    const cognitiveMiddleware = createCognitiveMiddleware({
-      metricsWindow: 20,
-      frustratedThreshold: 3,
-      concentratedThreshold: 5,
-      exploringThreshold: 4,
-      debugMode: this.config.debugMode,
-    });
+        // Initialize Redux-like Store with Cognitive Middleware (Sprint 3)
+        // The cognitive middleware analyzes every action and dispatches COGNITIVE_STATE_CHANGE
+        // Create middleware pipeline
+        // 1. Logger middleware (first) - logs all actions and state changes
+        // 2. Cognitive middleware (last) - analyzes user behavior patterns
+        const cognitiveMiddleware = createCognitiveMiddleware({
+            metricsWindow: 20,
+            frustratedThreshold: 3,
+            concentratedThreshold: 5,
+            exploringThreshold: 4,
+            debugMode: this.config.debugMode
+        });
     
-    // Conditionally include logger middleware based on configuration
-    // Logger is disabled in stress tests to prevent console flooding with thousands of action logs
-    const middleware: Middleware<RootState>[] = [
-      cognitiveMiddleware,  // Tracks cognitive states (always enabled)
-    ];
+        // Conditionally include logger middleware based on configuration
+        // Logger is disabled in stress tests to prevent console flooding with thousands of action logs
+        const middleware: Middleware<RootState>[] = [
+            cognitiveMiddleware  // Tracks cognitive states (always enabled)
+        ];
     
-    if (!this.config.disableLogger) {
-      middleware.unshift(loggerMiddleware);  // Logs actions for debugging (optional)
+        if (!this.config.disableLogger) {
+            middleware.unshift(loggerMiddleware);  // Logs actions for debugging (optional)
+        }
+    
+        this.store = createStore(
+            rootReducer,
+            undefined, // No preloaded state
+            applyMiddleware(...middleware)
+        );
+
+        this.history = new UserSessionHistory(this.config.historyMaxSize);
+
+        // Plugin management
+        this.plugins = new Map();
+        this.pluginOrder = [];
+        this.pluginStates = new Map();
+
+        // Lifecycle state
+        this.isInitialized = false;
+        this.isRunning = false;
+
+        // Performance tracking
+        this.startTime = null;
+        this.frameCount = 0;
+        this.lastFpsUpdate = 0;
+
+        // Setup core event listeners
+        this._setupCoreListeners();
+
+        // Setup Legacy Bridge (EventBus -> Store)
+        this._setupLegacyBridge();
+
+        if (this.config.debugMode) {
+            console.log('🚀 NavigatorCore initialized', {
+                plugins: this.plugins.size,
+                config: this.config
+            });
+        }
     }
-    
-    this.store = createStore(
-      rootReducer,
-      undefined, // No preloaded state
-      applyMiddleware(...middleware)
-    );
 
-    this.history = new UserSessionHistory(this.config.historyMaxSize);
+    // ========================================
+    // Lifecycle Management
+    // ========================================
 
-    // Plugin management
-    this.plugins = new Map();
-    this.pluginOrder = [];
-    this.pluginStates = new Map();
-
-    // Lifecycle state
-    this.isInitialized = false;
-    this.isRunning = false;
-
-    // Performance tracking
-    this.startTime = null;
-    this.frameCount = 0;
-    this.lastFpsUpdate = 0;
-
-    // Setup core event listeners
-    this._setupCoreListeners();
-
-    // Setup Legacy Bridge (EventBus -> Store)
-    this._setupLegacyBridge();
-
-    if (this.config.debugMode) {
-      console.log('🚀 NavigatorCore initialized', {
-        plugins: this.plugins.size,
-        config: this.config
-      });
-    }
-  }
-
-  // ========================================
-  // Lifecycle Management
-  // ========================================
-
-  /**
+    /**
    * Initialize the core and all plugins
    */
-  async init(): Promise<void> {
-    if (this.isInitialized) {
-      console.warn('NavigatorCore: Already initialized');
-      return;
-    }
-
-    this.eventBus.emit('core:init:start', { source: 'NavigatorCore' });
-
-    try {
-      // Sprint 2: Parallel Plugin Initialization
-      // Separate plugins into critical (priority >= 100) and deferred (priority < 100)
-      const criticalPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
-      const deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
-
-      for (const name of this.pluginOrder) {
-        const plugin = this.plugins.get(name)!;
-        // Default priority: 100 (critical) for backward compatibility
-        // Plugins must explicitly set priority < 100 to be deferred
-        const priority = plugin._priority ?? 100;
-
-        if (priority >= 100) {
-          criticalPlugins.push({ name, plugin });
-        } else {
-          deferredPlugins.push({ name, plugin });
+    async init(): Promise<void> {
+        if (this.isInitialized) {
+            console.warn('NavigatorCore: Already initialized');
+            return;
         }
-      }
 
-      // Initialize critical plugins in parallel using Promise.all
-      if (criticalPlugins.length > 0) {
-        await Promise.all(
-          criticalPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
-        );
-      }
+        this.eventBus.emit('core:init:start', { source: 'NavigatorCore' });
 
-      this.isInitialized = true;
-      this.eventBus.emit('core:init:complete', { source: 'NavigatorCore' });
+        try {
+            // Sprint 2: Parallel Plugin Initialization
+            // Separate plugins into critical (priority >= 100) and deferred (priority < 100)
+            const criticalPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
+            const deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }> = [];
 
-      if (this.config.debugMode) {
-        console.log('✅ NavigatorCore initialized successfully');
-      }
+            for (const name of this.pluginOrder) {
+                const plugin = this.plugins.get(name)!;
+                // Default priority: 100 (critical) for backward compatibility
+                // Plugins must explicitly set priority < 100 to be deferred
+                const priority = plugin._priority ?? 100;
 
-      // Initialize deferred plugins in background (non-blocking)
-      if (deferredPlugins.length > 0) {
-        this._initDeferredPlugins(deferredPlugins).catch((error) => {
-          console.error('NavigatorCore: Deferred plugin initialization failed', error);
-          this.eventBus.emit('core:error', {
-            message: 'Deferred plugin initialization failed',
-            error,
-            source: 'NavigatorCore'
-          });
-        });
-      }
+                if (priority >= 100) {
+                    criticalPlugins.push({ name, plugin });
+                } else {
+                    deferredPlugins.push({ name, plugin });
+                }
+            }
 
-      // Auto-start if configured
-      if (this.config.autoStart) {
-        await this.start();
-      }
+            // Initialize critical plugins in parallel using Promise.all
+            if (criticalPlugins.length > 0) {
+                await Promise.all(
+                    criticalPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
+                );
+            }
 
-    } catch (error) {
-      // L'evento di errore viene già emesso da _initPlugin
-      // Non lo riemmettiamo qui per evitare duplicati
-      throw error;
+            this.isInitialized = true;
+            this.eventBus.emit('core:init:complete', { source: 'NavigatorCore' });
+
+            if (this.config.debugMode) {
+                console.log('✅ NavigatorCore initialized successfully');
+            }
+
+            // Initialize deferred plugins in background (non-blocking)
+            if (deferredPlugins.length > 0) {
+                this._initDeferredPlugins(deferredPlugins).catch((error) => {
+                    console.error('NavigatorCore: Deferred plugin initialization failed', error);
+                    this.eventBus.emit('core:error', {
+                        message: 'Deferred plugin initialization failed',
+                        error,
+                        source: 'NavigatorCore'
+                    });
+                });
+            }
+
+            // Auto-start if configured
+            if (this.config.autoStart) {
+                await this.start();
+            }
+
+        } catch (error) {
+            // L'evento di errore viene già emesso da _initPlugin
+            // Non lo riemmettiamo qui per evitare duplicati
+            throw error;
+        }
     }
-  }
 
-  /**
+    /**
    * Initialize deferred plugins in background (Sprint 2)
    */
-  private async _initDeferredPlugins(
-    deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }>
-  ): Promise<void> {
-    try {
-      // Initialize deferred plugins in parallel
-      await Promise.all(
-        deferredPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
-      );
+    private async _initDeferredPlugins(
+        deferredPlugins: Array<{ name: string; plugin: INavigatorPlugin }>
+    ): Promise<void> {
+        try {
+            // Initialize deferred plugins in parallel
+            await Promise.all(
+                deferredPlugins.map(({ name, plugin }) => this._initPlugin(name, plugin))
+            );
 
-      // Emit event when all deferred plugins are ready
-      this.eventBus.emit('core:deferred:ready', {
-        source: 'NavigatorCore',
-        pluginCount: deferredPlugins.length,
-        plugins: deferredPlugins.map(({ name }) => name)
-      });
+            // Emit event when all deferred plugins are ready
+            this.eventBus.emit('core:deferred:ready', {
+                source: 'NavigatorCore',
+                pluginCount: deferredPlugins.length,
+                plugins: deferredPlugins.map(({ name }) => name)
+            });
 
-      if (this.config.debugMode) {
-        console.log(`✅ Deferred plugins initialized (${deferredPlugins.length})`);
-      }
-    } catch (error) {
-      console.error('NavigatorCore: Error initializing deferred plugins', error);
-      throw error;
+            if (this.config.debugMode) {
+                console.log(`✅ Deferred plugins initialized (${deferredPlugins.length})`);
+            }
+        } catch (error) {
+            console.error('NavigatorCore: Error initializing deferred plugins', error);
+            throw error;
+        }
     }
-  }
 
-  /**
+    /**
    * Start the core and all plugins
    */
-  async start(): Promise<void> {
-    if (!this.isInitialized) {
-      throw new Error('NavigatorCore: Must call init() before start()');
+    async start(): Promise<void> {
+        if (!this.isInitialized) {
+            throw new Error('NavigatorCore: Must call init() before start()');
+        }
+
+        if (this.isRunning) {
+            console.warn('NavigatorCore: Already running');
+            return;
+        }
+
+        this.eventBus.emit('core:start:begin', { source: 'NavigatorCore' });
+
+        try {
+            this.startTime = performance.now();
+
+            // Start plugins in order
+            for (const name of this.pluginOrder) {
+                const plugin = this.plugins.get(name)!;
+                await this._startPlugin(name, plugin);
+            }
+
+            this.isRunning = true;
+            this.eventBus.emit('core:start:complete', { source: 'NavigatorCore' });
+
+            // Start performance monitoring
+            this._startPerformanceMonitoring();
+
+            if (this.config.debugMode) {
+                console.log('▶️ NavigatorCore started');
+            }
+
+        } catch (error) {
+            this.eventBus.emit('core:error', {
+                message: 'Core start failed',
+                error,
+                source: 'NavigatorCore'
+            });
+            throw error;
+        }
     }
 
-    if (this.isRunning) {
-      console.warn('NavigatorCore: Already running');
-      return;
-    }
-
-    this.eventBus.emit('core:start:begin', { source: 'NavigatorCore' });
-
-    try {
-      this.startTime = performance.now();
-
-      // Start plugins in order
-      for (const name of this.pluginOrder) {
-        const plugin = this.plugins.get(name)!;
-        await this._startPlugin(name, plugin);
-      }
-
-      this.isRunning = true;
-      this.eventBus.emit('core:start:complete', { source: 'NavigatorCore' });
-
-      // Start performance monitoring
-      this._startPerformanceMonitoring();
-
-      if (this.config.debugMode) {
-        console.log('▶️ NavigatorCore started');
-      }
-
-    } catch (error) {
-      this.eventBus.emit('core:error', {
-        message: 'Core start failed',
-        error,
-        source: 'NavigatorCore'
-      });
-      throw error;
-    }
-  }
-
-  /**
+    /**
    * Pause/stop the core and all plugins
    */
-  async stop(): Promise<void> {
-    if (!this.isRunning) {
-      console.warn('NavigatorCore: Not running');
-      return;
+    async stop(): Promise<void> {
+        if (!this.isRunning) {
+            console.warn('NavigatorCore: Not running');
+            return;
+        }
+
+        this.eventBus.emit('core:stop:begin', { source: 'NavigatorCore' });
+
+        try {
+            // Stop plugins in reverse order
+            for (let i = this.pluginOrder.length - 1; i >= 0; i--) {
+                const name = this.pluginOrder[i];
+                const plugin = this.plugins.get(name)!;
+                await this._stopPlugin(name, plugin);
+            }
+
+            this.isRunning = false;
+            this.eventBus.emit('core:stop:complete', { source: 'NavigatorCore' });
+
+            if (this.config.debugMode) {
+                console.log('⏸️ NavigatorCore stopped');
+            }
+
+        } catch (error) {
+            this.eventBus.emit('core:error', {
+                message: 'Core stop failed',
+                error,
+                source: 'NavigatorCore'
+            });
+            throw error;
+        }
     }
 
-    this.eventBus.emit('core:stop:begin', { source: 'NavigatorCore' });
-
-    try {
-      // Stop plugins in reverse order
-      for (let i = this.pluginOrder.length - 1; i >= 0; i--) {
-        const name = this.pluginOrder[i];
-        const plugin = this.plugins.get(name)!;
-        await this._stopPlugin(name, plugin);
-      }
-
-      this.isRunning = false;
-      this.eventBus.emit('core:stop:complete', { source: 'NavigatorCore' });
-
-      if (this.config.debugMode) {
-        console.log('⏸️ NavigatorCore stopped');
-      }
-
-    } catch (error) {
-      this.eventBus.emit('core:error', {
-        message: 'Core stop failed',
-        error,
-        source: 'NavigatorCore'
-      });
-      throw error;
-    }
-  }
-
-  /**
+    /**
    * Completely destroy the core and cleanup
    */
-  async destroy(): Promise<void> {
-    this.eventBus.emit('core:destroy:begin', { source: 'NavigatorCore' });
+    async destroy(): Promise<void> {
+        this.eventBus.emit('core:destroy:begin', { source: 'NavigatorCore' });
 
-    try {
-      // Stop if running
-      if (this.isRunning) {
-        await this.stop();
-      }
+        try {
+            // Stop if running
+            if (this.isRunning) {
+                await this.stop();
+            }
 
-      // Destroy plugins in reverse order
-      for (let i = this.pluginOrder.length - 1; i >= 0; i--) {
-        const name = this.pluginOrder[i];
-        const plugin = this.plugins.get(name)!;
-        await this._destroyPlugin(name, plugin);
-      }
+            // Destroy plugins in reverse order
+            for (let i = this.pluginOrder.length - 1; i >= 0; i--) {
+                const name = this.pluginOrder[i];
+                const plugin = this.plugins.get(name)!;
+                await this._destroyPlugin(name, plugin);
+            }
 
-      // Clear plugin data
-      this.plugins.clear();
-      this.pluginStates.clear();
-      this.pluginOrder = [];
+            // Clear plugin data
+            this.plugins.clear();
+            this.pluginStates.clear();
+            this.pluginOrder = [];
 
-      this.isInitialized = false;
+            this.isInitialized = false;
       
-      // Emit completion BEFORE clearing event bus
-      this.eventBus.emit('core:destroy:complete', { source: 'NavigatorCore' });
+            // Emit completion BEFORE clearing event bus
+            this.eventBus.emit('core:destroy:complete', { source: 'NavigatorCore' });
       
-      // Clear event bus last
-      this.eventBus.clear();
+            // Clear event bus last
+            this.eventBus.clear();
 
-      if (this.config.debugMode) {
-        console.log('🗑️ NavigatorCore destroyed');
-      }
+            if (this.config.debugMode) {
+                console.log('🗑️ NavigatorCore destroyed');
+            }
 
-    } catch (error) {
-      console.error('NavigatorCore: Destroy failed', error);
-      throw error;
+        } catch (error) {
+            console.error('NavigatorCore: Destroy failed', error);
+            throw error;
+        }
     }
-  }
 
-  // ========================================
-  // Session History Management
-  // ========================================
+    // ========================================
+    // Session History Management
+    // ========================================
 
-  /**
+    /**
    * Record a user action in the session history
    * This is the key method for cognitive modeling
    * 
@@ -440,216 +440,216 @@ export class NavigatorCore {
    * });
    * ```
    */
-  recordAction(action: Action): void {
-    this.history.add(action);
+    recordAction(action: Action): void {
+        this.history.add(action);
 
-    // 🔍 SONDA #1: Commented for production
-    // console.log(`[DIAGNOSTIC] Action recorded: ${action.type}, Success: ${action.success}, Duration: ${action.duration_ms}ms`);
+        // 🔍 SONDA #1: Commented for production
+        // console.log(`[DIAGNOSTIC] Action recorded: ${action.type}, Success: ${action.success}, Duration: ${action.duration_ms}ms`);
 
-    // Emit event for potential listeners (analytics, debugging)
-    this.eventBus.emit('history:action:recorded', {
-      action,
-      historySize: this.history.size()
-    });
+        // Emit event for potential listeners (analytics, debugging)
+        this.eventBus.emit('history:action:recorded', {
+            action,
+            historySize: this.history.size()
+        });
     
-    if (this.config.debugMode) {
-      console.log('📝 Action recorded:', action.type, {
-        success: action.success,
-        duration: action.duration_ms
-      });
+        if (this.config.debugMode) {
+            console.log('📝 Action recorded:', action.type, {
+                success: action.success,
+                duration: action.duration_ms
+            });
+        }
     }
-  }
 
-  // ========================================
-  // Plugin Management (Stub for now)
-  // ========================================
+    // ========================================
+    // Plugin Management (Stub for now)
+    // ========================================
 
-  /**
+    /**
    * Register a plugin
    */
-  registerPlugin(plugin: INavigatorPlugin, options: PluginOptions = {}): NavigatorCore {
+    registerPlugin(plugin: INavigatorPlugin, options: PluginOptions = {}): NavigatorCore {
     // Validate plugin
-    if (!plugin || !plugin.name) {
-      throw new Error('NavigatorCore: Plugin must have a name property');
-    }
+        if (!plugin || !plugin.name) {
+            throw new Error('NavigatorCore: Plugin must have a name property');
+        }
 
-    if (this.plugins.has(plugin.name)) {
-      throw new Error(`NavigatorCore: Plugin "${plugin.name}" already registered`);
-    }
+        if (this.plugins.has(plugin.name)) {
+            throw new Error(`NavigatorCore: Plugin "${plugin.name}" already registered`);
+        }
 
-    // Validate plugin interface
-    if (typeof plugin.init !== 'function') {
-      throw new Error(`NavigatorCore: Plugin "${plugin.name}" missing required method: init`);
-    }
+        // Validate plugin interface
+        if (typeof plugin.init !== 'function') {
+            throw new Error(`NavigatorCore: Plugin "${plugin.name}" missing required method: init`);
+        }
 
-    // Store plugin
-    this.plugins.set(plugin.name, plugin);
-    this.pluginStates.set(plugin.name, 'registered');
+        // Store plugin
+        this.plugins.set(plugin.name, plugin);
+        this.pluginStates.set(plugin.name, 'registered');
 
-    // Set priority: use options.priority if provided, otherwise use plugin._priority, otherwise default to 100
-    const priority = options.priority ?? plugin._priority ?? 100;
-    plugin._priority = priority;
+        // Set priority: use options.priority if provided, otherwise use plugin._priority, otherwise default to 100
+        const priority = options.priority ?? plugin._priority ?? 100;
+        plugin._priority = priority;
 
-    let inserted = false;
-    for (let i = 0; i < this.pluginOrder.length; i++) {
-      const existingPlugin = this.plugins.get(this.pluginOrder[i])!;
-      const existingPriority = existingPlugin._priority ?? 100;
-      if (priority > existingPriority) {
-        this.pluginOrder.splice(i, 0, plugin.name);
-        inserted = true;
-        break;
-      }
-    }
-    if (!inserted) {
-      this.pluginOrder.push(plugin.name);
-    }
+        let inserted = false;
+        for (let i = 0; i < this.pluginOrder.length; i++) {
+            const existingPlugin = this.plugins.get(this.pluginOrder[i])!;
+            const existingPriority = existingPlugin._priority ?? 100;
+            if (priority > existingPriority) {
+                this.pluginOrder.splice(i, 0, plugin.name);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) {
+            this.pluginOrder.push(plugin.name);
+        }
 
-    // Pass plugin-specific config
-    if (options.config) {
-      plugin._config = options.config;
-    }
+        // Pass plugin-specific config
+        if (options.config) {
+            plugin._config = options.config;
+        }
 
-    this.eventBus.emit('core:plugin:registered', {
-      pluginName: plugin.name,
-      priority,
-      source: 'NavigatorCore'
-    });
-
-    if (this.config.debugMode) {
-      console.log(`🔌 Plugin registered: ${plugin.name}`, { priority });
-    }
-
-    return this; // For chaining
-  }
-
-  /**
-   * Get a plugin instance by name
-   */
-  getPlugin(name: string): INavigatorPlugin | null {
-    return this.plugins.get(name) || null;
-  }
-
-  // ========================================
-  // Private Methods
-  // ========================================
-
-  private async _initPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
-    const timeout = plugin._initTimeout || 5000; // Default: 5 secondi
-
-    // Crea promise per l'inizializzazione
-    const initPromise = (async () => {
-      try {
-        await plugin.init(this);
-        this.pluginStates.set(name, 'initialized');
-        
-        this.eventBus.emit('core:plugin:initialized', {
-          pluginName: name,
-          source: 'NavigatorCore'
+        this.eventBus.emit('core:plugin:registered', {
+            pluginName: plugin.name,
+            priority,
+            source: 'NavigatorCore'
         });
 
         if (this.config.debugMode) {
-          console.log(`✓ Plugin initialized: ${name}`);
+            console.log(`🔌 Plugin registered: ${plugin.name}`, { priority });
         }
-      } catch (error) {
-        console.error(`NavigatorCore: Plugin "${name}" init failed`, error);
-        throw error;
-      }
-    })();
 
-    // Crea promise per il timeout
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Plugin "${name}" init timeout (${timeout}ms)`));
-      }, timeout);
-    });
-
-    // Race tra init e timeout
-    try {
-      await Promise.race([initPromise, timeoutPromise]);
-    } catch (error) {
-      // Emetti evento di errore
-      this.eventBus.emit('core:error', {
-        message: `Plugin "${name}" initialization failed`,
-        error,
-        source: 'NavigatorCore'
-      });
-      throw error;
+        return this; // For chaining
     }
-  }
 
-  private async _startPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
-    try {
-      if (plugin.start) {
-        await plugin.start();
-      }
-      this.pluginStates.set(name, 'started');
+    /**
+   * Get a plugin instance by name
+   */
+    getPlugin(name: string): INavigatorPlugin | null {
+        return this.plugins.get(name) || null;
+    }
+
+    // ========================================
+    // Private Methods
+    // ========================================
+
+    private async _initPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
+        const timeout = plugin._initTimeout || 5000; // Default: 5 secondi
+
+        // Crea promise per l'inizializzazione
+        const initPromise = (async () => {
+            try {
+                await plugin.init(this);
+                this.pluginStates.set(name, 'initialized');
+        
+                this.eventBus.emit('core:plugin:initialized', {
+                    pluginName: name,
+                    source: 'NavigatorCore'
+                });
+
+                if (this.config.debugMode) {
+                    console.log(`✓ Plugin initialized: ${name}`);
+                }
+            } catch (error) {
+                console.error(`NavigatorCore: Plugin "${name}" init failed`, error);
+                throw error;
+            }
+        })();
+
+        // Crea promise per il timeout
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(`Plugin "${name}" init timeout (${timeout}ms)`));
+            }, timeout);
+        });
+
+        // Race tra init e timeout
+        try {
+            await Promise.race([initPromise, timeoutPromise]);
+        } catch (error) {
+            // Emetti evento di errore
+            this.eventBus.emit('core:error', {
+                message: `Plugin "${name}" initialization failed`,
+                error,
+                source: 'NavigatorCore'
+            });
+            throw error;
+        }
+    }
+
+    private async _startPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
+        try {
+            if (plugin.start) {
+                await plugin.start();
+            }
+            this.pluginStates.set(name, 'started');
       
-      this.eventBus.emit('core:plugin:started', {
-        pluginName: name,
-        source: 'NavigatorCore'
-      });
+            this.eventBus.emit('core:plugin:started', {
+                pluginName: name,
+                source: 'NavigatorCore'
+            });
 
-      if (this.config.debugMode) {
-        console.log(`▶ Plugin started: ${name}`);
-      }
-    } catch (error) {
-      console.error(`NavigatorCore: Plugin "${name}" start failed`, error);
-      throw error;
+            if (this.config.debugMode) {
+                console.log(`▶ Plugin started: ${name}`);
+            }
+        } catch (error) {
+            console.error(`NavigatorCore: Plugin "${name}" start failed`, error);
+            throw error;
+        }
     }
-  }
 
-  private async _stopPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
-    try {
-      if (plugin.stop) {
-        await plugin.stop();
-      }
-      this.pluginStates.set(name, 'stopped');
+    private async _stopPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
+        try {
+            if (plugin.stop) {
+                await plugin.stop();
+            }
+            this.pluginStates.set(name, 'stopped');
       
-      this.eventBus.emit('core:plugin:stopped', {
-        pluginName: name,
-        source: 'NavigatorCore'
-      });
+            this.eventBus.emit('core:plugin:stopped', {
+                pluginName: name,
+                source: 'NavigatorCore'
+            });
 
-      if (this.config.debugMode) {
-        console.log(`⏸ Plugin stopped: ${name}`);
-      }
-    } catch (error) {
-      console.error(`NavigatorCore: Plugin "${name}" stop failed`, error);
-      throw error;
+            if (this.config.debugMode) {
+                console.log(`⏸ Plugin stopped: ${name}`);
+            }
+        } catch (error) {
+            console.error(`NavigatorCore: Plugin "${name}" stop failed`, error);
+            throw error;
+        }
     }
-  }
 
-  private async _destroyPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
-    try {
-      if (plugin.destroy) {
-        await plugin.destroy();
-      }
-      this.pluginStates.set(name, 'destroyed');
+    private async _destroyPlugin(name: string, plugin: INavigatorPlugin): Promise<void> {
+        try {
+            if (plugin.destroy) {
+                await plugin.destroy();
+            }
+            this.pluginStates.set(name, 'destroyed');
       
-      this.eventBus.emit('core:plugin:destroyed', {
-        pluginName: name,
-        source: 'NavigatorCore'
-      });
+            this.eventBus.emit('core:plugin:destroyed', {
+                pluginName: name,
+                source: 'NavigatorCore'
+            });
 
-      if (this.config.debugMode) {
-        console.log(`🗑 Plugin destroyed: ${name}`);
-      }
-    } catch (error) {
-      console.error(`NavigatorCore: Plugin "${name}" destroy failed`, error);
-      // Don't throw - allow cleanup to continue
+            if (this.config.debugMode) {
+                console.log(`🗑 Plugin destroyed: ${name}`);
+            }
+        } catch (error) {
+            console.error(`NavigatorCore: Plugin "${name}" destroy failed`, error);
+            // Don't throw - allow cleanup to continue
+        }
     }
-  }
 
-  private _setupCoreListeners(): void {
+    private _setupCoreListeners(): void {
     // Setup system-level event listeners
-    this.eventBus.on('system:error', (event) => {
-      if (this.config.debugMode) {
-        console.error('System Error:', event.payload);
-      }
-    });
-  }
+        this.eventBus.on('system:error', (event) => {
+            if (this.config.debugMode) {
+                console.error('System Error:', event.payload);
+            }
+        });
+    }
 
-  /**
+    /**
    * Setup Legacy Bridge - EventBus to Store translation
    *
    * This is the critical migration piece. The Legacy Bridge:
@@ -675,52 +675,52 @@ export class NavigatorCore {
    * Migration Tracking: docs/technical-debt/LEGACY_EVENTBUS_MIGRATION.md
    * Target Removal: v4.0.0 (Q4 2026)
    */
-  private _setupLegacyBridge(): void {
+    private _setupLegacyBridge(): void {
     // Subscribe to ALL events using wildcard
-    this.eventBus.on('*', (event) => {
-      const eventName = event.name;
-      const payload = event.payload;
+        this.eventBus.on('*', (event) => {
+            const eventName = event.name;
+            const payload = event.payload;
 
-      // Skip internal Redux actions (they're already in the Store)
-      if (eventName.startsWith('@@redux/') || eventName.startsWith('@@store/')) {
-        return;
-      }
+            // Skip internal Redux actions (they're already in the Store)
+            if (eventName.startsWith('@@redux/') || eventName.startsWith('@@store/')) {
+                return;
+            }
 
-      // Translate legacy event to Store action
-      const storeAction: StoreAction = {
-        type: `legacy/${eventName}`,
-        payload,
-        metadata: {
-          source: 'legacy_bridge',
-          timestamp: event.timestamp,
-          originalEvent: eventName,
-        },
-      };
+            // Translate legacy event to Store action
+            const storeAction: StoreAction = {
+                type: `legacy/${eventName}`,
+                payload,
+                metadata: {
+                    source: 'legacy_bridge',
+                    timestamp: event.timestamp,
+                    originalEvent: eventName
+                }
+            };
 
-      // Dispatch to Store (shadow mode)
-      try {
-        this.store.dispatch(storeAction);
+            // Dispatch to Store (shadow mode)
+            try {
+                this.store.dispatch(storeAction);
+
+                if (this.config.debugMode) {
+                    console.log(
+                        `[BRIDGE] Translated: ${eventName} → legacy/${eventName}`,
+                        payload
+                    );
+                }
+            } catch (error) {
+                console.error('[BRIDGE] Failed to dispatch action:', storeAction, error);
+            }
+        });
 
         if (this.config.debugMode) {
-          console.log(
-            `[BRIDGE] Translated: ${eventName} → legacy/${eventName}`,
-            payload
-          );
+            console.log('🌉 Legacy Bridge active: EventBus → Store');
         }
-      } catch (error) {
-        console.error('[BRIDGE] Failed to dispatch action:', storeAction, error);
-      }
-    });
-
-    if (this.config.debugMode) {
-      console.log('🌉 Legacy Bridge active: EventBus → Store');
     }
-  }
 
-  private _startPerformanceMonitoring(): void {
+    private _startPerformanceMonitoring(): void {
     // Placeholder for performance monitoring
     // Will be implemented when needed
-  }
+    }
 }
 
 export default NavigatorCore;

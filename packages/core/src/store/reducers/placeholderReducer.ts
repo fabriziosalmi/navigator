@@ -47,36 +47,36 @@ export interface SessionState {
  * Cognitive reducer - now handles COGNITIVE_STATE_CHANGE from middleware
  */
 const cognitiveInitialState: CognitiveStateSlice = {
-  currentState: 'neutral',
-  confidence: 0,
-  lastUpdate: null,
+    currentState: 'neutral',
+    confidence: 0,
+    lastUpdate: null
 };
 
 export const cognitiveReducer: Reducer<CognitiveStateSlice, Action> = (
-  state = cognitiveInitialState,
-  action
+    state = cognitiveInitialState,
+    action
 ) => {
-  switch (action.type) {
-    case 'cognitive/STATE_CHANGE': {
-      const payload = action.payload as any;
-      // Support both middleware format (newState) and test format (currentState)
-      const newState = payload.newState || payload.currentState;
-      const confidence = payload.confidence ?? 0;
-      const timestamp = payload.timestamp ?? (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    switch (action.type) {
+        case 'cognitive/STATE_CHANGE': {
+            const payload = action.payload as any;
+            // Support both middleware format (newState) and test format (currentState)
+            const newState = payload.newState || payload.currentState;
+            const confidence = payload.confidence ?? 0;
+            const timestamp = payload.timestamp ?? (typeof performance !== 'undefined' ? performance.now() : Date.now());
       
-      return {
-        currentState: newState,
-        confidence: confidence,
-        lastUpdate: timestamp,
-      };
+            return {
+                currentState: newState,
+                confidence: confidence,
+                lastUpdate: timestamp
+            };
+        }
+
+        case '@@cognitive/RESET':
+            return { ...cognitiveInitialState };
+
+        default:
+            return state;
     }
-
-    case '@@cognitive/RESET':
-      return { ...cognitiveInitialState };
-
-    default:
-      return state;
-  }
 };/**
  * UI reducer (placeholder)
  */
@@ -90,68 +90,68 @@ interface InteractionState {
 }
 
 const uiInitialState: UIState = {
-  theme: 'light',
-  focusMode: false,
-  debugMode: false,
-  overlaysVisible: true,
+    theme: 'light',
+    focusMode: false,
+    debugMode: false,
+    overlaysVisible: true
 };
 
 // Internal interaction state (not exposed in UIState yet)
 let interactionState: InteractionState = {
-  lastAction: null,
-  lastSource: null,
-  lastTimestamp: null,
+    lastAction: null,
+    lastSource: null,
+    lastTimestamp: null
 };
 
 export const uiReducer: Reducer<UIState, Action> = (
-  state = uiInitialState,
-  action
+    state = uiInitialState,
+    action
 ) => {
-  // Handle interaction actions
-  switch (action.type) {
-    case 'interaction/SELECT':
-      interactionState = {
-        lastAction: 'select',
-        lastSource: action.payload?.source || null,
-        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
-        target: action.payload?.target,
-      };
-      return state; // UI doesn't change on select yet
+    // Handle interaction actions
+    switch (action.type) {
+        case 'interaction/SELECT':
+            interactionState = {
+                lastAction: 'select',
+                lastSource: action.payload?.source || null,
+                lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
+                target: action.payload?.target
+            };
+            return state; // UI doesn't change on select yet
 
-    case 'interaction/CANCEL':
-      interactionState = {
-        lastAction: 'cancel',
-        lastSource: action.payload?.source || null,
-        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
-      };
-      return state; // UI doesn't change on cancel yet
+        case 'interaction/CANCEL':
+            interactionState = {
+                lastAction: 'cancel',
+                lastSource: action.payload?.source || null,
+                lastTimestamp: action.payload?.metadata?.timestamp || Date.now()
+            };
+            return state; // UI doesn't change on cancel yet
 
-    case 'interaction/CONFIRM':
-      interactionState = {
-        lastAction: 'confirm',
-        lastSource: action.payload?.source || null,
-        lastTimestamp: action.payload?.metadata?.timestamp || Date.now(),
-      };
-      return state; // UI doesn't change on confirm yet
+        case 'interaction/CONFIRM':
+            interactionState = {
+                lastAction: 'confirm',
+                lastSource: action.payload?.source || null,
+                lastTimestamp: action.payload?.metadata?.timestamp || Date.now()
+            };
+            return state; // UI doesn't change on confirm yet
 
-    case '@@ui/INIT':
-      return { ...uiInitialState };
+        case '@@ui/INIT':
+            return { ...uiInitialState };
 
-    case '@@ui/SET_THEME':
-      return {
-        ...state,
-        theme: action.payload as 'light' | 'dark',
-      };
+        case '@@ui/SET_THEME':
+            return {
+                ...state,
+                theme: action.payload as 'light' | 'dark'
+            };
 
-    case '@@ui/TOGGLE_DEBUG':
-      return {
-        ...state,
-        debugMode: !state.debugMode,
-      };
+        case '@@ui/TOGGLE_DEBUG':
+            return {
+                ...state,
+                debugMode: !state.debugMode
+            };
 
-    default:
-      return state;
-  }
+        default:
+            return state;
+    }
 };
 
 /**
@@ -163,44 +163,44 @@ export const getInteractionState = () => interactionState;
  * Session reducer (placeholder)
  */
 const sessionInitialState: SessionState = {
-  startTime: Date.now(),
-  interactions: 0,
-  currentSessionId: null,
+    startTime: Date.now(),
+    interactions: 0,
+    currentSessionId: null
 };
 
 export const sessionReducer: Reducer<SessionState, Action> = (
-  state = sessionInitialState,
-  action
+    state = sessionInitialState,
+    action
 ) => {
-  // Placeholder - will be implemented in Sprint 3+
-  switch (action.type) {
-    case '@@session/INIT':
-      return {
-        ...sessionInitialState,
-        startTime: Date.now(),
-      };
+    // Placeholder - will be implemented in Sprint 3+
+    switch (action.type) {
+        case '@@session/INIT':
+            return {
+                ...sessionInitialState,
+                startTime: Date.now()
+            };
 
-    case '@@session/INCREMENT_INTERACTIONS':
-      return {
-        ...state,
-        interactions: state.interactions + 1,
-      };
+        case '@@session/INCREMENT_INTERACTIONS':
+            return {
+                ...state,
+                interactions: state.interactions + 1
+            };
 
-    default:
-      return state;
-  }
+        default:
+            return state;
+    }
 };
 
 /**
  * Placeholder actions for UI (to demonstrate the system works)
  */
 export const uiActions = {
-  setTheme: (theme: 'light' | 'dark') => ({
-    type: '@@ui/SET_THEME',
-    payload: theme,
-  } as const),
+    setTheme: (theme: 'light' | 'dark') => ({
+        type: '@@ui/SET_THEME',
+        payload: theme
+    } as const),
 
-  toggleDebug: () => ({
-    type: '@@ui/TOGGLE_DEBUG',
-  } as const),
+    toggleDebug: () => ({
+        type: '@@ui/TOGGLE_DEBUG'
+    } as const)
 };

@@ -60,19 +60,19 @@ export interface NavigateAction {
  * ```
  */
 export function navigate(
-  direction: NavigationDirection,
-  source: NavigationSource,
-  metadata?: NavigatePayload['metadata']
+    direction: NavigationDirection,
+    source: NavigationSource,
+    metadata?: NavigatePayload['metadata']
 ): NavigateAction {
-  return {
-    type: NAVIGATE,
-    payload: {
-      direction,
-      source,
-      metadata: {
-        timestamp: performance.now(),
-        ...metadata,
-      },
-    },
-  };
+    return {
+        type: NAVIGATE,
+        payload: {
+            direction,
+            source,
+            metadata: {
+                timestamp: performance.now(),
+                ...metadata
+            }
+        }
+    };
 }

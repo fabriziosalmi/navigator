@@ -8,22 +8,22 @@
 import { combineReducers } from '../combineReducers';
 import { historyReducer, type HistoryState } from './historyReducer';
 import { 
-  navigationReducer, 
-  navigationActions,
-  type NavigationState 
+    navigationReducer, 
+    navigationActions,
+    type NavigationState 
 } from './navigationReducer';
 import {
-  cognitiveReducer,
-  uiReducer,
-  sessionReducer,
-  type CognitiveStateSlice,
-  type UIState,
-  type SessionState,
+    cognitiveReducer,
+    uiReducer,
+    sessionReducer,
+    type CognitiveStateSlice,
+    type UIState,
+    type SessionState
 } from './placeholderReducer';
 import {
-  inputReducer,
-  INPUT_ACTIONS,
-  type InputState,
+    inputReducer,
+    INPUT_ACTIONS,
+    type InputState
 } from './inputReducer';
 
 /**
@@ -68,36 +68,36 @@ export interface RootState {
  * Root reducer combining all slice reducers
  */
 export const rootReducer = combineReducers<RootState>({
-  history: historyReducer,
-  navigation: navigationReducer,
-  cognitive: cognitiveReducer,
-  input: inputReducer,
-  ui: uiReducer,
-  session: sessionReducer,
+    history: historyReducer,
+    navigation: navigationReducer,
+    cognitive: cognitiveReducer,
+    input: inputReducer,
+    ui: uiReducer,
+    session: sessionReducer
 });
 
 /**
  * Export all state types for convenience
  */
 export type {
-  HistoryState,
-  NavigationState,
-  CognitiveStateSlice,
-  InputState,
-  UIState,
-  SessionState,
+    HistoryState,
+    NavigationState,
+    CognitiveStateSlice,
+    InputState,
+    UIState,
+    SessionState
 };
 
 /**
  * Export individual reducers (useful for testing)
  */
 export {
-  historyReducer,
-  navigationReducer,
-  navigationActions,
-  cognitiveReducer,
-  inputReducer,
-  INPUT_ACTIONS,
-  uiReducer,
-  sessionReducer,
+    historyReducer,
+    navigationReducer,
+    navigationActions,
+    cognitiveReducer,
+    inputReducer,
+    INPUT_ACTIONS,
+    uiReducer,
+    sessionReducer
 };

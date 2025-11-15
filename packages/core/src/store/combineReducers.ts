@@ -30,70 +30,70 @@ import type { Reducer, ReducersMapObject, Action } from './types';
  * ```
  */
 export function combineReducers<S>(
-  reducers: ReducersMapObject<S, any>
+    reducers: ReducersMapObject<S, any>
 ): Reducer<S> {
-  const reducerKeys = Object.keys(reducers);
-  const finalReducers: any = {};
+    const reducerKeys = Object.keys(reducers);
+    const finalReducers: any = {};
 
-  // Filter out non-function values
-  for (let i = 0; i < reducerKeys.length; i++) {
-    const key = reducerKeys[i] as keyof S;
+    // Filter out non-function values
+    for (let i = 0; i < reducerKeys.length; i++) {
+        const key = reducerKeys[i] as keyof S;
 
-    if (typeof reducers[key] === 'function') {
-      finalReducers[key] = reducers[key];
-    } else {
-      console.warn(
-        `combineReducers: Expected reducer for key "${String(key)}" to be a function. Skipping.`
-      );
-    }
-  }
-
-  const finalReducerKeys = Object.keys(finalReducers) as (keyof S)[];
-
-  // Return combined reducer
-  return function combination(
-    state: S | undefined = {} as S,
-    action: Action
-  ): S {
-    let hasChanged = false;
-    const nextState: any = {};
-
-    for (let i = 0; i < finalReducerKeys.length; i++) {
-      const key = finalReducerKeys[i];
-      const reducer = finalReducers[key];
-      const previousStateForKey = state[key];
-      const nextStateForKey = reducer(previousStateForKey, action);
-
-      if (typeof nextStateForKey === 'undefined') {
-        const errorMessage = getUndefinedStateErrorMessage(key as string, action);
-        throw new Error(errorMessage);
-      }
-
-      nextState[key] = nextStateForKey;
-      hasChanged = hasChanged || nextStateForKey !== previousStateForKey;
+        if (typeof reducers[key] === 'function') {
+            finalReducers[key] = reducers[key];
+        } else {
+            console.warn(
+                `combineReducers: Expected reducer for key "${String(key)}" to be a function. Skipping.`
+            );
+        }
     }
 
-    // Preserve keys that aren't managed by reducers
-    hasChanged =
+    const finalReducerKeys = Object.keys(finalReducers) as (keyof S)[];
+
+    // Return combined reducer
+    return function combination(
+        state: S | undefined = {} as S,
+        action: Action
+    ): S {
+        let hasChanged = false;
+        const nextState: any = {};
+
+        for (let i = 0; i < finalReducerKeys.length; i++) {
+            const key = finalReducerKeys[i];
+            const reducer = finalReducers[key];
+            const previousStateForKey = state[key];
+            const nextStateForKey = reducer(previousStateForKey, action);
+
+            if (typeof nextStateForKey === 'undefined') {
+                const errorMessage = getUndefinedStateErrorMessage(key as string, action);
+                throw new Error(errorMessage);
+            }
+
+            nextState[key] = nextStateForKey;
+            hasChanged = hasChanged || nextStateForKey !== previousStateForKey;
+        }
+
+        // Preserve keys that aren't managed by reducers
+        hasChanged =
       hasChanged || finalReducerKeys.length !== Object.keys(state as object).length;
 
-    return hasChanged ? nextState : state;
-  };
+        return hasChanged ? nextState : state;
+    };
 }
 
 /**
  * Helper to generate error messages
  */
 function getUndefinedStateErrorMessage(key: string, action: Action): string {
-  const actionType = action && action.type;
-  const actionDescription =
+    const actionType = action && action.type;
+    const actionDescription =
     (actionType && `action "${String(actionType)}"`) || 'an action';
 
-  return (
-    `Given ${actionDescription}, reducer "${key}" returned undefined. ` +
-    `To ignore an action, you must explicitly return the previous state. ` +
-    `If you want this reducer to hold no value, you can return null instead of undefined.`
-  );
+    return (
+        `Given ${actionDescription}, reducer "${key}" returned undefined. ` +
+    'To ignore an action, you must explicitly return the previous state. ' +
+    'If you want this reducer to hold no value, you can return null instead of undefined.'
+    );
 }
 
 /**
@@ -101,29 +101,29 @@ function getUndefinedStateErrorMessage(key: string, action: Action): string {
  * Useful in development to catch common mistakes
  */
 export function assertReducerShape(reducers: ReducersMapObject<any>): void {
-  Object.keys(reducers).forEach((key) => {
-    const reducer = reducers[key];
-    const initialState = reducer(undefined, { type: '@@INIT' });
+    Object.keys(reducers).forEach((key) => {
+        const reducer = reducers[key];
+        const initialState = reducer(undefined, { type: '@@INIT' });
 
-    if (typeof initialState === 'undefined') {
-      throw new Error(
-        `Reducer "${key}" returned undefined during initialization. ` +
-        `If the state passed to the reducer is undefined, you must ` +
-        `explicitly return the initial state. The initial state may ` +
-        `not be undefined. If you don't want to set a value for this reducer, ` +
-        `you can use null instead of undefined.`
-      );
-    }
+        if (typeof initialState === 'undefined') {
+            throw new Error(
+                `Reducer "${key}" returned undefined during initialization. ` +
+        'If the state passed to the reducer is undefined, you must ' +
+        'explicitly return the initial state. The initial state may ' +
+        'not be undefined. If you don\'t want to set a value for this reducer, ' +
+        'you can use null instead of undefined.'
+            );
+        }
 
-    const type = '@@PROBE_UNKNOWN_ACTION_' + Math.random().toString(36).substring(7);
-    if (typeof reducer(undefined, { type }) === 'undefined') {
-      throw new Error(
-        `Reducer "${key}" returned undefined when probed with a random type. ` +
+        const type = '@@PROBE_UNKNOWN_ACTION_' + Math.random().toString(36).substring(7);
+        if (typeof reducer(undefined, { type }) === 'undefined') {
+            throw new Error(
+                `Reducer "${key}" returned undefined when probed with a random type. ` +
         `Don't try to handle ${type} or other actions in "redux/*" namespace. They are considered private. ` +
-        `Instead, you must return the current state for any unknown actions, unless it is undefined, ` +
-        `in which case you must return the initial state, regardless of the action type. ` +
-        `The initial state may not be undefined, but can be null.`
-      );
-    }
-  });
+        'Instead, you must return the current state for any unknown actions, unless it is undefined, ' +
+        'in which case you must return the initial state, regardless of the action type. ' +
+        'The initial state may not be undefined, but can be null.'
+            );
+        }
+    });
 }

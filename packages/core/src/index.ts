@@ -24,13 +24,13 @@ export type { NavigateAction, NavigatePayload, NavigationDirection, NavigationSo
 
 export { select, cancel, confirm, SELECT, CANCEL, CONFIRM } from './actions/interaction';
 export type { 
-  SelectAction, 
-  CancelAction, 
-  ConfirmAction, 
-  InteractionAction,
-  SelectPayload,
-  CancelPayload,
-  ConfirmPayload
+    SelectAction, 
+    CancelAction, 
+    ConfirmAction, 
+    InteractionAction,
+    SelectPayload,
+    CancelPayload,
+    ConfirmPayload
 } from './actions/interaction';
 
 // Cognitive Model Types
@@ -38,41 +38,41 @@ export type { CognitiveState, CognitiveStateChangePayload, IntentPredictionPaylo
 
 // Core-specific types
 export type {
-  NavigatorEvent,
-  EventHandler,
-  EventMiddleware,
-  UnsubscribeFunction,
-  SubscriptionOptions,
-  EventBusOptions,
-  EventStats
+    NavigatorEvent,
+    EventHandler,
+    EventMiddleware,
+    UnsubscribeFunction,
+    SubscriptionOptions,
+    EventBusOptions,
+    EventStats
 } from './types';
 export type {
-  NavigatorState,
-  ComputedProperties
+    NavigatorState,
+    ComputedProperties
 } from './AppState';
 export type {
-  NavigatorCoreConfig,
-  INavigatorPlugin,
-  PluginOptions
+    NavigatorCoreConfig,
+    INavigatorPlugin,
+    PluginOptions
 } from './NavigatorCore';
 
 // Redux-like Store types (v3.1+)
 export type {
-  Action as StoreAction,
-  Reducer,
-  Store,
-  Dispatch,
-  Listener,
-  Unsubscribe,
-  Middleware,
-  MiddlewareAPI,
-  StoreEnhancer,
-  RootState,
-  HistoryState,
-  HistoryEntry,
-  NavigationState,
-  CognitiveState as CognitiveStoreState,
-  UIState,
-  SessionState,
+    Action as StoreAction,
+    Reducer,
+    Store,
+    Dispatch,
+    Listener,
+    Unsubscribe,
+    Middleware,
+    MiddlewareAPI,
+    StoreEnhancer,
+    RootState,
+    HistoryState,
+    HistoryEntry,
+    NavigationState,
+    CognitiveState as CognitiveStoreState,
+    UIState,
+    SessionState
 } from './store';
 

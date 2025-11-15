@@ -66,38 +66,38 @@ export interface MiddlewareAPI<S, A extends Action> {
  * ```
  */
 export function applyMiddleware<S, A extends Action>(
-  ...middlewares: Middleware<S, A>[]
+    ...middlewares: Middleware<S, A>[]
 ): StoreEnhancer {
-  return (createStore: any) => (reducer: any, preloadedState?: any) => {
+    return (createStore: any) => (reducer: any, preloadedState?: any) => {
     // Create the base store
-    const store = createStore(reducer, preloadedState);
+        const store = createStore(reducer, preloadedState);
     
-    // Temporary dispatch that throws if called during middleware setup
-    let dispatch: any = () => {
-      throw new Error(
-        'Dispatching while constructing your middleware is not allowed. ' +
+        // Temporary dispatch that throws if called during middleware setup
+        let dispatch: any = () => {
+            throw new Error(
+                'Dispatching while constructing your middleware is not allowed. ' +
         'Other middleware would not be applied to this dispatch.'
-      );
-    };
+            );
+        };
 
-    // API exposed to middleware
-    const middlewareAPI: MiddlewareAPI<S, A> = {
-      getState: store.getState,
-      dispatch: (action: A, ...args: any[]) => dispatch(action, ...args),
-    };
+        // API exposed to middleware
+        const middlewareAPI: MiddlewareAPI<S, A> = {
+            getState: store.getState,
+            dispatch: (action: A, ...args: any[]) => dispatch(action, ...args)
+        };
 
-    // Apply each middleware to the chain
-    const chain = middlewares.map(middleware => middleware(middlewareAPI));
+        // Apply each middleware to the chain
+        const chain = middlewares.map(middleware => middleware(middlewareAPI));
     
-    // Compose middleware chain
-    // Right-to-left composition: [MW1, MW2, MW3] => MW1(MW2(MW3(store.dispatch)))
-    dispatch = compose(...chain)(store.dispatch);
+        // Compose middleware chain
+        // Right-to-left composition: [MW1, MW2, MW3] => MW1(MW2(MW3(store.dispatch)))
+        dispatch = compose(...chain)(store.dispatch);
 
-    return {
-      ...store,
-      dispatch,
+        return {
+            ...store,
+            dispatch
+        };
     };
-  };
 }
 
 /**
@@ -116,15 +116,15 @@ export function applyMiddleware<S, A extends Action>(
  * ```
  */
 function compose(...funcs: Function[]): Function {
-  if (funcs.length === 0) {
+    if (funcs.length === 0) {
     // If no functions, return identity function
-    return <T>(arg: T) => arg;
-  }
+        return <T>(arg: T) => arg;
+    }
 
-  if (funcs.length === 1) {
-    return funcs[0];
-  }
+    if (funcs.length === 1) {
+        return funcs[0];
+    }
 
-  // Right-to-left composition
-  return funcs.reduce((a, b) => (...args: any[]) => a(b(...args)));
+    // Right-to-left composition
+    return funcs.reduce((a, b) => (...args: any[]) => a(b(...args)));
 }
