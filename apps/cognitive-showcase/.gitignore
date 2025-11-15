@@ -25,3 +25,4 @@ playwright/.cache/
 # Videos (too large for git)
 *.webm
 *.mp4
+.vercel

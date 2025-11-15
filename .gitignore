@@ -74,3 +74,4 @@ claude_report.md
 *-e2e-results.log
 debug-*.log
 FINAL-TEST-WITH-FIX.log
+.vercel

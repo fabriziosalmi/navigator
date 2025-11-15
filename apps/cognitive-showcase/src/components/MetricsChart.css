@@ -1,0 +1,32 @@
+.metrics-chart {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.chart-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.chart-value {
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.chart-canvas {
+  display: block;
+  border-radius: 0.5rem;
+}

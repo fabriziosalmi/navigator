@@ -1,0 +1,325 @@
+.onboarding-wizard {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  animation: slide-up 500ms ease-out;
+}
+
+.onboarding-card {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.95) 0%, rgba(79, 70, 229, 0.95) 100%);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(147, 51, 234, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  min-width: 400px;
+  max-width: 500px;
+  text-align: center;
+}
+
+.step-progress {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 300ms;
+}
+
+.progress-dot.active {
+  background: white;
+  transform: scale(1.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.progress-dot.complete {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+  animation: pulse-complete 0.5s ease-out;
+}
+
+@keyframes pulse-complete {
+  0% {
+    transform: scale(1.5);
+  }
+  50% {
+    transform: scale(2);
+  }
+  100% {
+    transform: scale(1.5);
+  }
+}
+
+.step-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.step-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.step-message {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 1.5rem;
+}
+
+.step-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.step-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #06b6d4 100%);
+  border-radius: 9999px;
+  transition: width 300ms ease-out;
+}
+
+.step-hint {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.step-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.step-counter {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: monospace;
+}
+
+.skip-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.skip-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Tutorial Arrows */
+.tutorial-arrow {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  animation: arrow-pulse 1s ease-in-out infinite;
+}
+
+.tutorial-arrow.arrow-left {
+  bottom: 12rem;
+  left: 20%;
+}
+
+.tutorial-arrow.arrow-right {
+  bottom: 12rem;
+  right: 20%;
+}
+
+.arrow-icon {
+  font-size: 2rem;
+  animation: arrow-bounce 1s ease-in-out infinite;
+}
+
+.arrow-label {
+  background: rgba(251, 191, 36, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid rgba(251, 191, 36, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+/* Onboarding Complete */
+.onboarding-complete {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(6, 182, 212, 0.95) 100%);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(34, 197, 94, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  text-align: center;
+  animation: slide-up 500ms ease-out;
+}
+
+.complete-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: rotate-in 600ms ease-out;
+}
+
+.complete-message {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dismiss-button {
+  background: white;
+  color: #059669;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 200ms;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dismiss-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Reset Button */
+.onboarding-reset-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 100;
+  background: rgba(147, 51, 234, 0.2);
+  border: 2px solid rgba(147, 51, 234, 0.5);
+  color: #a78bfa;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 200ms;
+  backdrop-filter: blur(10px);
+}
+
+.onboarding-reset-button:hover {
+  background: rgba(147, 51, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+/* Animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes arrow-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-10px);
+  }
+}
+
+.arrow-right .arrow-icon {
+  animation-name: arrow-bounce-right;
+}
+
+@keyframes arrow-bounce-right {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes rotate-in {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .onboarding-card {
+    min-width: auto;
+    max-width: 90vw;
+    padding: 1.5rem;
+  }
+
+  .tutorial-arrow {
+    display: none;
+  }
+
+  .onboarding-wizard {
+    bottom: 1rem;
+  }
+}

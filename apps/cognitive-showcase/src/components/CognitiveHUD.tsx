@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
+import MetricsChart from './MetricsChart';
+import ParticleEffect from './ParticleEffect';
 import './CognitiveHUD.css';
+
+interface DataPoint {
+  timestamp: number;
+  value: number;
+}
 
 interface CognitiveMetrics {
   errorRate: number;
@@ -23,12 +30,27 @@ interface CognitiveHUDProps {
 
 function CognitiveHUD({ cognitiveState, metrics, lastAction }: CognitiveHUDProps) {
   const [actionHistory, setActionHistory] = useState<Action[]>([]);
+  const [errorRateHistory, setErrorRateHistory] = useState<DataPoint[]>([]);
+  const [speedHistory, setSpeedHistory] = useState<DataPoint[]>([]);
+  const [particleTrigger, setParticleTrigger] = useState<string>('');
 
   useEffect(() => {
     if (lastAction) {
       setActionHistory((prev) => [lastAction, ...prev].slice(0, 5));
     }
   }, [lastAction]);
+
+  // Update chart data when metrics change
+  useEffect(() => {
+    const now = Date.now();
+    setErrorRateHistory((prev) => [...prev, { timestamp: now, value: metrics.errorRate }].slice(-30));
+    setSpeedHistory((prev) => [...prev, { timestamp: now, value: metrics.averageSpeed }].slice(-30));
+  }, [metrics]);
+
+  // Trigger particle effect on state change
+  useEffect(() => {
+    setParticleTrigger(cognitiveState + Date.now());
+  }, [cognitiveState]);
 
   const getStateColor = (state: string) => {
     const colors: Record<string, string> = {
@@ -63,6 +85,10 @@ function CognitiveHUD({ cognitiveState, metrics, lastAction }: CognitiveHUDProps
 
       {/* Main State Display */}
       <div className="state-display" data-state={cognitiveState} data-testid="cognitive-state-container">
+        <ParticleEffect 
+          trigger={particleTrigger} 
+          color={getStateColor(cognitiveState)} 
+        />
         <div className="state-emoji">{getStateEmoji(cognitiveState)}</div>
         <div className="state-name" data-testid="cognitive-state">{cognitiveState}</div>
         <div className="state-indicator">
@@ -182,6 +208,22 @@ function CognitiveHUD({ cognitiveState, metrics, lastAction }: CognitiveHUDProps
           {cognitiveState === 'neutral' && 
             'Monitoring user behavior patterns...'}
         </div>
+      </div>
+
+      {/* Performance Charts */}
+      <div className="charts-section">
+        <MetricsChart
+          data={errorRateHistory}
+          label="Error Rate Trend"
+          unit="%"
+          color="#ef4444"
+        />
+        <MetricsChart
+          data={speedHistory}
+          label="Avg Speed Trend"
+          unit="ms"
+          color="#06b6d4"
+        />
       </div>
     </div>
   );

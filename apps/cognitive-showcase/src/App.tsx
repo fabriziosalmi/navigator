@@ -3,6 +3,8 @@ import { useNavigator } from '@navigator.menu/react';
 import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 import ImageCarousel from './components/ImageCarousel';
 import CognitiveHUD from './components/CognitiveHUD';
+import OnboardingWizard from './components/OnboardingWizard';
+import InputModeToggle from './components/InputModeToggle';
 import './App.css';
 
 interface CognitiveMetrics {
@@ -29,6 +31,8 @@ function App() {
   });
   const [lastAction, setLastAction] = useState<Action | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [, setOnboardingComplete] = useState(false);
+  const [gestureEnabled, setGestureEnabled] = useState(false);
 
   const { core } = useNavigator({
     autoStart: true,
@@ -169,6 +173,14 @@ function App() {
             metrics={metrics}
             lastAction={lastAction}
           />
+          
+          {/* Input Mode Toggle */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <InputModeToggle
+              gestureEnabled={gestureEnabled}
+              onToggle={setGestureEnabled}
+            />
+          </div>
         </div>
       </div>
 
@@ -178,6 +190,13 @@ function App() {
           Press random keys to trigger frustration state.
         </p>
       </footer>
+
+      {/* Onboarding Wizard */}
+      <OnboardingWizard
+        metrics={metrics}
+        cognitiveState={cognitiveState}
+        onComplete={() => setOnboardingComplete(true)}
+      />
     </div>
   );
 }

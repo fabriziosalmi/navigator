@@ -55,7 +55,9 @@ p {
   border-radius: 12px;
   padding: 2rem;
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -71,5 +73,55 @@ p {
 
 .card p {
   font-size: 0.9rem;
-  margin: 0;
+  margin: 0 0 1.5rem 0;
+  flex: 1;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.btn-demo,
+.btn-docs {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, var(--primary-color), #0095ff);
+  border: none;
+  color: #0a0e27;
+}
+
+.btn-demo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+.btn-demo:active {
+  transform: translateY(0);
+}
+
+.btn-docs {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.btn-docs:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }

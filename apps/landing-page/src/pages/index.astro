@@ -72,27 +72,33 @@ import '../styles/global.css';
 				
 				<!-- CTA Buttons -->
 				<div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up animation-delay-600">
-					<!-- Primary CTA -->
+					<!-- Primary CTA - Cognitive Showcase -->
 					<a 
-						href="https://navigator-demo.vercel.app" 
+						href="https://navigator-cognitive-showcase.vercel.app" 
 						target="_blank"
 						class="group relative px-8 py-4 bg-gradient-to-r from-orange-600 to-blue-600 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105"
 					>
 						<span class="flex items-center gap-2">
-							🚀 Launch Live Demo
+							🚀 Launch Cognitive Demo
 							<svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
 							</svg>
 						</span>
 					</a>
 					
-					<!-- Secondary CTA -->
-					<button 
-						onclick="navigator.clipboard.writeText('npm install @navigator.menu/core'); this.querySelector('span').textContent = '✓ Copied!'; setTimeout(() => this.querySelector('span').textContent = 'npm install @navigator.menu/core', 2000)"
-						class="group px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-mono text-sm hover:bg-white/10 hover:border-orange-400 transition-all duration-300 hover:scale-105"
+					<!-- Secondary CTA - PDK Demo -->
+					<a 
+						href="https://navigator-pdk-demo.vercel.app" 
+						target="_blank"
+						class="group px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg font-semibold hover:bg-white/10 hover:border-orange-400 transition-all duration-300 hover:scale-105"
 					>
-						<span>npm install @navigator.menu/core</span>
-					</button>
+						<span class="flex items-center gap-2">
+							📦 View SDK Demo
+							<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+							</svg>
+						</span>
+					</a>
 				</div>
 				
 				<!-- Social Proof / Stats -->

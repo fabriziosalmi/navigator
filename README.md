@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue)](https://www.typescriptlang.org/)
 
-**[🚀 Live Demo](https://fabriziosalmi.github.io/navigator/)** | **[📚 Full Documentation](https://fabriziosalmi.github.io/navigator/docs/)** | **[🧑‍🍳 Cookbook Recipes](./docs/docs/COOKBOOK.md)**
+**[🚀 Cognitive Demo](https://navigator-cognitive-showcase.vercel.app)** | **[📦 SDK Demo](https://navigator-pdk-demo.vercel.app)** | **[📚 Full Documentation](https://fabriziosalmi.github.io/navigator/docs/)** | **[🧑‍🍳 Cookbook Recipes](./docs/docs/COOKBOOK.md)**
 
 Navigator is a **decoupled, plugin-based SDK** for building next-generation web interfaces. It's a context-aware perception platform that understands user intent, predicts actions, and adapts the UI in real-time.
 
