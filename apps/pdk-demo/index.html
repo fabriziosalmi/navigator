@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigator SDK Demo | PDK v2.0.0 Features</title>
+  <meta name="description" content="Interactive demo showcasing Navigator Plugin Development Kit (PDK) features: BasePlugin, NipValidator, utilities, and testing mocks." />
+  <meta name="keywords" content="Navigator, PDK, Plugin Development Kit, JavaScript SDK, NIP validator" />
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Navigator SDK Demo" />
+  <meta property="og:description" content="Explore Navigator PDK v2.0.0 features with interactive demos." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Navigator SDK Demo" />
+  <meta name="twitter:description" content="Interactive Navigator PDK demo" />
+  
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <div id="app">
+    <div class="demo-layout">
+      <!-- Main Content -->
+      <main class="demo-main">
+        <header class="demo-header">
+          <h1>📦 Navigator PDK Demo</h1>
+          <p class="subtitle">Interactive showcase of the Plugin Development Kit v2.0.0</p>
+        </header>
+        
+        <section class="intro-section">
+          <div class="intro-card">
+            <h2>🚀 What is Navigator PDK?</h2>
+            <p>The Plugin Development Kit provides everything you need to extend Navigator with custom plugins:</p>
+            <ul>
+              <li><strong>BasePlugin</strong> - Abstract class with lifecycle hooks</li>
+              <li><strong>NipValidator</strong> - Event validation per NIP v1.0 spec</li>
+              <li><strong>Utilities</strong> - debounce, throttle, math helpers</li>
+              <li><strong>Testing Mocks</strong> - Unit test your plugins easily</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="cards-section">
+          <h2>🎯 Try the Features</h2>
+          <p class="section-desc">Click "Run Demo" and open DevTools Console (F12) to see each feature in action</p>
+          <div class="cards-container" id="cardsContainer">
+            <!-- Cards will be dynamically added here -->
+          </div>
+        </section>
+      </main>
+      
+      <!-- Sidebar -->
+      <aside class="demo-sidebar">
+        <div class="sidebar-card">
+          <h3>💡 How to Use</h3>
+          <ol>
+            <li>Open DevTools Console (F12)</li>
+            <li>Click any "Run Demo" button</li>
+            <li>Watch the console output</li>
+            <li>Click "📖 Docs" for details</li>
+          </ol>
+        </div>
+        
+        <div class="sidebar-card">
+          <h3>📚 Resources</h3>
+          <ul class="resource-links">
+            <li><a href="https://github.com/fabriziosalmi/navigator/tree/main/packages/pdk" target="_blank">📦 PDK Package</a></li>
+            <li><a href="https://github.com/fabriziosalmi/navigator/blob/main/docs/NIP.md" target="_blank">📋 NIP Spec</a></li>
+            <li><a href="https://github.com/fabriziosalmi/navigator" target="_blank">🔗 GitHub Repo</a></li>
+          </ul>
+        </div>
+        
+        <div class="sidebar-card console-status">
+          <h3>🖥️ Console Status</h3>
+          <p id="consoleStatus" class="status-indicator">
+            <span class="status-dot"></span>
+            Waiting for demo...
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+  
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

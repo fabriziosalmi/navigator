@@ -21,7 +21,7 @@ export default defineWorkspace([
     ...baseConfig,
     test: {
       name: 'demo-app',
-      include: ['apps/demo/tests/**/*.{test,spec}.{ts,js}'],
+      include: ['apps/pdk-demo/tests/**/*.{test,spec}.{ts,js}'],
       environment: 'jsdom',
     }
   },

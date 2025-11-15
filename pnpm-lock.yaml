@@ -107,19 +107,6 @@ importers:
         specifier: ^6.4.1
         version: 6.4.1(@types/node@20.19.24)(terser@5.44.1)
 
-  apps/demo:
-    dependencies:
-      '@navigator.menu/pdk':
-        specifier: workspace:*
-        version: link:../../packages/pdk
-      '@navigator.menu/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-    devDependencies:
-      vite:
-        specifier: ^5.4.21
-        version: 5.4.21(@types/node@20.19.24)(terser@5.44.1)
-
   apps/landing-page:
     dependencies:
       '@tailwindcss/vite':
@@ -137,6 +124,19 @@ importers:
       vite:
         specifier: ^6.4.1
         version: 6.4.1(@types/node@20.19.24)(terser@5.44.1)
+
+  apps/pdk-demo:
+    dependencies:
+      '@navigator.menu/pdk':
+        specifier: workspace:*
+        version: link:../../packages/pdk
+      '@navigator.menu/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+    devDependencies:
+      vite:
+        specifier: ^5.4.21
+        version: 5.4.21(@types/node@20.19.24)(terser@5.44.1)
 
   apps/react-test-app:
     dependencies:

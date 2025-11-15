@@ -29,7 +29,7 @@
 **Vercel Settings**:
 - **Project Name**: `navigator-pdk-demo`
 - **Framework Preset**: Vite
-- **Root Directory**: `apps/demo`
+- **Root Directory**: `apps/pdk-demo`
 - **Build Command**: `pnpm build`
 - **Output Directory**: `dist`
 - **Install Command**: `pnpm install`
