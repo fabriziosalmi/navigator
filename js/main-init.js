@@ -134,12 +134,14 @@ function applyConfigValues() {
     CONFIG.lod.nearDistance = getConfig('performance.lod.near_distance', 2);
     CONFIG.lod.mediumDistance = getConfig('performance.lod.medium_distance', 4);
     
-    // console.log('✅ Configuration applied:', {
-        fps: CONFIG.performance.targetFPS,
-        gestureConf: CONFIG.camera.minDetectionConfidence,
-        audio: CONFIG.audio.masterVolume,
-        debug: CONFIG.ui.debug
-    });
+    if (CONFIG.ui.debug) {
+        console.log('✅ Configuration applied:', {
+            fps: CONFIG.performance.targetFPS,
+            gestureConf: CONFIG.camera.minDetectionConfidence,
+            audio: CONFIG.audio.masterVolume,
+            debug: CONFIG.ui.debug
+        });
+    }
 }
 
 // Move adaptive HUD to quantum HUD
