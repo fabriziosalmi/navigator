@@ -1,5 +1,6 @@
 {
   "name": "@navigator/docs-site",
+  "private": true,
   "version": "1.0.0",
   "description": "Navigator SDK Documentation",
   "type": "module",
