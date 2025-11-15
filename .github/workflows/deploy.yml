@@ -78,9 +78,9 @@ jobs:
         env:
           CI: true
 
-      # 8. Production Build (already done in step 6)
-      - name: Build production bundle
-        run: echo "Build already completed in Build packages step"
+      # 8. Build root-level demo for GitHub Pages
+      - name: Build demo site
+        run: pnpm exec vite build
         env:
           NODE_ENV: production
 
