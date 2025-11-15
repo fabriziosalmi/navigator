@@ -1,5 +1,6 @@
 {
   "name": "@navigator.menu/pathfinding-demo",
+  "private": true,
   "version": "1.0.0",
   "description": "Navigator Pathfinding & Gesture Control Demo - Multi-layer gesture-controlled interface with MediaPipe hand tracking",
   "type": "module",

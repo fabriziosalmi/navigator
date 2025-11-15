@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "vercel-build": "cd ../.. && pnpm build && cd apps/cognitive-showcase && tsc && vite build",
+    "vercel-build": "cd ../.. && pnpm build && cd apps/showcase && tsc && vite build",
     "preview": "vite preview",
     "test:record": "playwright test --project=record-demo"
   },
