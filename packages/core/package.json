@@ -1,6 +1,6 @@
 {
   "name": "@navigator.menu/core",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Navigator Core - Framework-agnostic event-driven architecture with plugin system and state management",
   "type": "module",
   "main": "./dist/index.cjs",

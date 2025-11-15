@@ -1,5 +1,12 @@
 # @navigator.menu/plugin-mock-gesture
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [8d03dc7]
+  - @navigator.menu/core@3.0.2
+
 ## 3.0.1
 
 ### Patch Changes
