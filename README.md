@@ -12,6 +12,21 @@
 
 Navigator is a **decoupled, plugin-based SDK** for building next-generation web interfaces. It's a context-aware perception platform that understands user intent, predicts actions, and adapts the UI in real-time.
 
+## 📑 Table of Contents
+
+- [🌟 Key Features](#-key-features)
+- [🚀 Quick Start (React)](#-quick-start-react)
+- [⚡ Performance Optimizations](#-performance-optimizations-sprint-2)
+- [📖 Documentation](#-documentation)
+- [🏗️ Architecture](#️-architecture)
+- [🧪 Quality & Validation](#-quality--validation)
+- [📦 Available Packages](#-available-packages)
+- [🎯 Use Cases](#-use-cases)
+- [🤝 Contributing](#-contributing)
+- [🌐 Community & Support](#-community--support)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+
 ---
 
 ## 🌟 Key Features
@@ -30,10 +45,26 @@ Navigator is a **decoupled, plugin-based SDK** for building next-generation web 
 
 Get a keyboard-controlled app running in under 5 minutes.
 
+### Prerequisites
+
+- Node.js 18.0.0 or higher
+- npm, yarn, or pnpm
+
 ### 1. Install Dependencies
 
+Using npm:
 ```bash
 npm install @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
+```
+
+Using pnpm:
+```bash
+pnpm add @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
+```
+
+Using yarn:
+```bash
+yarn add @navigator.menu/core @navigator.menu/react @navigator.menu/plugin-keyboard
 ```
 
 ### 2. Add to Your React App
@@ -258,7 +289,17 @@ Navigator is perfect for building:
 - ♿ **Accessible Interfaces:** Multi-modal input for better accessibility
 - 🧪 **Prototypes:** Quickly test different input methods without refactoring
 
-**Requirements**: ES6 modules, MediaPipe WASM, Web Audio API, webcam access
+### Browser Requirements
+
+- Modern browsers with ES6 module support
+- Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+
+### Optional Features
+
+Some plugins may require additional browser APIs:
+- **MediaPipe WASM** - For advanced gesture recognition
+- **Web Audio API** - For voice/audio features
+- **Webcam access** - For camera-based input methods
 
 ---
 
@@ -266,15 +307,46 @@ Navigator is perfect for building:
 
 Contributions are welcome! Whether it's a bug report, a new feature, or a new recipe for the cookbook, we'd love to have your help.
 
-**Getting Started:**
+### Getting Started
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/amazing-feature`
-3. Make your changes and add tests
-4. Run validation: `pnpm validate`
-5. Submit a Pull Request
+1. **Fork the repository**
+2. **Clone your fork:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/navigator.git
+   cd navigator
+   ```
+3. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
+4. **Create a feature branch:**
+   ```bash
+   git checkout -b feat/amazing-feature
+   ```
+5. **Make your changes and add tests**
+6. **Run validation:**
+   ```bash
+   pnpm validate
+   ```
+7. **Commit your changes:**
+   ```bash
+   git commit -m "feat: add amazing feature"
+   ```
+8. **Push to your fork:**
+   ```bash
+   git push origin feat/amazing-feature
+   ```
+9. **Submit a Pull Request**
 
-Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Conduct](./CODE_OF_CONDUCT.md)** for details.
+### Local Development Commands
+
+- `pnpm dev` - Start the demo application
+- `pnpm build` - Build all packages
+- `pnpm test` - Run all tests
+- `pnpm lint` - Run linting
+- `pnpm validate` - Run full validation suite (lint, test, build)
+
+Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Conduct](./CODE_OF_CONDUCT.md)** for more details.
 
 ---
 
