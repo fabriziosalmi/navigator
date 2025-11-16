@@ -20,7 +20,7 @@ Navigator is a **decoupled, plugin-based SDK** for building next-generation web 
 *   🔮 **Predictive Intent System:** Predicts user actions *before* they are completed, enabling zero-latency interactions.
 *   🔌 **Fully Plugin-Based:** The entire architecture is modular. Add or remove capabilities like gesture, voice, or keyboard input by simply adding a plugin.
 *   ⚡ **High-Performance Core:** Redux-like unidirectional data flow ensures **predictable state management** with time-travel debugging. Parallel plugin initialization (55-93% faster startup).
-*   ⚛️ **Framework Agnostic:** Works with any framework. Comes with official wrappers for **React** (`@navigator.menu/react`) and **Vue** (`@navigator.menu/vue`).
+*   ⚛️ **Framework Agnostic:** Works with any framework. Comes with an official wrapper for **React** (`@navigator.menu/react`).
 *   🛡️ **Robust & Tested:** Built with TypeScript, with **386+ tests** and **95%+ code coverage** across all packages.
 *   🧑‍💻 **World-Class DX:** A powerful CLI (`create-app`), a Plugin Development Kit (PDK), and a "Cookbook" full of practical recipes get you started in minutes.
 
@@ -146,16 +146,13 @@ appState.watch('search.query', performSearch, {
 
 ## 📖 Documentation
 
-📚 **[Complete Documentation Index](docs/docs/INDEX.md)** - Full documentation catalog
-
-### Quick Links
-- **[Getting Started](docs/docs/GETTING_STARTED.md)** - Installation, first steps, troubleshooting
-- **[Features](docs/docs/FEATURES.md)** - Complete feature breakdown and configuration
-- **[Architecture](docs/docs/ARCHITECTURE.md)** - Technical deep-dive, module reference
-- **[Cookbook](docs/docs/COOKBOOK.md)** - Recipes and development patterns
-- **[Validation System](VALIDATION.md)** - Pre-push quality gates and CI/CD
-
----
+- **[Getting Started Guide](./apps/docs-site/getting-started.md)** - Installation and first steps
+- **[Cookbook](./apps/docs-site/cookbook.md)** - Complete working examples
+- **[Architecture Deep-Dive](./apps/docs-site/architecture.md)** - Understand the design philosophy
+- **[Plugin Development](./apps/docs-site/plugin-architecture.md)** - Build your own plugins
+- **[Features](./apps/docs-site/features.md)** - Complete feature breakdown and configuration
+- **[Optimization Guide](./apps/docs-site/optimization-guide.md)** - Performance tips and best practices
+- **[Cognitive Intelligence](./apps/docs-site/cognitive-intelligence.md)** - AI-powered user behavior modeling
 
 ---
 
@@ -170,21 +167,23 @@ Navigator is a **monorepo** containing the core SDK, official plugins, framework
 │   ├── types/               # TypeScript definitions & NIP Protocol
 │   ├── pdk/                 # Plugin Development Kit
 │   ├── cli/                 # Scaffolding tool: `create-app`
+│   ├── create-navigator-app/ # App scaffolding tool: `create-navigator-app`
 │   ├── plugin-keyboard/     # ⌨️  Keyboard input sensor
 │   ├── plugin-logger/       # 📝 Configurable logging system
 │   ├── plugin-dom-renderer/ # 🎨 DOM manipulation helpers
 │   ├── plugin-mock-gesture/ # 🧪 Testing utilities
-│   ├── react/               # ⚛️  React wrapper (`useNavigator` hook)
-│   └── vue/                 # 💚 Vue wrapper (composables)
+│   └── react/               # ⚛️  React wrapper (`useNavigator` hook)
 │
 ├── apps/                    # 🚀 Example Applications
-│   ├── demo/                # Main demo (navigator.menu)
+│   ├── showcase/            # Main showcase application
+│   ├── docs-site/           # Documentation site
+│   ├── pdk-demo/            # PDK demonstration
 │   └── react-test-app/      # E2E validation app
 │
-└── docs/                    # 📚 Documentation & Guides
-    ├── COOKBOOK.md          # Complete recipes & examples
-    ├── ARCHITECTURE.md      # Deep-dive into design
-    └── plugin-development/  # Build your own plugins
+└── project-docs/            # 📚 Project Documentation
+    ├── adrs/                # Architecture Decision Records
+    ├── reports/             # Project reports
+    └── research/            # Research documents
 ```
 
 ### The Navigator Way: Three Core Principles
@@ -235,16 +234,16 @@ packages/react:             E2E validated      ✓
 
 | Package | Version | Size | Description |
 |---------|---------|------|-------------|
-| [`@navigator.menu/core`](./packages/core) | 2.0.0 | 3.25 KB | Core engine with Event Bus |
-| [`@navigator.menu/react`](./packages/react) | 0.1.0 | 6.28 KB | React integration hooks |
-| [`@navigator.menu/pdk`](./packages/pdk) | 2.0.0 | - | Plugin Development Kit |
-| [`@navigator.menu/types`](./packages/types) | 2.0.0 | - | TypeScript definitions |
-| [`@navigator.menu/cli`](./packages/cli) | 2.0.0 | - | Scaffolding CLI tool |
-| [`@navigator.menu/plugin-keyboard`](./packages/plugin-keyboard) | 1.0.0 | 1.07 KB | Keyboard input plugin |
-| [`@navigator.menu/plugin-cognitive`](./packages/plugin-cognitive) | 1.0.0 | - | Cognitive AI modeling |
-| [`@navigator.menu/plugin-dom-renderer`](./packages/plugin-dom-renderer) | 1.0.0 | - | DOM manipulation helpers |
-| [`@navigator.menu/plugin-logger`](./packages/plugin-logger) | 1.0.0 | - | Configurable logging |
-| [`@navigator.menu/plugin-mock-gesture`](./packages/plugin-mock-gesture) | 2.0.0 | - | Testing utilities |
+| [`@navigator.menu/core`](./packages/core) | 3.0.3 | 3.25 KB | Core engine with Event Bus |
+| [`@navigator.menu/react`](./packages/react) | 1.0.3 | 6.28 KB | React integration hooks |
+| [`@navigator.menu/pdk`](./packages/pdk) | 3.0.1 | - | Plugin Development Kit |
+| [`@navigator.menu/types`](./packages/types) | 3.0.1 | - | TypeScript definitions |
+| [`@navigator.menu/cli`](./packages/cli) | 3.0.0 | - | Scaffolding CLI tool |
+| [`create-navigator-app`](./packages/create-navigator-app) | 2.0.0 | - | App scaffolding tool |
+| [`@navigator.menu/plugin-keyboard`](./packages/plugin-keyboard) | 2.0.3 | 1.07 KB | Keyboard input plugin |
+| [`@navigator.menu/plugin-dom-renderer`](./packages/plugin-dom-renderer) | 2.0.3 | - | DOM manipulation helpers |
+| [`@navigator.menu/plugin-logger`](./packages/plugin-logger) | 2.0.1 | - | Configurable logging |
+| [`@navigator.menu/plugin-mock-gesture`](./packages/plugin-mock-gesture) | 3.0.3 | - | Testing utilities |
 
 ---
 
@@ -279,21 +278,10 @@ Please read our **[Contributing Guide](./CONTRIBUTING.md)** and **[Code of Condu
 
 ---
 
-## 📚 Documentation
-
-- **[Getting Started Guide](./apps/docs-site/getting-started.md)** - Installation and first steps
-- **[Cookbook](./apps/docs-site/cookbook.md)** - Complete working examples
-- **[Architecture Deep-Dive](./apps/docs-site/architecture.md)** - Understand the design philosophy
-- **[Plugin Development](./apps/docs-site/plugin-architecture.md)** - Build your own plugins
-- **[API Reference](./documentation/docs/core-concepts.md)** - Complete API documentation
-
----
-
 ## 🌐 Community & Support
 
 - **[GitHub Discussions](https://github.com/fabriziosalmi/navigator/discussions)** - Ask questions, share ideas
 - **[Issues](https://github.com/fabriziosalmi/navigator/issues)** - Report bugs, request features
-- **[Changelog](./CHANGELOG.md)** - See what's new in each release
 
 ---
 
