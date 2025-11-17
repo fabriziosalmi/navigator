@@ -1,6 +1,10 @@
 # Architecture Documentation
 
-> **Note**: As of **November 2025**, Navigator has migrated to a **Redux-like Unidirectional Data Flow** architecture. The Store is now the single source of truth, with EventBus/AppState maintained for backward compatibility during the transition.
+> **IMPORTANT**: As of **v3.0+ (November 2025)**, Navigator uses a **Redux-like Unidirectional Data Flow** architecture with a centralized Store as the single source of truth.
+> 
+> ⚠️ **EventBus and AppState are DEPRECATED** (marked `@deprecated` in code) and will be **removed in v4.0**. They are currently maintained only for backward compatibility during the migration period.
+>
+> 📚 **For migration guidance**, see: [Legacy EventBus Migration Plan](https://github.com/fabriziosalmi/navigator/blob/main/project-docs/research/technical-debt/LEGACY_EVENTBUS_MIGRATION.md)
 
 ---
 
@@ -178,7 +182,7 @@ const unsubscribe = store.subscribe(() => {
 store.dispatch(navigate({ currentCard: 3, direction: 'right' }));
 ```
 
-### Migration Status (November 2025)
+### Migration Status (v3.0+, November 2025)
 
 | Component | Status | Details |
 |-----------|--------|---------|
@@ -188,28 +192,34 @@ store.dispatch(navigate({ currentCard: 3, direction: 'right' }));
 | **CognitiveMiddleware** | ✅ Active | Analyzes patterns, dispatches state changes |
 | **HistoryMiddleware** | ✅ Active | Records all actions to history slice |
 | **LoggerMiddleware** | ✅ Active | Dev-mode action logging |
-| **EventBus** | 🟡 Parallel | Legacy Bridge translates events → Store actions |
-| **AppState** | 🟡 Parallel | Maintained for backward compatibility |
+| **EventBus** | ⚠️ DEPRECATED | Legacy Bridge active for backward compatibility, will be removed in v4.0 |
+| **AppState** | ⚠️ DEPRECATED | Maintained for backward compatibility, will be removed in v4.0 |
 
-**Legacy Bridge**: Automatically translates EventBus events to Store actions with `legacy/*` prefix, enabling gradual migration without breaking changes.
-
----
-
-## Legacy Architecture (maintained for compatibility)
-
-> **Note**: This document covers both the **legacy monolithic implementation** (sections below) and the **new SDK architecture** (NavigatorCore, plugins, framework wrappers).
+**Legacy Bridge**: Automatically translates EventBus events to Store actions with `legacy/*` prefix, enabling gradual migration without breaking changes. This bridge will be removed when EventBus is fully removed in v4.0.
 
 ---
 
-## New SDK Architecture (v3.0+)
+## ⚠️ DEPRECATED: Legacy Architecture (v2.x)
 
-Navigator SDK is built on a **plugin-based, event-driven architecture** with three core components:
+> **WARNING**: The sections below document the **legacy v2.x architecture** that used EventBus and AppState. 
+> 
+> **This architecture is DEPRECATED as of v3.0** and will be removed in v4.0.
+> 
+> **For new projects**, use the Redux-like Store architecture described above.
+> 
+> **For existing projects**, refer to the [Migration Guide](https://github.com/fabriziosalmi/navigator/blob/main/project-docs/research/technical-debt/LEGACY_EVENTBUS_MIGRATION.md).
+
+---
+
+## Legacy SDK Architecture (v2.x - DEPRECATED)
+
+Navigator SDK is built on a **plugin-based architecture** with the **Redux-like Store** as the single source of truth (since v3.0). The legacy EventBus pattern (v2.x) has been replaced by unidirectional data flow.
 
 ### Core Components
 
 #### 1. NavigatorCore (`packages/core/src/NavigatorCore.ts`)
 
-The orchestrator responsible for plugin lifecycle management:
+The orchestrator responsible for plugin lifecycle management and Store initialization:
 
 ```typescript
 class NavigatorCore {
@@ -219,9 +229,12 @@ class NavigatorCore {
   async start(): Promise<void>
   async stop(): Promise<void>
   
-  // Core systems
-  eventBus: EventBus
-  appState: AppState
+  // Core systems (v3.0+)
+  store: Store          // Redux-like Store (primary)
+  
+  // Legacy systems (DEPRECATED - will be removed in v4.0)
+  eventBus: EventBus    // @deprecated Use store.subscribe() instead
+  appState: AppState    // @deprecated Use store.getState() instead
 }
 ```
 
@@ -237,11 +250,27 @@ class NavigatorCore {
 **Performance Optimization** (Sprint 2):
 - **Parallel Initialization**: 55-93% faster startup time
 - **Priority-based Loading**: Critical plugins block, deferred plugins don't
-- **Background Ready Event**: `core:deferred:ready` emitted when all deferred plugins complete
+- **Background Ready Event**: Store state update when all deferred plugins complete
 
-#### 2. EventBus (`packages/core/src/EventBus.ts`)
+#### 2. Store (`packages/core/src/store/`) - **PRIMARY (v3.0+)**
 
-Decoupled pub/sub messaging system:
+The Redux-like Store is the **single source of truth** for all application state:
+
+```typescript
+interface Store {
+  getState(): RootState
+  dispatch(action: Action): void
+  subscribe(listener: (state: RootState) => void): () => void
+}
+```
+
+**For details**, see [Unidirectional Data Flow Architecture](#the-unidirectional-data-flow-architecture-v30) above.
+
+#### 3. EventBus (`packages/core/src/EventBus.ts`) - **⚠️ DEPRECATED**
+
+> **@deprecated since v3.0** - Will be removed in v4.0. Use `store.subscribe()` for state changes and `store.dispatch()` for actions.
+
+Legacy decoupled pub/sub messaging system (maintained for backward compatibility):
 
 ```typescript
 class EventBus {
@@ -252,21 +281,22 @@ class EventBus {
 }
 ```
 
-**Event Flow**:
-```
-Plugin → EventBus.emit() → EventBus → Subscribed callbacks
-```
+**Migration**: Replace EventBus usage with Store patterns:
+- `eventBus.on('event', callback)` → `store.subscribe((state) => { ... })`
+- `eventBus.emit('event', data)` → `store.dispatch(action)`
 
-**Standard Events**:
+**Standard Events** (legacy, will be removed):
 - `core:init:start` / `core:init:complete`
 - `core:start:begin` / `core:start:complete`
 - `core:plugin:registered` / `core:plugin:initialized` / `core:plugin:started`
-- `core:deferred:ready` (Sprint 2: deferred plugins complete)
+- `core:deferred:ready`
 - `state:changed` / `state:reset`
 
-#### 3. AppState (`packages/core/src/AppState.ts`)
+#### 4. AppState (`packages/core/src/AppState.ts`) - **⚠️ DEPRECATED**
 
-Centralized reactive state management:
+> **@deprecated since v3.0** - Will be removed in v4.0. Use `store.getState()` and `store.dispatch()` instead.
+
+Legacy centralized reactive state management (maintained for backward compatibility):
 
 ```typescript
 class AppState {
@@ -278,7 +308,12 @@ class AppState {
 }
 ```
 
-**State Structure**:
+**Migration**: Replace AppState usage with Store patterns:
+- `appState.get('path')` → `store.getState().slice.field`
+- `appState.setState('path', value)` → `store.dispatch(action)`
+- `appState.watch('path', callback)` → `store.subscribe((state) => { ... })`
+
+**Legacy State Structure** (now replaced by Store slices):
 ```typescript
 interface NavigatorState {
   navigation: { currentLayer, totalLayers, isTransitioning, ... }
@@ -291,7 +326,7 @@ interface NavigatorState {
 }
 ```
 
-**Watchers** (Sprint 2 Task 2):
+**Legacy Watchers** (replaced by `store.subscribe()`):
 ```typescript
 // Sync mode (default): immediate callbacks
 appState.watch('user.level', (newLevel) => {
@@ -364,10 +399,18 @@ function App() {
     autoStart: true
   });
   
-  // Subscribe to events
+  // Subscribe to Store state changes (v3.0+)
   useEffect(() => {
-    return core?.eventBus.on('keyboard:keydown', handleKey);
+    if (!core) return;
+    return core.store.subscribe((state) => {
+      console.log('State updated:', state);
+    });
   }, [core]);
+  
+  // Dispatch actions (v3.0+)
+  const handleNavigate = () => {
+    core?.store.dispatch(navigate({ currentCard: 2, direction: 'right' }));
+  };
 }
 ```
 
@@ -383,13 +426,22 @@ export default {
       autoStart: true
     });
     
+    // Subscribe to Store state changes (v3.0+)
+    onMounted(() => {
+      if (!core.value) return;
+      core.value.store.subscribe((state) => {
+        console.log('State updated:', state);
+      });
+    });
+    
     return { core, isReady };
   }
 }
 ```
 
-### Data Flow (New Unidirectional Pattern)
+### Data Flow (v3.0+ Unidirectional Pattern)
 
+**Current (Store-based - PRIMARY)**:
 ```
 User Action (keyboard, gesture, voice)
   ↓
@@ -408,23 +460,26 @@ Subscribers notified via store.subscribe()
 UI components re-render with new state
 ```
 
-**Legacy Flow (EventBus - parallel system)**:
+**Legacy (EventBus - DEPRECATED, will be removed in v4.0)**:
 ```
 Plugin emits event → EventBus → Legacy Bridge → Store (legacy/* action)
 ```
 
+The Legacy Bridge automatically translates EventBus events to Store actions during the migration period.
+
 ### Performance Characteristics
 
-| Metric | Sprint 1 (EventBus) | Sprint 2 (Optimized EventBus) | Sprint 3 (Store Migration) |
-|--------|---------------------|-------------------------------|----------------------------|
-| **Startup Time (3 critical plugins)** | 2850ms | 200ms (-93%) | 180ms (-94%) |
-| **Startup Time (mixed workload)** | 400ms | 180ms (-55%) | 165ms (-59%) |
+| Metric | v2.x (EventBus) | v3.0 (Store + EventBus Legacy) | v4.0 (Store Only - Planned) |
+|--------|-----------------|--------------------------------|------------------------------|
+| **Startup Time (3 critical plugins)** | 2850ms | 180ms (-94%) | ~150ms (projected) |
+| **Startup Time (mixed workload)** | 400ms | 165ms (-59%) | ~140ms (projected) |
 | **State Watcher Callbacks (100 rapid updates)** | 100 | 1 (-99%) | 1 (-99%) |
-| **Main Thread Blocking** | Yes | No (debounced) | No (Store batching) |
-| **Bundle Size (core)** | 4.18 KB | 4.32 KB (+3.3%) | 6.8 KB (+62% - includes Redux) |
-| **Test Coverage** | 280 tests | 320 tests | **386 tests** |
-| **Cognitive Loop Latency** | ~150ms | ~100ms | **~50ms** (middleware) |
-| **State Predictability** | Medium | Medium | **High** (time-travel) |
+| **Main Thread Blocking** | Yes | No (Store batching) | No |
+| **Bundle Size (core)** | 4.18 KB | 6.8 KB (+62% - includes Redux) | ~6.5 KB (EventBus removed) |
+| **Test Coverage** | 280 tests | **386 tests** | TBD |
+| **Cognitive Loop Latency** | ~150ms | **~50ms** (middleware) | ~40ms (optimized) |
+| **State Predictability** | Medium | **High** (time-travel) | **High** |
+| **Debugging Capability** | Limited | **Full action history** | **Full action history** |
 
 ---
 

@@ -1,27 +1,35 @@
-# Navigator v2.0 - Plugin Architecture Documentation
+# Navigator v3.0+ - Plugin Architecture Documentation
 
 ## 🎯 Overview
 
-Navigator v2.0 introduces a revolutionary **Core & Plugin Architecture** that transforms the application from a monolithic system into a modular, event-driven ecosystem.
+Navigator v3.0+ uses a revolutionary **Core & Plugin Architecture** with a **Redux-like Store** that transforms the application from EventBus-driven to a predictable, unidirectional data flow system.
 
 ### Key Principles
 
 1. **Zero Coupling**: Plugins don't know about each other
-2. **Event-Driven**: All communication through events
+2. **Unidirectional Data Flow**: All state changes through Store actions (v3.0+)
 3. **Framework-Agnostic**: Core has no DOM/input dependencies
 4. **Plug & Play**: Easy to add/remove/replace plugins
 
+> **⚠️ IMPORTANT**: EventBus and AppState are **DEPRECATED** since v3.0 and will be removed in v4.0. Use the Store for all state management.
+
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture Overview (v3.0+)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    NAVIGATOR CORE                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  EventBus    │  │   AppState   │  │   Plugins    │      │
-│  │  (PubSub)    │  │   (Store)    │  │  (Registry)  │      │
+│  │    Store     │  │   Plugins    │  │  Middleware  │      │
+│  │ (Redux-like) │  │  (Registry)  │  │   Pipeline   │      │
+│  │   PRIMARY    │  │              │  │              │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                               │
+│  ┌──────────────┐  ┌──────────────┐                        │
+│  │  EventBus*   │  │  AppState*   │  *DEPRECATED (v4.0)   │
+│  │ (@deprecated)│  │ (@deprecated)│                        │
+│  └──────────────┘  └──────────────┘                        │
 └─────────────────────────────────────────────────────────────┘
            │                    │                    │
            └────────────────────┴────────────────────┘
@@ -32,121 +40,186 @@ Navigator v2.0 introduces a revolutionary **Core & Plugin Architecture** that tr
 │ INPUT PLUGINS │      │   LOGIC     │      │ OUTPUT PLUGINS│
 │               │      │  PLUGINS    │      │               │
 │ • Keyboard    │      │             │      │ • DomRenderer │
-│ • Gesture     │─────▶│ Navigation  │─────▶│ • Audio       │
-│ • Voice       │      │   Logic     │      │ • Effects     │
+│ • Gesture     │─────▶│ Dispatch    │─────▶│ • Audio       │
+│ • Voice       │      │  Actions    │      │ • Effects     │
 └───────────────┘      └─────────────┘      └───────────────┘
-   (Raw Events)       (Intent Events)        (Visual/Audio)
+  (Raw Input)         (Store Actions)       (Subscribe to State)
 ```
 
 ---
 
 ## 📦 Core Components
 
-### NavigatorCore (`js/core/NavigatorCore.js`)
+### NavigatorCore (`packages/core/src/NavigatorCore.ts`)
 
 The heart of the system. Manages:
 - Plugin lifecycle (init → start → stop → destroy)
 - Plugin registration and priority ordering
+- Store initialization and middleware setup (v3.0+)
 - System state (running, initialized)
 - Performance monitoring
 
 **Key Methods:**
-```javascript
+```typescript
 const core = new NavigatorCore({ debugMode: true });
 
 // Register plugins
-core.registerPlugin(new KeyboardInputPlugin(), { priority: 100 });
+core.registerPlugin('keyboard', new KeyboardInputPlugin(), { priority: 100 });
 
 // Lifecycle
 await core.init();    // Initialize all plugins
 await core.start();   // Start all plugins
 await core.stop();    // Pause all plugins
 await core.destroy(); // Complete cleanup
+
+// Access Store (v3.0+) - PRIMARY
+const state = core.store.getState();
+core.store.dispatch(navigate({ currentCard: 2 }));
+core.store.subscribe((state) => { /* handle state change */ });
 ```
 
-### EventBus (`js/core/EventBus.js`)
+### Store (`packages/core/src/store/`) - **PRIMARY (v3.0+)**
 
-Decoupled event system with:
-- Type-safe event emission
-- Wildcard subscriptions (`*`)
-- Event history for debugging
-- Middleware/interceptors
-- Priority-based handlers
-
-**Example:**
-```javascript
-// Subscribe
-core.eventBus.on('intent:navigate_left', (event) => {
-    console.log('Navigate left!', event.payload);
-});
-
-// Emit
-core.eventBus.emit('intent:navigate_left', {
-    source: 'KeyboardInput',
-    timestamp: Date.now()
-});
-
-// Wildcard listener (all events)
-core.eventBus.on('*', (event) => {
-    console.log('Event:', event.name);
-});
-```
-
-### AppState (`js/core/AppState.js`)
-
-Centralized state management:
+Redux-like unidirectional data flow:
+- Single source of truth
 - Immutable state updates
-- Automatic event emission on changes
-- State history & time-travel
-- Computed properties
-- LocalStorage persistence
+- Action-based state changes
+- Middleware pipeline
+- Time-travel debugging
 
 **Example:**
-```javascript
-// Get state
-const currentLayer = core.state.get('navigation.currentLayer');
-
-// Set state (deep merge)
-core.state.setState('navigation.currentCardIndex', 2);
-
-// Watch for changes
-core.state.watch('navigation.currentLayer', (newValue) => {
-    console.log('Layer changed to:', newValue);
+```typescript
+// Dispatch an action
+core.store.dispatch({
+  type: 'navigation/NAVIGATE',
+  payload: { currentCard: 2, direction: 'right' }
 });
 
-// Time travel
-core.state.timeTravel(5); // Go back 5 states
+// Subscribe to state changes
+const unsubscribe = core.store.subscribe((state) => {
+  console.log('Navigation state:', state.navigation);
+  updateUI(state);
+});
+
+// Get current state
+const currentState = core.store.getState();
+console.log('Current card:', currentState.navigation.currentCard);
 ```
 
-### BasePlugin (`js/core/BasePlugin.js`)
+**For details**, see [Architecture Documentation](/architecture#the-unidirectional-data-flow-architecture-v30).
 
-Abstract base class for all plugins:
-```javascript
-class MyPlugin extends BasePlugin {
-    constructor() {
-        super('MyPlugin', { /* config */ });
-    }
+---
 
-    async onInit() {
-        // Initialize resources
-        this.on('some:event', this._handleEvent);
-    }
+## ⚠️ DEPRECATED Components (Removed in v4.0)
 
-    async onStart() {
-        // Start processing
-    }
+### EventBus (`packages/core/src/EventBus.ts`) - **@deprecated**
 
-    async onStop() {
-        // Pause processing
-    }
+> **WARNING**: EventBus is deprecated since v3.0 and will be removed in v4.0. Use `store.subscribe()` and `store.dispatch()` instead.
 
-    async onDestroy() {
-        // Cleanup (auto-unsubscribes events)
-    }
+Legacy decoupled event system (maintained for backward compatibility):
 
-    _handleEvent(event) {
-        this.emit('my:response', { data: 'hello' });
-    }
+**Migration Example:**
+```typescript
+// ❌ Old (EventBus - DEPRECATED)
+core.eventBus.on('intent:navigate_left', (event) => {
+  console.log('Navigate left!', event.payload);
+});
+core.eventBus.emit('intent:navigate_left', { source: 'KeyboardInput' });
+
+// ✅ New (Store - v3.0+)
+core.store.subscribe((state) => {
+  if (state.navigation.direction === 'left') {
+    console.log('Navigated left!');
+  }
+});
+core.store.dispatch(navigate({ direction: 'left', source: 'keyboard' }));
+```
+
+### AppState (`packages/core/src/AppState.ts`) - **@deprecated**
+
+> **WARNING**: AppState is deprecated since v3.0 and will be removed in v4.0. Use `store.getState()` and `store.dispatch()` instead.
+
+Legacy centralized state management (maintained for backward compatibility):
+
+**Migration Example:**
+```typescript
+// ❌ Old (AppState - DEPRECATED)
+const currentLayer = core.state.get('navigation.currentLayer');
+core.state.setState('navigation.currentCardIndex', 2);
+core.state.watch('navigation.currentLayer', (newValue) => {
+  console.log('Layer changed:', newValue);
+});
+
+// ✅ New (Store - v3.0+)
+const currentLayer = core.store.getState().navigation.currentLayer;
+core.store.dispatch(navigate({ currentCard: 2 }));
+core.store.subscribe((state) => {
+  console.log('Layer changed:', state.navigation.currentLayer);
+});
+```
+
+**Migration Guide**: See [Legacy EventBus Migration Plan](https://github.com/fabriziosalmi/navigator/blob/main/project-docs/research/technical-debt/LEGACY_EVENTBUS_MIGRATION.md)
+
+---
+---
+
+## 🔌 Plugin Interface
+
+All plugins must implement the `INavigatorPlugin` interface:
+
+```typescript
+interface INavigatorPlugin {
+  readonly name: string
+  readonly version: string
+  _priority?: number
+  
+  init?(core: NavigatorCore): Promise<void> | void
+  start?(core: NavigatorCore): Promise<void> | void
+  stop?(): Promise<void> | void
+  destroy?(): Promise<void> | void
+}
+```
+
+### Example Plugin (v3.0+)
+
+```typescript
+import { INavigatorPlugin, NavigatorCore } from '@navigator.menu/core';
+import { navigate } from '@navigator.menu/core/actions';
+
+class MyPlugin implements INavigatorPlugin {
+  name = 'MyPlugin';
+  version = '1.0.0';
+  _priority = 100;
+  
+  private core?: NavigatorCore;
+  private unsubscribe?: () => void;
+
+  async init(core: NavigatorCore): Promise<void> {
+    this.core = core;
+    
+    // Subscribe to Store state changes (v3.0+)
+    this.unsubscribe = core.store.subscribe((state) => {
+      console.log('State changed:', state.navigation.currentCard);
+    });
+  }
+
+  async start(): Promise<void> {
+    // Dispatch an action to the Store (v3.0+)
+    this.core?.store.dispatch(navigate({
+      currentCard: 0,
+      direction: 'right',
+      source: 'MyPlugin'
+    }));
+  }
+
+  async stop(): Promise<void> {
+    // Pause processing
+  }
+
+  async destroy(): Promise<void> {
+    // Cleanup
+    this.unsubscribe?.();
+  }
 }
 ```
 
@@ -156,229 +229,193 @@ class MyPlugin extends BasePlugin {
 
 ### Input Plugins
 
-Capture raw input and emit events. **No navigation logic!**
+Capture raw input and dispatch actions. **No navigation logic!**
 
-#### KeyboardInputPlugin
-```javascript
-// Emits:
-- input:keyboard:keydown
-- input:keyboard:keyup
-- input:keyboard:combo (e.g., "Ctrl+d")
+#### KeyboardPlugin (`@navigator.menu/plugin-keyboard`)
+```typescript
+// Dispatches actions (v3.0+):
+core.store.dispatch(keyPressed({ key: 'ArrowLeft', timestamp: Date.now() }));
+core.store.dispatch(select({ source: 'keyboard' }));
+core.store.dispatch(cancel({ source: 'keyboard' }));
 ```
 
-#### GestureInputPlugin
-```javascript
-// Emits:
-- input:gesture:hand_detected
-- input:gesture:hand_lost
-- input:gesture:swipe_left/right/up/down
-- input:gesture:pinch
-- input:gesture:fist
-- input:gesture:point
+**Legacy (deprecated)**:
+```typescript
+// Old: emitted events
+core.eventBus.emit('input:keyboard:keydown', { key: 'ArrowLeft' });
 ```
 
-### Logic Plugins
-
-Translate raw inputs into high-level intents.
-
-#### NavigationLogicPlugin
-```javascript
-// Listens to:
-- input:keyboard:keydown
-- input:gesture:swipe_*
-
-// Emits:
-- intent:navigate_left/right/up/down
-- intent:select_card
-- intent:toggle_fullscreen
-- intent:go_back
+#### GesturePlugin (v3.0+)
+```typescript
+// Dispatches actions (v3.0+):
+core.store.dispatch(gestureDetected({ 
+  type: 'swipe', 
+  direction: 'left',
+  confidence: 0.95 
+}));
 ```
 
 ### Output Plugins
 
-React to intents and update the UI/audio/effects.
+Subscribe to Store state and update UI/audio/effects.
 
-#### DomRendererPlugin
-```javascript
-// Listens to:
-- intent:navigate_left/right/up/down
-- intent:select_card
-
-// Emits:
-- renderer:card_changed
-- renderer:layer_changed
-- renderer:card_selected
+#### DomRendererPlugin (`@navigator.menu/plugin-dom-renderer`)
+```typescript
+// Subscribes to Store (v3.0+):
+core.store.subscribe((state) => {
+  if (state.cognitive.state === 'frustrated') {
+    updateCognitiveHUD('frustrated');
+  }
+});
 ```
 
-#### AudioFeedbackPlugin
-```javascript
-// Listens to:
-- intent:navigate_*
-- renderer:card_changed
-- system:error
-
-// Actions:
-- Plays spatial audio
-- Direction-based panning
-```
-
-#### VisualEffectsPlugin
-```javascript
-// Listens to:
-- renderer:card_changed
-- renderer:layer_changed
-- input:gesture:swipe_*
-
-// Actions:
-- Light beams
-- Particle effects
-- Card blur
-- LED indicators
+**Legacy (deprecated)**:
+```typescript
+// Old: listened to events
+core.eventBus.on('intent:navigate_left', () => { /* update UI */ });
 ```
 
 ---
 
 ## 🎮 Usage Examples
 
-### Basic Setup
+### Basic Setup (v3.0+)
 
-```javascript
-import { NavigatorCore } from './core/NavigatorCore.js';
-import { KeyboardInputPlugin } from './plugins/input/KeyboardInputPlugin.js';
-import { NavigationLogicPlugin } from './plugins/logic/NavigationLogicPlugin.js';
-import { DomRendererPlugin } from './plugins/output/DomRendererPlugin.js';
+```typescript
+import { NavigatorCore } from '@navigator.menu/core';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+import { DomRendererPlugin } from '@navigator.menu/plugin-dom-renderer';
 
 const core = new NavigatorCore({ debugMode: true });
 
 // Register plugins in priority order
-core.registerPlugin(new KeyboardInputPlugin(), { priority: 100 });
-core.registerPlugin(new NavigationLogicPlugin(), { priority: 50 });
-core.registerPlugin(new DomRendererPlugin(), { priority: 10 });
+core.registerPlugin('keyboard', new KeyboardPlugin(), { priority: 100 });
+core.registerPlugin('dom-renderer', new DomRendererPlugin(), { priority: 10 });
 
 // Start the system
 await core.init();
 await core.start();
-```
 
-### Keyboard-Only Build
-
-```javascript
-// No gesture input needed!
-const core = new NavigatorCore();
-
-core.registerPlugin(new KeyboardInputPlugin());
-core.registerPlugin(new NavigationLogicPlugin());
-core.registerPlugin(new DomRendererPlugin());
-core.registerPlugin(new AudioFeedbackPlugin());
-
-await core.init();
-await core.start();
-```
-
-### Custom Plugin Example
-
-```javascript
-class ThreeJsRendererPlugin extends BasePlugin {
-    constructor() {
-        super('ThreeJsRenderer', {});
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-    }
-
-    async onInit() {
-        // Setup Three.js
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer();
-
-        // Listen to navigation intents
-        this.on('intent:navigate_left', () => {
-            this._rotateScene(-Math.PI / 4);
-        });
-
-        this.on('intent:navigate_right', () => {
-            this._rotateScene(Math.PI / 4);
-        });
-    }
-
-    _rotateScene(angle) {
-        // Rotate 3D scene instead of DOM cards
-        this.scene.rotation.y += angle;
-    }
-}
-
-// Use it!
-core.registerPlugin(new ThreeJsRendererPlugin());
-```
-
----
-
-## 📝 Configuration
-
-### YAML Configuration (`config.yaml`)
-
-The system still uses `config.yaml` for centralized configuration:
-
-```yaml
-# Plugin-specific configuration
-plugins:
-  KeyboardInput:
-    enabled: true
-    preventDefaults: true
-  
-  GestureInput:
-    enabled: true
-    camera:
-      width: 640
-      height: 480
-  
-  AudioFeedback:
-    masterVolume: 0.3
-    spatial:
-      enabled: true
-```
-
-### Per-Plugin Config
-
-```javascript
-core.registerPlugin(new MyPlugin(), {
-    priority: 75,
-    config: {
-        customSetting: 'value'
-    }
+// Subscribe to state changes
+core.store.subscribe((state) => {
+  console.log('Current card:', state.navigation.currentCard);
 });
 
-// In plugin:
-this.getConfig('customSetting'); // 'value'
+// Dispatch actions
+core.store.dispatch(navigate({ currentCard: 2, direction: 'right' }));
+```
+
+### React Integration (v3.0+)
+
+```typescript
+import { useNavigator } from '@navigator.menu/react';
+import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
+import { navigate } from '@navigator.menu/core/actions';
+
+function App() {
+  const { core, isReady } = useNavigator({
+    plugins: [
+      { name: 'keyboard', plugin: new KeyboardPlugin(), priority: 100 }
+    ],
+    autoStart: true
+  });
+
+  // Subscribe to Store state
+  useEffect(() => {
+    if (!core) return;
+    return core.store.subscribe((state) => {
+      setCurrentCard(state.navigation.currentCard);
+    });
+  }, [core]);
+
+  // Dispatch actions
+  const handleNext = () => {
+    core?.store.dispatch(navigate({ 
+      currentCard: currentCard + 1, 
+      direction: 'right' 
+    }));
+  };
+
+  return <div>...</div>;
+}
 ```
 
 ---
 
-## 🔍 Debugging
+## 🔍 Debugging (v3.0+)
 
-### Event History
+### Action History & Time-Travel
 
-```javascript
-// Get all events
-const history = core.eventBus.getHistory();
+```typescript
+// Get action history from Store
+const history = core.store.getState().history.past;
 
-// Get specific event
-const navEvents = core.eventBus.getHistory('intent:navigate_left');
+// View all dispatched actions
+console.log('Action history:', history);
 
-// Event statistics
-const stats = core.eventBus.getStats();
-console.log(stats.topEvents); // Most frequent events
+// Time-travel debugging (if middleware supports it)
+// Navigate through state history to debug issues
+history.forEach(action => {
+  console.log(`${action.type}:`, action.payload);
+});
 ```
 
-### State Time-Travel
+### Logger Middleware
 
-```javascript
-// Undo last 3 state changes
+```typescript
+// Enabled in dev mode
+const core = new NavigatorCore({ debugMode: true });
+
+// Logs every action and state change:
+// [Logger] Action: navigation/NAVIGATE { currentCard: 2, direction: 'right' }
+// [Logger] New State: { navigation: { currentCard: 2, ... } }
+```
+
+### DevTools Integration
+
+```typescript
+// Subscribe to state changes for debugging
+core.store.subscribe((state) => {
+  console.log('State snapshot:', JSON.stringify(state, null, 2));
+});
+
+// Track specific state slices
+core.store.subscribe((state) => {
+  if (state.navigation.currentCard !== previousCard) {
+    console.log('Card changed:', previousCard, '->', state.navigation.currentCard);
+    previousCard = state.navigation.currentCard;
+  }
+});
+```
+
+---
+
+## ⚠️ DEPRECATED: Legacy Debugging Features
+
+### EventBus History - **@deprecated**
+
+> Use Store action history instead (see above).
+
+```typescript
+// ❌ Old (DEPRECATED)
+const history = core.eventBus.getHistory();
+const stats = core.eventBus.getStats();
+
+// ✅ New (v3.0+)
+const history = core.store.getState().history.past;
+```
+
+### AppState Time-Travel - **@deprecated**
+
+> Use Store middleware for time-travel debugging instead.
+
+```typescript
+// ❌ Old (DEPRECATED)
 core.state.timeTravel(3);
 
-// View state history
-const history = core.state.getHistory(10);
+// ✅ New (v3.0+)
+// Implement time-travel via middleware or DevTools
+```
 ```
 
 ### Performance Stats
@@ -395,71 +432,102 @@ console.log(stats);
 
 ---
 
-## 🚀 Migration from v1
+## 🚀 Migration Guide
 
-### Old Way (v1 - Monolithic)
+### From v1 (Monolithic) to v2 (EventBus)
 
+**v1 - Tight Coupling:**
 ```javascript
-import { GestureDetector } from './GestureDetector.js';
-import { NavigationController } from './NavigationController.js';
-import { AudioManager } from './AudioManager.js';
-
 const gestureDetector = new GestureDetector();
 const navController = new NavigationController();
-const audioManager = new AudioManager();
 
-// Tight coupling!
+// Direct method calls
 gestureDetector.onSwipeLeft = () => {
-    navController.previousCard();
-    audioManager.playNavigationSound();
+  navController.previousCard();
 };
 ```
 
-### New Way (v2 - Modular)
-
+**v2 - EventBus (DEPRECATED in v3.0):**
 ```javascript
-import { NavigatorCore } from './core/NavigatorCore.js';
-import { GestureInputPlugin } from './plugins/input/GestureInputPlugin.js';
-import { NavigationLogicPlugin } from './plugins/logic/NavigationLogicPlugin.js';
-import { DomRendererPlugin } from './plugins/output/DomRendererPlugin.js';
-import { AudioFeedbackPlugin } from './plugins/output/AudioFeedbackPlugin.js';
-
 const core = new NavigatorCore();
+core.registerPlugin('gesture', new GestureInputPlugin());
+core.registerPlugin('navigation', new NavigationLogicPlugin());
 
-// Zero coupling! Events connect them
-core.registerPlugin(new GestureInputPlugin());
-core.registerPlugin(new NavigationLogicPlugin());
-core.registerPlugin(new DomRendererPlugin());
-core.registerPlugin(new AudioFeedbackPlugin());
-
-await core.init();
-await core.start();
+// Event-based communication
+core.eventBus.on('intent:navigate_left', () => { /* ... */ });
 ```
 
-### Event Flow Comparison
+### From v2 (EventBus) to v3 (Store) ⭐ CURRENT
+
+**v2 - EventBus (DEPRECATED):**
+```javascript
+// ❌ Old way
+core.eventBus.on('intent:navigate_left', (event) => {
+  console.log('Navigate left');
+});
+core.eventBus.emit('intent:navigate_left', { source: 'keyboard' });
+```
+
+**v3 - Store (RECOMMENDED):**
+```typescript
+// ✅ New way
+core.store.subscribe((state) => {
+  if (state.navigation.direction === 'left') {
+    console.log('Navigate left');
+  }
+});
+core.store.dispatch(navigate({ direction: 'left', source: 'keyboard' }));
+```
+
+### Data Flow Evolution
 
 **v1 (Direct Calls):**
 ```
 GestureDetector → NavigationController.previousCard()
                 → AudioManager.playSound()
-                → LayerManager.updateDOM()
 ```
 
-**v2 (Event-Driven):**
+**v2 (EventBus - DEPRECATED):**
 ```
 GestureInputPlugin
   ↓ emit('input:gesture:swipe_left')
 NavigationLogicPlugin
   ↓ emit('intent:navigate_left')
 DomRendererPlugin (listens, updates DOM)
-AudioFeedbackPlugin (listens, plays sound)
+```
+
+**v3 (Store - CURRENT):**
+```
+GesturePlugin
+  ↓ dispatch(gestureDetected({ type: 'swipe', direction: 'left' }))
+Middleware Pipeline (cognitive, history, logger)
+  ↓ 
+Reducers (compute new state)
+  ↓
+Store (updates state)
+  ↓
+Subscribers (DomRenderer, etc.) notified
 ```
 
 ---
 
 ## 🎯 Benefits
 
-### 1. **Testability**
+### 1. **Predictability** (v3.0+)
+State changes are always predictable and traceable:
+
+```typescript
+// Every state change goes through actions
+core.store.dispatch(navigate({ currentCard: 2 }));
+
+// State is immutable
+const state1 = core.store.getState();
+core.store.dispatch(navigate({ currentCard: 3 }));
+const state2 = core.store.getState();
+// state1 !== state2 (new object)
+```
+
+### 2. **Testability**
 Each plugin can be tested in isolation:
 ```javascript
 const plugin = new NavigationLogicPlugin();
