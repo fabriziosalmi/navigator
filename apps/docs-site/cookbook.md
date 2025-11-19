@@ -4,49 +4,55 @@
 
 > **"La primissima e più importante ricetta"** - Start here if you're using React!
 
+> ⚠️ **IMPORTANT (v3.0+)**: This cookbook contains examples using both the **new Store-based architecture** (recommended) and the **legacy EventBus pattern** (deprecated). Look for the 🆕 **v3.0+** badges for modern examples.
+> 
+> **EventBus and AppState are DEPRECATED** since v3.0 and will be removed in v4.0. For new projects, use the Store-based examples.
+
 ---
 
-## 🧭 The Navigator Way: Three Core Principles
+## 🧭 The Navigator Way: Core Principles (v3.0+)
 
-Before diving into the recipes, understand the **architectural philosophy** that makes Navigator different from every other UI framework:
+Before diving into the recipes, understand the **architectural philosophy** that makes Navigator different:
 
-### Principle #1: Input Plugins Capture, They Don't Act
+### Principle #1: Input Plugins Dispatch Actions (v3.0+)
 
-**What This Means**: Input plugins (keyboard, gesture, voice) have **one job only**: translate physical world inputs into standardized digital events on the Event Bus.
+**What This Means**: Input plugins (keyboard, gesture, voice) have **one job only**: translate physical world inputs into **Store actions**.
 
 - ✅ **They DO**: Detect keypresses, touches, voice commands
-- ✅ **They DO**: Emit standardized NIP (Navigator Intent Protocol) events
+- ✅ **They DO**: Dispatch actions to the Store: `store.dispatch(keyPressed({ key: 'ArrowLeft' }))`
 - ❌ **They DON'T**: Know what your application does
-- ❌ **They DON'T**: Manipulate DOM or application state
+- ❌ **They DON'T**: Manipulate DOM or application state directly
 - ❌ **They DON'T**: Contain business logic
 
-**Example**: A `KeyboardPlugin` doesn't know if pressing "ArrowLeft" will navigate a carousel, move a 3D camera, or undo text. It just emits `intent:navigate({ direction: 'left' })`.
+**Legacy (DEPRECATED)**: In v2.x, plugins emitted EventBus events. This pattern is still supported but will be removed in v4.0.
 
-### Principle #2: Your Application Listens to Intents, Not Inputs
+### Principle #2: Your Application Subscribes to Store State (v3.0+)
 
-**What This Means**: Your application code **never** directly listens to `keydown`, `touchstart`, or `voice` events. Instead, it subscribes to **intent events** from the Event Bus.
+**What This Means**: Your application code **subscribes to Store state changes** to react to user interactions.
 
-- ✅ **You DO**: Listen to `intent:navigate`, `intent:select`, `intent:media_play`
-- ✅ **You DO**: Update your application state in response to intents
+- ✅ **You DO**: Subscribe to Store: `core.store.subscribe((state) => { ... })`
+- ✅ **You DO**: Read state: `core.store.getState().navigation.currentCard`
+- ✅ **You DO**: Dispatch actions: `core.store.dispatch(navigate({ direction: 'left' }))`
 - ❌ **You DON'T**: Use `document.addEventListener('keydown', ...)`
 - ❌ **You DON'T**: Put input detection logic in your components
+- ❌ **You DON'T**: Use EventBus (deprecated in v3.0)
 
-**Why This Matters**: Your carousel component works identically whether controlled by keyboard, gestures, or voice. Change input method = **zero code changes** in your app.
+**Why This Matters**: Your components work identically whether controlled by keyboard, gestures, or voice. Change input method = **zero code changes** in your app.
 
-### Principle #3: The Core is the Decoupled Heart
+### Principle #3: The Core Manages Unidirectional Data Flow (v3.0+)
 
-**What This Means**: All communication flows through the `NavigatorCore` Event Bus. Input plugins and your application **never directly communicate**.
+**What This Means**: All state flows through the `NavigatorCore` Store in one direction: **Action → Reducer → State → UI**.
 
 ```
 ┌─────────────────┐
 │  Keyboard      │───┐
-│  Plugin        │   │
+│  Plugin        │   │ dispatch(action)
 └─────────────────┘   │
                       ▼
 ┌─────────────────┐   ┌──────────────┐   ┌─────────────────┐
 │  Gesture       │──▶│ Navigator    │──▶│  Your App      │
-│  Plugin        │   │ Core         │   │  (React/Vue/   │
-└─────────────────┘   │ (Event Bus)  │   │   Vanilla)     │
+│  Plugin        │   │ Core Store   │   │  (subscribes   │
+└─────────────────┘   │              │   │   to state)    │
                       └──────────────┘   └─────────────────┘
 ┌─────────────────┐   ▲
 │  Voice         │───┘
@@ -433,7 +439,7 @@ function App() {
 
 #### What Changed?
 
-**EventBus Pattern (Events):**
+**❌ EventBus Pattern (DEPRECATED - v2.x):**
 ```tsx
 core.eventBus.on('keyboard:keydown', (event) => {
   // React to individual events
@@ -441,7 +447,7 @@ core.eventBus.on('keyboard:keydown', (event) => {
 });
 ```
 
-**Store Pattern (State):**
+**✅ Store Pattern (RECOMMENDED - v3.0+):**
 ```tsx
 core.store.subscribe(() => {
   const state = core.store.getState();
@@ -479,13 +485,12 @@ interface NavigatorState {
 
 #### When to Use Which Pattern?
 
-| Pattern | Use When | Example |
-|---------|----------|---------|
-| **EventBus** | Reacting to specific actions | "When user presses Enter, submit form" |
-| **Store** | Rendering UI based on state | "Show current card number" |
-| **Both** | Complex apps with side effects | "Listen to events for side effects, read Store for rendering" |
+| Pattern | Use When | Example | Status |
+|---------|----------|---------|--------|
+| **Store** | Rendering UI based on state | "Show current card number" | ✅ **RECOMMENDED (v3.0+)** |
+| **EventBus** | Legacy code only | "Old event-based patterns" | ⚠️ **DEPRECATED (removed in v4.0)** |
 
-**Pro Tip**: Modern Navigator apps use **Store for UI rendering** and **EventBus for side effects** (analytics, logging, external API calls).
+**Migration Note**: EventBus is deprecated since v3.0. All new code should use Store exclusively. EventBus will be removed in v4.0.
 
 ---
 
