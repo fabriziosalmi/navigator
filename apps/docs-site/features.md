@@ -1,4 +1,6 @@
-# Aetherium Navigator - Features Documentation
+# Navigator Showcase - Features Documentation
+
+> **Note:** This document describes features of the legacy showcase application (`apps/showcase`), which demonstrates the Navigator SDK in a gesture/voice-driven UI. For SDK package documentation, see the [Architecture](./architecture.md) and [Plugin Architecture](./plugin-architecture.md) guides.
 
 ## Multi-Modal Navigation
 

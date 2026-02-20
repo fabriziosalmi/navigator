@@ -1,6 +1,8 @@
 # Getting Started Guide
 
-## Quick Start (5 minutes)
+> **Note:** This guide covers the legacy showcase application, which runs as a standalone browser app with webcam/microphone support. For getting started with the **Navigator SDK packages** (TypeScript, React, npm), see the [README](../../README.md) and [Architecture](./architecture.md) docs.
+
+## Quick Start - Showcase Application (5 minutes)
 
 ### Prerequisites
 
@@ -481,4 +483,4 @@ Open a GitHub issue with:
 
 ---
 
-**Happy Navigating!** 🚀✨
+Happy navigating!

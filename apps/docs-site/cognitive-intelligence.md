@@ -1,18 +1,18 @@
-# Cognitive Intelligence System - Architecture & Implementation
+# Behavioral State Middleware - Architecture & Implementation
 
 **Version:** 1.0.0  
-**Status:** ✅ Implemented  
-**Date:** January 2025
+**Status:** Implemented  
+**Package:** `@navigator.menu/core` (built-in middleware)
 
-## 📋 Executive Summary
+## Overview
 
-The Cognitive Intelligence System replaces reactive navigation logic with a **proactive, context-aware system** that understands and predicts user intent. It analyzes interaction patterns in real-time to detect mental states (frustrated, concentrated, exploring, learning) and adapts the interface accordingly.
+The behavioral state middleware analyzes user interaction patterns in real-time and classifies them into one of five states: `neutral`, `frustrated`, `concentrated`, `exploring`, or `learning`. These classifications are based on rule-based analysis of action history — error rates, timing, and action variety — not machine learning or AI models.
 
-**Key Innovation:** From "wait for user input" → "understand user state, predict intent, adapt interface"
+**Data flow:** Actions dispatched → Middleware intercepts → Session history updated → Metrics analyzed → If state changes, `cognitive/STATE_CHANGE` action is dispatched → Reducers update `state.cognitive.currentState`
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### System Components
 
@@ -58,10 +58,10 @@ The Cognitive Intelligence System replaces reactive navigation logic with a **pr
 
 ---
 
-## 🧠 Component 1: UserSessionHistory
+## Component 1: UserSessionHistory
 
-**File:** `/js/core/UserSessionHistory.js`  
-**Purpose:** Circular buffer that stores the last 50 user actions for pattern analysis.
+**File:** `packages/core/src/intelligence/UserSessionHistory.ts`  
+**Purpose:** Circular buffer that stores the last N user actions for pattern analysis.
 
 ### Data Structure
 
@@ -105,11 +105,11 @@ Each action stored:
 
 ---
 
-## 🎯 Component 2: CognitiveModelPlugin
+## Component 2: Cognitive Middleware
 
-**File:** `/js/plugins/intelligence/CognitiveModelPlugin.js`  
-**Priority:** 60  
-**Purpose:** Analyze user behavior patterns and emit cognitive state changes.
+**File:** `packages/core/src/store/middleware/cognitiveMiddleware.ts`  
+**Priority:** 60 (middleware runs in order)  
+**Purpose:** Intercepts all Store actions, records them in UserSessionHistory, analyzes recent metrics, and dispatches `cognitive/STATE_CHANGE` if the inferred state changes.
 
 ### State Machine
 
@@ -279,11 +279,9 @@ this.emit('cognitive_state:frustrated', {
 
 ---
 
-## 🎯 Component 3: IntentPredictorPlugin
+## Component 3: IntentPredictorPlugin
 
-**File:** `/js/plugins/intelligence/IntentPredictorPlugin.js`  
-**Priority:** 60  
-**Purpose:** Predict user intent before gesture completion using trajectory analysis.
+> **Note:** The `IntentPredictorPlugin` described below was part of an earlier design iteration and is **not currently implemented** as a separate published package. The gesture signature matching and trajectory analysis described here represent planned functionality for future gesture input plugins. Current behavioral state detection is handled entirely by the cognitive middleware.
 
 ### Gesture Signature Database
 
@@ -389,11 +387,11 @@ this.emit('intent:pre_render', {
 
 ---
 
-## 🔧 Integration with Existing Systems
+## Integration with Existing Systems
 
 ### DomRendererPlugin Integration
 
-**File Modified:** `/js/plugins/output/DomRendererPlugin.js`
+**File:** `packages/core/src/` (DomRendererPlugin, if used)
 
 **Changes:**
 1. Listen to `cognitive_state:change` event
@@ -431,7 +429,7 @@ _onCognitiveStateChange(data) {
 
 ### GridLockSystem Integration
 
-**File Modified:** `/js/GridLockSystem.js`
+**File:** Legacy showcase app (`GridLockSystem.js`, not part of SDK packages)
 
 **Changes:**
 1. Add `setCognitiveState(state)` method
@@ -467,7 +465,7 @@ GridLockSystem
 
 ### CSS Visual Feedback
 
-**File Created:** `/css/cognitive-states.css`
+**File:** `/css/cognitive-states.css` (legacy showcase app only — not part of SDK packages)
 
 **State Classes:**
 
@@ -501,9 +499,11 @@ GridLockSystem
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-**File:** `/config.yaml`
+**File:** `packages/core/src/store/middleware/cognitiveMiddleware.ts`
+
+The cognitive middleware accepts a configuration object when created:
 
 ### CognitiveModelPlugin Settings
 
@@ -644,26 +644,15 @@ console.log(intentPlugin.getCurrentPrediction());
 
 ---
 
-## 🚀 Future Enhancements
+## Future Enhancements (Planned)
 
-### Phase 2: Machine Learning Integration
-- **User-specific models:** Learn individual user patterns
-- **Gesture customization:** Train custom gesture signatures
-- **Transfer learning:** Start with baseline, adapt to user
-
-### Phase 3: Advanced Predictions
-- **Multi-gesture sequences:** Predict "swipe left → select card"
-- **Context awareness:** Use time of day, session length
-- **Fatigue detection:** Detect declining performance over time
-
-### Phase 4: Proactive Interventions
-- **Auto-tutorials:** Suggest features when exploring
-- **Break reminders:** Detect fatigue, suggest rest
-- **Difficulty adjustment:** Auto-tune thresholds per user
+- **User-specific thresholds:** Learn individual user patterns over time
+- **Gesture input integration:** Apply state adjustments to gesture confidence thresholds
+- **Fatigue detection:** Detect declining performance over longer sessions
 
 ---
 
-## 📝 API Reference
+## API Reference
 
 ### UserSessionHistory
 
@@ -701,94 +690,50 @@ interface Metrics {
 }
 ```
 
-### CognitiveModelPlugin
+### Cognitive Middleware State
 
 ```typescript
-class CognitiveModelPlugin extends BasePlugin {
-    updateCognitiveState(): void
-    getCurrentState(): StateInfo
-    getDetailedAnalysis(): Analysis
-    forceState(state: CognitiveState): void
-    reset(): void
-}
-
 type CognitiveState = 'neutral' | 'frustrated' | 'concentrated' | 'exploring' | 'learning'
 
-interface StateInfo {
-    state: CognitiveState
-    previousState: CognitiveState
-    signals: Record<string, number>
-    history: any
-}
-
-// Events
-'cognitive_state:change' → { from, to, signals, timestamp }
-'cognitive_state:frustrated' → { from, timestamp }
-'cognitive_state:concentrated' → { from, timestamp }
-// ...
-```
-
-### IntentPredictorPlugin
-
-```typescript
-class IntentPredictorPlugin extends BasePlugin {
-    getCurrentPrediction(): Prediction | null
-    getTrackingState(): TrackingState
-    forcePrediction(): void
-}
-
-interface Prediction {
-    gesture: string
+// Store state shape (state.cognitive)
+interface CognitiveStateSlice {
+    currentState: CognitiveState
     confidence: number
+    lastUpdate: number | null
 }
 
-// Events
-'intent:prediction' → { gesture, confidence, probabilities, timestamp }
-'intent:stable' → { gesture, confidence, timestamp }
-'intent:pre_render' → { gesture, confidence, timestamp }
-'intent:predict:{gesture}' → { confidence, timestamp }
+// Action dispatched on state change
+{
+  type: 'cognitive/STATE_CHANGE',
+  payload: {
+    previousState: CognitiveState
+    newState: CognitiveState
+    confidence: number
+    signals: Record<string, number>
+    metrics: SessionMetrics
+    timestamp: number
+  }
+}
 ```
 
 ---
 
-## 📚 Resources
+## Resources
 
-**Related Files:**
-- `/js/core/UserSessionHistory.js` - Circular buffer implementation
-- `/js/plugins/intelligence/CognitiveModelPlugin.js` - State detection
-- `/js/plugins/intelligence/IntentPredictorPlugin.js` - Intent prediction
-- `/js/plugins/output/DomRendererPlugin.js` - Visual adaptation
-- `/js/GridLockSystem.js` - Gesture threshold adaptation
-- `/css/cognitive-states.css` - State-specific styles
-- `/config.yaml` - Configuration settings
+**SDK source files:**
+- `packages/core/src/intelligence/UserSessionHistory.ts` - Circular buffer implementation
+- `packages/core/src/store/middleware/cognitiveMiddleware.ts` - State detection middleware
+- `packages/core/src/store/reducers/placeholderReducer.ts` - Cognitive state reducer
 
-**Documentation:**
-- `ARCHITECTURE.md` - Overall system architecture
-- `FASE4_IMPLEMENTATION_REPORT.md` - Phase 4 features
-- `docs/FEATURES.md` - Feature descriptions
-
-**Testing:**
-- `/tests/adaptive-system.spec.js` - Integration tests
-- `/tests/keyboard-navigation.spec.js` - Input tests
+**Tests:**
+- `packages/core/tests/store/cognitiveMiddleware.spec.ts`
+- `packages/core/tests/integration/cognitive-intelligence.spec.ts`
+- `packages/core/tests/UserSessionHistory.spec.ts`
 
 ---
 
-## 🎓 Conclusion
+## Summary
 
-The Cognitive Intelligence System represents a paradigm shift from reactive to **proactive, context-aware** user interfaces. By continuously analyzing user behavior and predicting intent, Navigator adapts in real-time to provide an optimal experience regardless of user skill level or mental state.
+The behavioral state middleware classifies user interaction patterns using rule-based analysis of action history. It detects 5 states (neutral, frustrated, concentrated, exploring, learning) based on measurable metrics: error rate, action timing, and action variety. State transitions require multiple consecutive signal votes to prevent false positives.
 
-**Key Achievements:**
-✅ 4 cognitive states detected automatically  
-✅ Intent prediction 200-300ms before gesture completion  
-✅ Dynamic adaptation of animations, thresholds, and UI  
-✅ Zero configuration required from user  
-✅ ~5% CPU overhead  
-✅ Fully documented and maintainable  
-
-**Impact:**
-- **Frustrated users:** System slows down, increases forgiveness
-- **Expert users:** System speeds up, removes distractions
-- **New users:** System provides hints and positive reinforcement
-- **All users:** Get personalized experience that adapts to them
-
-This is the foundation for future ML-powered personalization and proactive assistance.
+The middleware integrates directly into the Redux-like Store pipeline — no polling loops, no timers. It reacts to actual user actions as they are dispatched.

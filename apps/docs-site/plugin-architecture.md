@@ -1,8 +1,8 @@
 # Navigator v3.0+ - Plugin Architecture Documentation
 
-## 🎯 Overview
+## Overview
 
-Navigator v3.0+ uses a revolutionary **Core & Plugin Architecture** with a **Redux-like Store** that transforms the application from EventBus-driven to a predictable, unidirectional data flow system.
+Navigator v3.0+ uses a **Core & Plugin Architecture** with a **Redux-like Store** that provides a predictable, unidirectional data flow system.
 
 ### Key Principles
 
@@ -110,7 +110,7 @@ console.log('Current card:', currentState.navigation.currentCard);
 
 ---
 
-## ⚠️ DEPRECATED Components (Removed in v4.0)
+## DEPRECATED Components (Removed in v4.0)
 
 ### EventBus (`packages/core/src/EventBus.ts`) - **@deprecated**
 
@@ -163,7 +163,7 @@ core.store.subscribe((state) => {
 ---
 ---
 
-## 🔌 Plugin Interface
+## Plugin Interface
 
 All plugins must implement the `INavigatorPlugin` interface:
 
@@ -225,7 +225,7 @@ class MyPlugin implements INavigatorPlugin {
 
 ---
 
-## 🔌 Plugin Types
+## Plugin Types
 
 ### Input Plugins
 
@@ -277,7 +277,7 @@ core.eventBus.on('intent:navigate_left', () => { /* update UI */ });
 
 ---
 
-## 🎮 Usage Examples
+## Usage Examples
 
 ### Basic Setup (v3.0+)
 
@@ -313,9 +313,9 @@ import { KeyboardPlugin } from '@navigator.menu/plugin-keyboard';
 import { navigate } from '@navigator.menu/core/actions';
 
 function App() {
-  const { core, isReady } = useNavigator({
+  const { core } = useNavigator({
     plugins: [
-      { name: 'keyboard', plugin: new KeyboardPlugin(), priority: 100 }
+      new KeyboardPlugin()
     ],
     autoStart: true
   });
@@ -342,7 +342,7 @@ function App() {
 
 ---
 
-## 🔍 Debugging (v3.0+)
+## Debugging (v3.0+)
 
 ### Action History & Time-Travel
 
@@ -390,7 +390,7 @@ core.store.subscribe((state) => {
 
 ---
 
-## ⚠️ DEPRECATED: Legacy Debugging Features
+## DEPRECATED: Legacy Debugging Features
 
 ### EventBus History - **@deprecated**
 
@@ -432,7 +432,7 @@ console.log(stats);
 
 ---
 
-## 🚀 Migration Guide
+## Migration Guide
 
 ### From v1 (Monolithic) to v2 (EventBus)
 
@@ -511,7 +511,7 @@ Subscribers (DomRenderer, etc.) notified
 
 ---
 
-## 🎯 Benefits
+## Benefits
 
 ### 1. **Predictability** (v3.0+)
 State changes are always predictable and traceable:
@@ -571,74 +571,42 @@ class HapticFeedbackPlugin extends BasePlugin {
 
 ---
 
-## 📚 File Structure
+## SDK Package Structure
+
+The Navigator SDK is organized as a monorepo. The published packages are:
 
 ```
-js/
-├── core/
-│   ├── NavigatorCore.js      # Core engine
-│   ├── EventBus.js            # Event system
-│   ├── AppState.js            # State management
-│   └── BasePlugin.js          # Plugin base class
-│
-├── plugins/
-│   ├── input/
-│   │   ├── KeyboardInputPlugin.js
-│   │   ├── GestureInputPlugin.js
-│   │   └── VoiceInputPlugin.js (TODO)
-│   │
-│   ├── logic/
-│   │   └── NavigationLogicPlugin.js
-│   │
-│   └── output/
-│       ├── DomRendererPlugin.js
-│       ├── AudioFeedbackPlugin.js
-│       └── VisualEffectsPlugin.js
-│
-├── main-navigator-v2.js      # New entry point
-│
-└── [legacy files]             # Still used by plugins
-    ├── GestureDetector.js
-    ├── AudioManager.js
-    ├── LayerManager.js
-    ├── VisualEffects.js
-    └── ...
+packages/
+├── core/                # NavigatorCore, Store, EventBus (deprecated), AppState (deprecated)
+├── types/               # Shared TypeScript definitions
+├── pdk/                 # Plugin Development Kit (base classes, helpers)
+├── cli/                 # Scaffolding CLI
+├── create-navigator-app/# App scaffolding tool
+├── plugin-keyboard/     # Keyboard input plugin
+├── plugin-logger/       # Logging plugin
+├── plugin-dom-renderer/ # DOM manipulation helpers
+├── plugin-mock-gesture/ # Testing utilities
+└── react/               # React wrapper (useNavigator hook)
 ```
 
----
-
-## 🔄 Legacy Files Usage
-
-These legacy files are **still used** but now **wrapped by plugins**:
-
-- `GestureDetector.js` → Used by `GestureInputPlugin`
-- `AudioManager.js` → Used by `AudioFeedbackPlugin`
-- `LayerManager.js` → Used by `DomRendererPlugin`
-- `VisualEffects.js` → Used by `VisualEffectsPlugin`
-- `LightBeamSystem.js` → Used by `VisualEffectsPlugin`
-- `ConfigLoader.js` → Used by `main-navigator-v2.js`
+> The `apps/showcase/` directory contains the legacy browser-only demo application, which uses a separate set of JavaScript modules (`GestureDetector.js`, `AudioManager.js`, etc.). Those files are not part of the published SDK packages.
 
 ---
 
-## 🎓 Next Steps
+## Next Steps
 
-1. **Use v2 in Production**: Update `index.html` to load `main-navigator-v2.js`
-2. **Create Custom Plugins**: Build your own input/output plugins
-3. **Deprecate v1**: Phase out `main-init.js` after testing
-4. **Add Tests**: Write plugin-specific unit tests
-5. **Document Events**: Create event catalog for all event types
+1. **Create Custom Plugins**: Build your own input/output plugins using the PDK
+2. **Add Tests**: Write plugin-specific unit tests
+3. **Read the Architecture docs**: Understand the Store-based data flow
 
 ---
 
-## 🌟 Conclusion
+## Summary
 
-Navigator v2.0's Core & Plugin Architecture is a **game-changer**:
+Navigator's plugin architecture provides:
 
-✅ **Fully Decoupled** - No plugin knows about others  
-✅ **Event-Driven** - Clean communication via events  
-✅ **Framework-Agnostic** - Core has zero DOM/input dependencies  
-✅ **Extensible** - Add features without modifying core  
-✅ **Testable** - Isolate and test each plugin  
-✅ **Flexible** - Mix and match plugins for any use case  
-
-**This is the future of Navigator!** 🚀
+- **Fully Decoupled**: No plugin communicates directly with another
+- **Store-Based**: All state changes flow through dispatched actions (v3.0+)
+- **Framework-Agnostic**: Core has zero DOM or framework dependencies
+- **Extensible**: Add capabilities without modifying existing code
+- **Testable**: Each plugin can be tested in isolation
