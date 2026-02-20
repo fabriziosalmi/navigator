@@ -382,7 +382,7 @@ core.registerPlugin('analytics', new AnalyticsPlugin(), { priority: 50 });
 |--------|---------|----------|---------|
 | KeyboardPlugin | `@navigator.menu/plugin-keyboard` | 100 | Keyboard input capture |
 | DOMRendererPlugin | `@navigator.menu/plugin-dom-renderer` | 100 | DOM manipulation helpers |
-| CognitiveModelPlugin | `@navigator.menu/plugin-cognitive` | 80 | User state detection |
+| CognitiveModelPlugin | Built into `@navigator.menu/core` middleware | 80 | User behavior state detection |
 | LoggerPlugin | `@navigator.menu/plugin-logger` | 50 | Configurable logging |
 | MockGesturePlugin | `@navigator.menu/plugin-mock-gesture` | 10 | Testing utilities |
 
@@ -394,7 +394,7 @@ core.registerPlugin('analytics', new AnalyticsPlugin(), { priority: 50 });
 import { useNavigator } from '@navigator.menu/react';
 
 function App() {
-  const { core, isReady } = useNavigator({
+  const { core } = useNavigator({
     plugins: [new KeyboardPlugin()],
     autoStart: true
   });
@@ -414,30 +414,7 @@ function App() {
 }
 ```
 
-#### Vue (`@navigator.menu/vue`)
-
-```typescript
-import { useNavigator } from '@navigator.menu/vue';
-
-export default {
-  setup() {
-    const { core, isReady } = useNavigator({
-      plugins: [new KeyboardPlugin()],
-      autoStart: true
-    });
-    
-    // Subscribe to Store state changes (v3.0+)
-    onMounted(() => {
-      if (!core.value) return;
-      core.value.store.subscribe((state) => {
-        console.log('State updated:', state);
-      });
-    });
-    
-    return { core, isReady };
-  }
-}
-```
+> **Note:** A Vue wrapper (`@navigator.menu/vue`) is not currently published. For Vue projects, use `@navigator.menu/core` directly.
 
 ### Data Flow (v3.0+ Unidirectional Pattern)
 
@@ -489,7 +466,7 @@ The Legacy Bridge automatically translates EventBus events to Store actions duri
 
 ## System Overview
 
-Aetherium Navigator is built with a **fully modular ES6+ architecture** - 12 independent modules with clear separation of concerns, zero dependencies on external frameworks.
+The legacy showcase application uses a standalone ES6+ module architecture - independent JavaScript modules with clear separation of concerns, no external framework dependencies.
 
 ---
 
