@@ -14,6 +14,6 @@
     "@navigator.menu/pdk": "workspace:*"
   },
   "devDependencies": {
-    "vite": "^5.4.21"
+    "vite": "^6.4.3"
   }
 }
