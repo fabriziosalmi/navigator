@@ -50,7 +50,7 @@
     "happy-dom": "^20.0.10",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
-    "vitest": "^1.6.1"
+    "vitest": "^3.2.6"
   },
   "publishConfig": {
     "access": "public"
