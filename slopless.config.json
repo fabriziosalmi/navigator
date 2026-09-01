@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "**/coverage/**",
+    "**/dist/**",
+    "**/*.min.js"
+  ],
+  "rules": {}
+}
