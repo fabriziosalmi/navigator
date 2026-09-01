@@ -25,7 +25,7 @@ jobs:
       # upstream repository not to change under us.
       - name: Run slopless
         continue-on-error: true
-        uses: fabriziosalmi/slopless@3ea395d5bcafd2d265d391e77074445689f2f9a2 # v1.1.4
+        uses: fabriziosalmi/slopless@a9177f6333d731ec620d786638cf26639708b606 # v1.2.2
         with:
           patterns: "packages/*/src/**/*.ts apps/*/js/**/*.js apps/*/css/**/*.css **/*.md"
           config: slopless.config.json
