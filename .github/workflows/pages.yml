@@ -1,0 +1,110 @@
+# One site for the five things that used to be five Vercel projects. GitHub Pages
+# serves a single tree per repository, so each app is built with a base that
+# matches where it is mounted and copied into place.
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A queued deploy is worth waiting for; a cancelled one leaves the site on the
+# previous build, which is fine, but two writing at once is not.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The apps import the workspace packages, so those come first.
+      - run: pnpm run build
+
+      - name: Build every app
+        run: |
+          set -euo pipefail
+          for app in landing-page docs-site pathfinding-demo showcase pdk-demo; do
+            echo "::group::$app"
+            pnpm --filter "./apps/$app" run build
+            echo "::endgroup::"
+          done
+
+      # The landing page is the root; the rest are mounted beside it. docs-site
+      # is VitePress, so its output is under .vitepress/.
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          rm -rf _site && mkdir -p _site/{docs,pathfinding,showcase,pdk}
+          cp -r apps/landing-page/dist/.            _site/
+          cp -r apps/docs-site/.vitepress/dist/.    _site/docs/
+          cp -r apps/pathfinding-demo/dist/.        _site/pathfinding/
+          cp -r apps/showcase/dist/.                _site/showcase/
+          cp -r apps/pdk-demo/dist/.                _site/pdk/
+          # Without this, Pages runs Jekyll and drops anything starting with _.
+          touch _site/.nojekyll
+
+      # A page that builds but cannot load its own stylesheet is a page that
+      # deployed and does not work, and nothing else here would notice.
+      - name: Every page must serve, and so must its assets
+        run: |
+          set -euo pipefail
+          # Mounted under /navigator/, which is where the project's Pages site
+          # lives, so a base of /navigator/... has to resolve for real.
+          root="$(mktemp -d)"
+          cp -r _site "$root/navigator"
+          python3 -m http.server 8899 --directory "$root" >/dev/null 2>&1 &
+          sleep 2
+          fail=0
+          for path in "" docs/ pathfinding/ showcase/ pdk/; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8899/navigator/$path")"
+            asset="$(curl -s "http://127.0.0.1:8899/navigator/$path" \
+                     | grep -o '\(src\|href\)="[^"]*\.\(js\|css\)"' | head -1 | sed 's/.*="//;s/"//')"
+            acode="-"
+            if [ -n "$asset" ]; then
+              case "$asset" in
+                /*)   full="http://127.0.0.1:8899$asset" ;;
+                ./*)  full="http://127.0.0.1:8899/navigator/$path${asset#./}" ;;
+                *)    full="http://127.0.0.1:8899/navigator/$path$asset" ;;
+              esac
+              acode="$(curl -s -o /dev/null -w '%{http_code}' "$full")"
+            fi
+            echo "  /$path  page=$code  asset=$acode"
+            [ "$code" = "200" ] || fail=1
+            [ "$acode" = "200" ] || [ "$acode" = "-" ] || fail=1
+          done
+          leftover="$(grep -rho '\(src\|href\)="/[^"]*"' _site --include='*.html' | grep -v '"/navigator/' || true)"
+          if [ -n "$leftover" ]; then
+            echo "Absolute references the site does not serve:"; echo "$leftover" | sort -u
+            fail=1
+          fi
+          exit $fail
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

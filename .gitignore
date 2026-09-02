@@ -75,3 +75,6 @@ claude_report.md
 debug-*.log
 FINAL-TEST-WITH-FIX.log
 .vercel
+
+# Assembled by the pages workflow, never committed.
+_site/
