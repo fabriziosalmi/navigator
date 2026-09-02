@@ -4,7 +4,8 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Navigator SDK",
   description: "Advanced gesture and keyboard navigation SDK for web applications",
-  base: '/',
+  // One Pages site per repository, so the docs live in a subdirectory of it.
+  base: '/navigator/docs/',
   
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
