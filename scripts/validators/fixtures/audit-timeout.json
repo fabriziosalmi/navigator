@@ -1,0 +1,2 @@
+{ "error": { "code": "ERR_SOCKET_TIMEOUT",
+             "message": "request to https://registry.npmjs.org/-/npm/v1/security/audits failed, reason: Socket timeout" } }
