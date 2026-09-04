@@ -1,0 +1,3 @@
+{ "advisories": {
+    "1": { "severity": "high", "module_name": "vite", "title": "Server allows reading arbitrary files" } },
+  "metadata": { "vulnerabilities": { "info": 0, "low": 0, "moderate": 2, "high": 1, "critical": 0 } } }
