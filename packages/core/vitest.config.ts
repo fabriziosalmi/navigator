@@ -18,6 +18,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      // Measure source only, as the sibling packages do. Without this,
+      // vitest 3 also counts tsup.config.ts and the vitest configs, which
+      // no test can execute, and core fell under the 80% threshold.
+      include: ['src/**/*.ts'],
       exclude: [
         'node_modules/',
         'dist/',
