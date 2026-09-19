@@ -63,12 +63,12 @@
     "typescript-eslint": "^8.46.3",
     "vite": "^5.4.10",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^1.2.0",
+    "vitest": "^3.2.7",
     "wait-on": "^7.2.0"
   },
   "pnpm": {
     "overrides": {
-      "happy-dom": ">=20.0.2",
+      "happy-dom": ">=20.8.9",
       "esbuild": ">=0.25.0"
     }
   },
