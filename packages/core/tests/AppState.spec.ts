@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EventBus } from '../src/EventBus';
 import { AppState } from '../src/AppState';
 
@@ -470,15 +470,21 @@ describe('AppState', () => {
 
   describe('persist() and restore()', () => {
     beforeEach(() => {
-      // Mock localStorage
-      global.localStorage = {
+      // Mock localStorage. vi.stubGlobal defines the property instead of
+      // assigning it: from vitest 5 an assignment is forwarded to the jsdom
+      // window, whose localStorage is getter-only, and throws a TypeError.
+      vi.stubGlobal('localStorage', {
         getItem: vi.fn(),
         setItem: vi.fn(),
         removeItem: vi.fn(),
         clear: vi.fn(),
         length: 0,
         key: vi.fn()
-      };
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
     });
 
     it('should persist state to localStorage', () => {
