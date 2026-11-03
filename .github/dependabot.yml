@@ -2,15 +2,26 @@ version: 2
 updates:
   # pnpm workspace (root lockfile). open-pull-requests-limit 0 keeps version
   # updates off; the entry exists so security updates respect the ignore below.
+  # The packages and apps are listed too: security updates also open per
+  # workspace (#49), and an ignore only applies to the directories it covers.
   - package-ecosystem: "npm"
-    directory: "/"
+    directories:
+      - "/"
+      - "/packages/*"
+      - "/apps/*"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 0
     ignore:
       # vitest 5 needs a migration (coverage-v8, poolOptions, workspace -> projects),
-      # see #45. Do it as a planned change, not as a security group bump.
+      # see #45. Do it as a planned change, not as a security group bump. On #50 it
+      # also failed on the Node 20 CI leg (Map.groupBy is not a function).
+      # A version range, because #50 came after the update-types ignore of #46.
       - dependency-name: "vitest"
-        update-types: ["version-update:semver-major"]
+        versions: [">=5.0.0"]
       - dependency-name: "@vitest/*"
+        versions: [">=5.0.0"]
+      # Each workspace is pinned on its own patched vite major (6.4.5, 7.3.7,
+      # 8.3.5, #48); #50 moved all of them to ^8.3.5 inside a security group.
+      - dependency-name: "vite"
         update-types: ["version-update:semver-major"]
