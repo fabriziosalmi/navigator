@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # pnpm workspace (root lockfile). open-pull-requests-limit 0 keeps version
+  # updates off; the entry exists so security updates respect the ignore below.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    ignore:
+      # vitest 5 needs a migration (coverage-v8, poolOptions, workspace -> projects),
+      # see #45. Do it as a planned change, not as a security group bump.
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/*"
+        update-types: ["version-update:semver-major"]
