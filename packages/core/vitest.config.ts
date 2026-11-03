@@ -32,7 +32,10 @@ export default defineConfig({
       thresholds: {
         lines: 80,
         functions: 80,
-        branches: 80,
+        // vitest 4 maps v8 coverage through the AST and counts more
+        // branches: on the same code and tests, vitest 3.2.7 reported 82.4%
+        // and vitest 4.1.12 reports 76.76%. Statements went 81.69 -> 86.89.
+        branches: 76,
         statements: 80
       }
     }
