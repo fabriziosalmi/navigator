@@ -5,6 +5,8 @@ updates:
   # The packages and apps are listed too: security updates also open per
   # workspace (#49), and an ignore only applies to the directories it covers.
   - package-ecosystem: "npm"
+    cooldown:
+      default-days: 7
     directories:
       - "/"
       - "/packages/*"
